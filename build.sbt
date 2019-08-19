@@ -20,7 +20,7 @@ addCompilerPlugin("org.sireum" %% "scalac-plugin" % sireumScalacVersion)
 libraryDependencies += "org.sireum.runtime" %% "library" % runtimeVersion
 
 libraryDependencies += "io.projectreactor" % "reactor-core" % "3.3.0.M3" //% "compileonly"
-libraryDependencies += "io.projectreactor" % "reactor-test" % "3.3.0.M3" //% Test
+//libraryDependencies += "io.projectreactor" % "reactor-test" % "3.3.0.M3" //% Test // no longer needed! now directly include test
 
 //libraryDependencies += "javax.annotation" % "javax.annotation-api" % "1.3.2" // Javax annotations are used in reactor and cause fatal warnings for scala to parse. See for example @Nullable in package reactor.util.annotation
 libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2" // except javax nullable is located here: https://stackoverflow.com/questions/19030954/cant-find-nullable-inside-javax-annotation
