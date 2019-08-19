@@ -13,9 +13,17 @@ public class JFluxVarargs {
         return Flux.just(data);
     }
 
-    @SafeVarargs
-    public static <T> Flux<T> just(T... data) {
+    public static <T> Flux<T> just(T data) {
         return Flux.just(data);
+    }
+
+    @SafeVarargs
+    public static <I> Flux<I> firstVarargs(Publisher<? extends I> ... sources) {
+        return Flux.first(sources);
+    }
+
+    public static <I> Flux<I> first(Iterable<? extends Publisher<? extends I>> sources) {
+        return Flux.first(sources);
     }
 
 

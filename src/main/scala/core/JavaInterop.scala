@@ -1,6 +1,7 @@
 package core
 
 import reactor.core.publisher.{Flux => JFlux}
+import reactor.core.publisher.{Mono => JMono}
 import java.lang.{Iterable => JIterable}
 import java.time.{Duration => JDuration}
 import java.lang.{Runnable => JRunnable}
@@ -15,7 +16,8 @@ import scala.concurrent.duration.FiniteDuration
 
 object JavaInterop {
 
-  def wrap[T](jFlux: JFlux[T]): Flux[T] = new Flux[T](jFlux)
+  def wrapFlux[T](jFlux: JFlux[T]): Flux[T] = new Flux[T](jFlux)
+  def wrapMono[T](jMono: JMono[T]): Mono[T] = new Mono[T](jMono)
 
 //  def asJavaDuration(finiteDuration: FiniteDuration): JDuration = JDuration.ofNanos(finiteDuration.toNanos)
 //

@@ -3,6 +3,7 @@ package core
 import reactor.core.publisher.{Flux => JFlux}
 import java.util.function.{Function => JFunction}
 import java.util.function.{BiFunction => JBiFunction}
+import java.util.function.{BiPredicate => JBiPredicate}
 import java.lang.{Iterable => JIterable}
 import java.time.{Duration => JDuration}
 import java.util.function.{Consumer => JConsumer}
@@ -10,6 +11,9 @@ import java.util.function.{Supplier => JSupplier}
 import java.util.stream.{Stream => JStream}
 import java.util.{Comparator => JComparator}
 import java.lang.{Runnable => JRunnable}
+import java.util.{Optional => JOptional}
+import java.util.concurrent.CompletionStage
+
 import reactor.util.function.{Tuple2 => JTuple2}
 import reactor.util.function.{Tuple3 => JTuple3}
 import reactor.util.function.{Tuple4 => JTuple4}
@@ -22,6 +26,7 @@ import scala.collection.JavaConverters
 import scala.concurrent.duration.FiniteDuration
 import scala.language.implicitConversions
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 //import scala.math.Ordering.comparatorToOrdering
 
 trait ImplicitJavaInterop {
@@ -31,6 +36,10 @@ trait ImplicitJavaInterop {
   ///
 
   implicit def asJavaDuration(finiteDuration: FiniteDuration): JDuration = JDuration.ofNanos(finiteDuration.toNanos)
+  implicit def asJavaCompletionStage[T](future: Future[T]): CompletionStage[T] = scala.compat.java8.FutureConverters.toJava(future)
+
+  implicit def asJavaOptional[T](option: Option[T]): JOptional[T] = scala.compat.java8.OptionConverters.toJava(option)
+
 
   // COLLECTIONS
 
@@ -57,6 +66,9 @@ trait ImplicitJavaInterop {
 
   // Known as a Function in the java world
   implicit def asJavaFn1[T, R](function: T => R): JFunction[T, R] = (t: T) => function.apply(t)
+
+  // Known as BiPredicate in the java world
+  implicit def asJavaBiPredicate[T, U](biPredicate: (T, U) => Boolean): JBiPredicate[T, U] = (t: T, u: U) => biPredicate.apply(t, u)
 
   // Known as a BiFunction in the java world
   implicit def asJavaFn2[T, U, R](function: (T, U) => R): JBiFunction[T, U, R] = (t: T, u: U) => function.apply(t, u)
