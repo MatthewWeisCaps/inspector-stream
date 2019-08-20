@@ -3,14 +3,19 @@ package core
 import reactor.core.publisher.{Flux => JFlux}
 import java.util.function.{Function => JFunction}
 import java.util.function.{BiFunction => JBiFunction}
+import java.util.function.{Predicate => JPredicate}
 import java.util.function.{BiPredicate => JBiPredicate}
+import java.util.function.{BiConsumer => JBiConsumer}
 import java.lang.{Iterable => JIterable}
+import java.util.{Map => JMap}
 import java.time.{Duration => JDuration}
 import java.util.function.{Consumer => JConsumer}
 import java.util.function.{Supplier => JSupplier}
+import java.lang.{Boolean => JBoolean}
 import java.util.stream.{Stream => JStream}
 import java.util.{Comparator => JComparator}
 import java.lang.{Runnable => JRunnable}
+import java.util
 import java.util.{Optional => JOptional}
 import java.util.concurrent.CompletionStage
 
@@ -22,14 +27,17 @@ import reactor.util.function.{Tuple6 => JTuple6}
 import reactor.util.function.{Tuple7 => JTuple7}
 import reactor.util.function.{Tuple8 => JTuple8}
 
-import scala.collection.JavaConverters
+import scala.collection.{JavaConverters, mutable}
 import scala.concurrent.duration.FiniteDuration
 import scala.language.implicitConversions
 import scala.collection.JavaConverters._
+import scala.collection.convert.Wrappers
+import scala.collection.convert.Wrappers.JIterableWrapper
 import scala.concurrent.Future
-//import scala.math.Ordering.comparatorToOrdering
 
 trait ImplicitJavaInterop {
+
+//  implicit def toScalaBoolean(boolean: JBoolean): Boolean = boolean.asInstanceOf[Boolean]
 
   ///
   /// UTILITY
@@ -39,7 +47,6 @@ trait ImplicitJavaInterop {
   implicit def asJavaCompletionStage[T](future: Future[T]): CompletionStage[T] = scala.compat.java8.FutureConverters.toJava(future)
 
   implicit def asJavaOptional[T](option: Option[T]): JOptional[T] = scala.compat.java8.OptionConverters.toJava(option)
-
 
   // COLLECTIONS
 
@@ -53,6 +60,7 @@ trait ImplicitJavaInterop {
   implicit def toScalaTuple7[T1, T2, T3, T4, T5, T6, T7](tuple7: JTuple7[T1, T2, T3, T4, T5, T6, T7]): (T1, T2, T3, T4, T5, T6, T7) = (tuple7.getT1, tuple7.getT2, tuple7.getT3, tuple7.getT4, tuple7.getT5, tuple7.getT6, tuple7.getT7)
   implicit def toScalaTuple8[T1, T2, T3, T4, T5, T6, T7, T8](tuple8: JTuple8[T1, T2, T3, T4, T5, T6, T7, T8]): (T1, T2, T3, T4, T5, T6, T7, T8) = (tuple8.getT1, tuple8.getT2, tuple8.getT3, tuple8.getT4, tuple8.getT5, tuple8.getT6, tuple8.getT7, tuple8.getT8)
 
+
   // FUNCTIONS
 
   // Known as a Runnable in the java world
@@ -64,8 +72,14 @@ trait ImplicitJavaInterop {
   // Known as a Consumer in the java world
   implicit def asJavaSupplier[T](supplier: () => T): JSupplier[T] = () => supplier.apply()
 
+  // Known as a Predicate in the java world
+  implicit def asJavaPredicate[T, U](predicate: T => Boolean): JPredicate[T] = (t: T) => predicate.apply(t)
+
   // Known as a Function in the java world
   implicit def asJavaFn1[T, R](function: T => R): JFunction[T, R] = (t: T) => function.apply(t)
+
+  // Known as BiPredicate in the java world
+  implicit def asJavaBiConsumer[T, U](biConsumer: (T, U) => Unit): JBiConsumer[T, U] = (t: T, u: U) => biConsumer.apply(t, u)
 
   // Known as BiPredicate in the java world
   implicit def asJavaBiPredicate[T, U](biPredicate: (T, U) => Boolean): JBiPredicate[T, U] = (t: T, u: U) => biPredicate.apply(t, u)

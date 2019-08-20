@@ -5,13 +5,17 @@ import reactor.core.publisher.{Mono => JMono}
 import java.lang.{Iterable => JIterable}
 import java.time.{Duration => JDuration}
 import java.lang.{Runnable => JRunnable}
+import java.util.{Map => JMap}
+import java.util
 import java.util.function.{Consumer => JConsumer}
 import java.util.function.{Function => JFunction}
 import java.util.function.{BiFunction => JBiFunction}
 
 import org.reactivestreams.Publisher
 
+import scala.collection.{JavaConverters, mutable}
 import scala.collection.JavaConverters.asJavaIterable
+import scala.collection.parallel.immutable
 import scala.concurrent.duration.FiniteDuration
 
 object JavaInterop {
@@ -19,9 +23,22 @@ object JavaInterop {
   def wrapFlux[T](jFlux: JFlux[T]): Flux[T] = new Flux[T](jFlux)
   def wrapMono[T](jMono: JMono[T]): Mono[T] = new Mono[T](jMono)
 
-//  def asJavaDuration(finiteDuration: FiniteDuration): JDuration = JDuration.ofNanos(finiteDuration.toNanos)
-//
+  def toSeq[T](list: java.util.List[T]): Seq[T] = JavaConverters.asScalaIteratorConverter(list.iterator()).asScala.toSeq
+  def toMap[K, V](map: java.util.Map[K, V]): Map[K, V] = JavaConverters.mapAsScalaMapConverter(map).asScala.toMap
+
+  def asJavaMap[K, V](map: Map[K, V]): JMap[K, V] = JavaConverters.mapAsJavaMap(map)
+  def asJavaMutableMap[K, V](map: mutable.Map[K, V]): JMap[K, V] = JavaConverters.mutableMapAsJavaMap(map)
+
+
+
+  def toIterable[T](collection: util.Collection[T]): Iterable[T] = JavaConverters.collectionAsScalaIterable(collection)
+  def asJavaCollection[T](iterable: mutable.Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
+
+  //  def asJavaCollection[T](iterable: Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
 //  def asJavaIterable[T](iterable: Iterable[T]): JIterable[T] = asJavaIterable(iterable)
+
+  //  def asJavaDuration(finiteDuration: FiniteDuration): JDuration = JDuration.ofNanos(finiteDuration.toNanos)
+//
 //
 //  // Known as a Runnable in the java world
 //  def asJavaRunnable[T](runnable: () => Unit): JRunnable = () => runnable.apply()

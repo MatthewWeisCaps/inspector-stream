@@ -5,7 +5,7 @@ import java.util.concurrent.{Callable, CompletionStage}
 import core.JavaInterop._
 import org.reactivestreams.{Publisher, Subscriber}
 import reactor.core.publisher.FluxSink.OverflowStrategy
-import reactor.core.{Disposable, JFluxVarargs, JMonoVarargs}
+import reactor.core.{Disposable}
 import reactor.core.publisher.{FluxSink, MonoSink, SynchronousSink, Flux => JFlux, Mono => JMono}
 import reactor.core.scheduler.Scheduler
 import java.util.concurrent.{Future => JFuture}
@@ -118,12 +118,23 @@ final class Mono[T] (private val publisher: Publisher[T]) extends Publisher[T] w
   /// API METHODS
   ///
 
-//  def all() => Mono[Boolean]
+  def as[P](transformer: Mono[T] => P): P = delegate.as((jm: JMono[T]) => transformer.apply(wrapMono(jm)))
 
-//  def blockLast(timeout: Duration = Duration.Inf): Option[T] = timeout match {
-//    case _: Infinite => Option(delegate.blockLast())
-//    case finiteDuration: FiniteDuration => Option(delegate.blockLast(finiteDuration))
-//  }
+  def and(other: Publisher[_]): Mono[_] = wrapMono(delegate.and(other))
+
+  def block(): T = delegate.block()
+
+  def block(timeout: Duration): T = timeout match {
+    case _: Infinite => delegate.block()
+    case finiteDuration: FiniteDuration => delegate.block(finiteDuration)
+  }
+
+  def blockOptional(): Option[T] = Option(delegate.block())
+
+  def blockOptional(timeout: Duration): Option[T] = timeout match {
+    case _: Infinite => Option(delegate.block())
+    case finiteDuration: FiniteDuration => Option(delegate.block(finiteDuration))
+  }
 
   def doOnError(onError: Throwable => Unit): Mono[T] = wrapMono(delegate.doOnError(onError))
 

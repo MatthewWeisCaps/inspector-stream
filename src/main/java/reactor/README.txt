@@ -1,3 +1,6 @@
+This package contains an almost-identical copy of the reactor-test 3.3.0.M3 library, with a couple small changes to
+make calling java vararg functions easier in scala. All changes are noted in this file.
+
 UNMODIFIED VERSIONS OF THIS PACKAGE AND SUBPACKAGES BELONG TO THE REACTOR-CORE (TEST) (v. 3.3.0.M3) PROJECT
 
 /*

@@ -1,12 +1,13 @@
 package core
 
-import java.lang
-import java.util.function.Consumer
+import java.{lang, util}
+import java.util.function.{Consumer, Supplier, Function => JFunction}
 import java.time.{Duration => JDuration}
 import java.util.concurrent.Callable
+import java.util.stream.Collector
 
 import org.reactivestreams.{Publisher, Subscriber}
-import reactor.core.{Disposable, JFluxVarargs, publisher}
+import reactor.core.{Disposable, publisher}
 import reactor.core.publisher.FluxSink.OverflowStrategy
 import reactor.core.publisher.{FluxSink, SynchronousSink}
 import reactor.test.StepVerifier
@@ -14,8 +15,6 @@ import reactor.core.publisher.{Flux => JFlux}
 import reactor.test.scheduler.VirtualTimeScheduler
 import reactor.util.concurrent.Queues.{SMALL_BUFFER_SIZE, XS_BUFFER_SIZE}
 import core.JavaInterop._
-import java.util.function.{Function => JFunction}
-
 import reactor.util.function.{Tuple2 => JTuple2}
 import reactor.util.function.{Tuple3 => JTuple3}
 import reactor.util.function.{Tuple4 => JTuple4}
@@ -26,11 +25,16 @@ import reactor.util.function.{Tuple8 => JTuple8}
 import reactor.core.scheduler.Scheduler
 import reactor.util.context.Context
 import reactor.util.function.Tuples
+import publisher.{Mono => JMono}
 
+import scala.collection.convert.Wrappers.IterableWrapper
+import scala.collection.{JavaConverters, mutable}
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.concurrent.duration.Duration.Infinite
 import scala.language.{existentials, higherKinds}
 
+
+// TODO make sure any and all @Nullable methods are converted to Option
 object Flux extends ImplicitJavaInterop {
 
   ///
@@ -114,7 +118,7 @@ object Flux extends ImplicitJavaInterop {
     case (delay: FiniteDuration, period: FiniteDuration) => wrapFlux(JFlux.interval(delay, period, timer).map(Long2long))
   }
 
-  def just[T](data: T*): Flux[T] = wrapFlux(JFluxVarargs.justVarargs(data:_*))
+  def just[T](data: T*): Flux[T] = wrapFlux(JFlux.just(data:_*))
 
   def merge[T](source: Publisher[Publisher[T]]): Flux[T] = wrapFlux(JFlux.merge(source))
   def merge[T](source: Publisher[Publisher[T]], concurrency: Int): Flux[T] = wrapFlux(JFlux.merge(source, concurrency))
@@ -143,8 +147,6 @@ object Flux extends ImplicitJavaInterop {
   def never[T](): Flux[T] = wrapFlux(JFlux.never())
 
   def range(start: Int, count: Int): Flux[Int] = wrapFlux(JFlux.range(start, count).map(_.toInt))
-
-  def single[T](data: T): Flux[T] = wrapFlux(JFluxVarargs.just(data))
 
   def switchOnNext[T](mergedPublishers: Publisher[_ <: Publisher[T]]): Flux[T] = wrapFlux(JFlux.switchOnNext(mergedPublishers))
   def switchOnNext[T](mergedPublishers: Publisher[_ <: Publisher[T]], prefetch: Int): Flux[T] = wrapFlux(JFlux.switchOnNext(mergedPublishers, prefetch))
@@ -190,12 +192,129 @@ final class Flux[T] (private val publisher: Publisher[T]) extends Publisher[T] w
   /// API METHODS
   ///
 
-//  def all() => Mono[Boolean]
+  def all(predicate: T => Boolean): Mono[Boolean] = wrapMono(delegate.all(predicate)).asInstanceOf[Mono[Boolean]]
+  def any(predicate: T => Boolean): Mono[Boolean] = wrapMono(delegate.any(predicate)).asInstanceOf[Mono[Boolean]]
 
-  def blockLast(timeout: Duration = Duration.Inf): Option[T] = timeout match {
+  def as[P](transformer: Flux[T] => P): P = delegate.as((jf: JFlux[T]) => transformer.apply(wrapFlux(jf)))
+
+  def blockFirst(): Option[T] = Option(delegate.blockFirst())
+
+  def blockFirst(timeout: Duration): Option[T] = timeout match {
+    case _: Infinite => Option(delegate.blockFirst())
+    case finiteDuration: FiniteDuration => Option(delegate.blockLast(finiteDuration))
+  }
+
+  def blockLast(): Option[T] = Option(delegate.blockLast())
+
+  def blockLast(timeout: Duration): Option[T] = timeout match {
     case _: Infinite => Option(delegate.blockLast())
     case finiteDuration: FiniteDuration => Option(delegate.blockLast(finiteDuration))
   }
+
+  // todo benchmark toSeq!
+
+  def buffer(): Flux[Seq[T]] = wrapFlux(delegate.buffer()).map(toSeq)
+  def buffer(maxSize: Int): Flux[Seq[T]] = wrapFlux(delegate.buffer(maxSize)).map(toSeq)
+  def buffer(maxSize: Int, skip: Int): Flux[Seq[T]] = wrapFlux(delegate.buffer(maxSize, skip)).map(toSeq)
+  def buffer(other: Publisher[T]): Flux[Seq[T]] = wrapFlux(delegate.buffer(other)).map(toSeq)
+
+  def buffer(bufferingTimespan: FiniteDuration): Flux[Seq[T]] = wrapFlux(delegate.buffer(bufferingTimespan)).map(toSeq)
+  def buffer(bufferingTimespan: FiniteDuration, openBufferEvery: FiniteDuration): Flux[Seq[T]] = wrapFlux(delegate.buffer(bufferingTimespan, openBufferEvery)).map(toSeq)
+  def buffer(bufferingTimespan: FiniteDuration, timer: Scheduler): Flux[Seq[T]] = wrapFlux(delegate.buffer(bufferingTimespan, timer)).map(toSeq)
+  def buffer(bufferingTimespan: FiniteDuration, openBufferEvery: FiniteDuration, timer: Scheduler): Flux[Seq[T]] = wrapFlux(delegate.buffer(bufferingTimespan, openBufferEvery, timer)).map(toSeq)
+
+  def bufferTimeout(maxSize: Int, maxTime: FiniteDuration): Flux[Seq[T]] = wrapFlux(delegate.bufferTimeout(maxSize, maxTime)).map(toSeq)
+  // todo missing custom collection wrapper here (see JavaInterop's toIterable(collection: Collection) method)
+  def bufferTimeout(maxSize: Int, maxTime: FiniteDuration, timer: Scheduler): Flux[Seq[T]] = wrapFlux(delegate.bufferTimeout(maxSize, maxTime, timer)).map(toSeq)
+  // todo missing custom collection wrapper here
+
+  def bufferUntil(predicate: T => Boolean): Flux[Seq[T]] = wrapFlux(delegate.bufferUntil(predicate)).map(toSeq)
+  def bufferUntil(predicate: T => Boolean, cutBefore: Boolean): Flux[Seq[T]] = wrapFlux(delegate.bufferUntil(predicate, cutBefore)).map(toSeq)
+
+  def bufferWhile(predicate: T => Boolean): Flux[Seq[T]] = wrapFlux(delegate.bufferWhile(predicate)).map(toSeq)
+
+  def bufferWhen[U, V](bucketOpening: Publisher[U], closeSelector: U => Publisher[V]): Flux[Seq[T]] = wrapFlux(delegate.bufferWhen(bucketOpening, closeSelector)).map(toSeq)
+  // todo missing custom collection wrapper here (see JavaConverters.asJavaCollection())
+
+  def cache(): Flux[T] = wrapFlux(delegate.cache())
+  def cache(history: Int): Flux[T] = wrapFlux(delegate.cache(history))
+  def cache(ttl: Duration): Flux[T] = ttl match {
+    case _: Infinite => ???
+    case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(finiteDuration))
+  }
+  def cache(ttl: Duration, timer: Scheduler): Flux[T] = ttl match {
+    case _: Infinite => ???
+    case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(finiteDuration, timer))
+  }
+  def cache(history: Int, ttl: Duration): Flux[T] = ttl match {
+    case _: Infinite => ???
+    case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(history, finiteDuration))
+  }
+  def cache(history: Int, ttl: Duration, timer: Scheduler): Flux[T] = ttl match {
+    case _: Infinite => ???
+    case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(history, finiteDuration, timer))
+  }
+
+  def cast[E](clazz: Class[E]): Flux[E] = wrapFlux(delegate.cast(clazz))
+
+  def cancelOn(scheduler: Scheduler): Flux[T] = wrapFlux(delegate.cancelOn(scheduler))
+
+  def checkpoint(): Flux[T] = wrapFlux(delegate.checkpoint())
+  def checkpoint(description: String): Flux[T] = wrapFlux(delegate.checkpoint(description))
+  def checkpoint(description: Option[String], forceStackTrace: Boolean): Flux[T] = description match {
+    case Some(desc) => wrapFlux(delegate.checkpoint(desc, forceStackTrace))
+    case None => wrapFlux(delegate.checkpoint(null, forceStackTrace)) // this java api accepts Nullable
+  }
+
+  def collect[E](containerSupplier: () => E, collector: (E, T) => Unit): Mono[E] = wrapMono(delegate.collect(containerSupplier, collector))
+  def collect[R, A](collector: Collector[T, A, R]): Mono[R] = wrapMono(delegate.collect(collector))
+  def collectSeq(): Mono[Seq[T]] = wrapMono(delegate.collectList()).map(toSeq)
+
+  def collectMap[K](keyExtractor: T => K): Mono[_ <: Map[K, T]] = {
+    // this explicit type def is required
+    val mono: Mono[util.Map[K, T]] = wrapMono(delegate.collectMap(keyExtractor))
+    mono.map(toMap)
+  }
+
+  def collectMap[K, V](keyExtractor: T => K, valueExtractor: T => V): Mono[_ <: Map[K, V]] = {
+    // this explicit type def is required
+    val mono: Mono[util.Map[K, V]] = wrapMono(delegate.collectMap(keyExtractor, valueExtractor))
+    mono.map(toMap)
+  }
+
+  def collectMap[K, V](keyExtractor: T => K, valueExtractor: T => V, mapSupplier: () => mutable.Map[K, V]): Mono[_ <: Map[K, V]] = {
+    // this explicit type def is required
+    val mono: Mono[util.Map[K, V]] = wrapMono(delegate.collectMap(keyExtractor, valueExtractor, () => asJavaMutableMap(mapSupplier())))
+    mono.map(toMap)
+  }
+
+  def collectMultimap[K](keyExtractor: T => K): Mono[_ <: Map[K, Iterable[T]]] = {
+    // this explicit type def is required
+    val mono: Mono[util.Map[K, util.Collection[T]]] = wrapMono(delegate.collectMultimap(keyExtractor))
+    mono.map(toMap).map(map => map.mapValues(toIterable))
+  }
+
+  def collectMultimap[K, V](keyExtractor: T => K, valueExtractor: T => V): Mono[_ <: Map[K, Iterable[V]]] = {
+    // this explicit type def is required
+    val mono: Mono[util.Map[K, util.Collection[V]]] = wrapMono(delegate.collectMultimap(keyExtractor, valueExtractor))
+    mono.map(toMap).map(map => map.mapValues(toIterable))
+  }
+
+  // todo find out if this can be implemented without copying the map, since the intent is to have the map be mutable
+  //   so the mapSupplier's map's implementation can be used
+//  def collectMultimap[K, V](keyExtractor: T => K, valueExtractor: T => V, mapSupplier: () => mutable.Map[K, mutable.Iterable[V]]): Mono[_ <: Map[K, Iterable[V]]] = {
+//    val supplier: Supplier[util.Map[K, util.Collection[V]]] = () => {
+//      val smap: mutable.Map[K, mutable.Iterable[V]] = mapSupplier()
+//      val map: java.util.Map[K, util.Collection[V]] = asJavaMutableMap(mutable.Map())
+//      smap.keys.forEach((k: K) => map.put(k, asJavaCollection(smap(k))))
+//      map
+//    }
+//
+//    // this explicit type def is required
+//    val mono: Mono[util.Map[K, util.Collection[V]]] = wrapMono(delegate.collectMultimap(keyExtractor, valueExtractor, supplier))
+//    mono.map(toMap).map(map => map.mapValues(toIterable))
+//  }
+
 
   def doOnError(onError: Throwable => Unit): Flux[T] = wrapFlux(delegate.doOnError(onError))
 
