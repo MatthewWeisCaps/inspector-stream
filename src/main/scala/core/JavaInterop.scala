@@ -12,6 +12,7 @@ import java.util.function.{Function => JFunction}
 import java.util.function.{BiFunction => JBiFunction}
 
 import org.reactivestreams.Publisher
+import reactor.util.function.Tuples
 
 import scala.collection.{JavaConverters, mutable}
 import scala.collection.JavaConverters.asJavaIterable
@@ -33,6 +34,17 @@ object JavaInterop {
 
   def toIterable[T](collection: util.Collection[T]): Iterable[T] = JavaConverters.collectionAsScalaIterable(collection)
   def asJavaCollection[T](iterable: mutable.Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
+  def asJavaCollection[T](iterable: Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
+
+
+  // tuples
+  def toReactorTuple2[T1, T2](tuple: (T1, T2)): reactor.util.function.Tuple2[T1, T2] = Tuples.of(tuple._1, tuple._2)
+  def toReactorTuple3[T1, T2, T3](tuple: (T1, T2, T3)): reactor.util.function.Tuple3[T1, T2, T3] = Tuples.of(tuple._1, tuple._2, tuple._3)
+  def toReactorTuple4[T1, T2, T3, T4](tuple: (T1, T2, T3, T4)): reactor.util.function.Tuple4[T1, T2, T3, T4] = Tuples.of(tuple._1, tuple._2, tuple._3, tuple._4)
+  def toReactorTuple5[T1, T2, T3, T4, T5](tuple: (T1, T2, T3, T4, T5)): reactor.util.function.Tuple5[T1, T2, T3, T4, T5] = Tuples.of(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5)
+  def toReactorTuple6[T1, T2, T3, T4, T5, T6](tuple: (T1, T2, T3, T4, T5, T6)): reactor.util.function.Tuple6[T1, T2, T3, T4, T5, T6] = Tuples.of(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6)
+  def toReactorTuple7[T1, T2, T3, T4, T5, T6, T7](tuple: (T1, T2, T3, T4, T5, T6, T7)): reactor.util.function.Tuple7[T1, T2, T3, T4, T5, T6, T7] = Tuples.of(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7)
+  def toReactorTuple8[T1, T2, T3, T4, T5, T6, T7, T8](tuple: (T1, T2, T3, T4, T5, T6, T7, T8)): reactor.util.function.Tuple8[T1, T2, T3, T4, T5, T6, T7, T8] = Tuples.of(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8)
 
   //  def asJavaCollection[T](iterable: Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
 //  def asJavaIterable[T](iterable: Iterable[T]): JIterable[T] = asJavaIterable(iterable)

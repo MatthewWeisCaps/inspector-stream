@@ -10,8 +10,10 @@ import java.lang.{Iterable => JIterable}
 import java.util.{Map => JMap}
 import java.time.{Duration => JDuration}
 import java.util.function.{Consumer => JConsumer}
+import java.util.function.{LongConsumer => JLongConsumer}
 import java.util.function.{Supplier => JSupplier}
 import java.lang.{Boolean => JBoolean}
+import java.lang.{Long => JLong}
 import java.util.stream.{Stream => JStream}
 import java.util.{Comparator => JComparator}
 import java.lang.{Runnable => JRunnable}
@@ -47,6 +49,8 @@ trait ImplicitJavaInterop {
   implicit def asJavaCompletionStage[T](future: Future[T]): CompletionStage[T] = scala.compat.java8.FutureConverters.toJava(future)
 
   implicit def asJavaOptional[T](option: Option[T]): JOptional[T] = scala.compat.java8.OptionConverters.toJava(option)
+  implicit def asJavaBoolean(boolean: Boolean): JBoolean = boolean2Boolean(boolean)
+  implicit def asJavaLong(long: Long): JLong = long2Long(long)
 
   // COLLECTIONS
 
@@ -65,6 +69,9 @@ trait ImplicitJavaInterop {
 
   // Known as a Runnable in the java world
   implicit def asJavaRunnable(runnable: () => Unit): JRunnable = () => runnable.apply()
+
+  // Known as a LongConsumer in the java world
+  implicit def asJavaLongConsumer(consumer: Long => Unit): JLongConsumer = (n: Long) => consumer.apply(n)
 
   // Known as a Consumer in the java world
   implicit def asJavaConsumer[T](consumer: T => Unit): JConsumer[T] = (t: T) => consumer.apply(t)

@@ -6,7 +6,6 @@ scalaVersion := "2.12.7"
 
 val sireumScalacVersion = "3.3.3"
 val runtimeVersion = "88b726350a5e3658cb10f5f115c3f214112508ad"
-//ivyConfigurations += config("compileonly").hide
 incOptions := incOptions.value.withLogRecompileOnMacro(false)
 
 scalacOptions := Seq("-target:jvm-1.8", "-deprecation", "-Ydelambdafy:method", "-feature", "-unchecked", "-Xfatal-warnings") // disabled Xfatal-warnings due to annotation reading bug
@@ -19,7 +18,7 @@ resolvers += "Spring Repo" at "https://repo.spring.io/milestone"
 addCompilerPlugin("org.sireum" %% "scalac-plugin" % sireumScalacVersion)
 libraryDependencies += "org.sireum.runtime" %% "library" % runtimeVersion
 
-libraryDependencies += "io.projectreactor" % "reactor-core" % "3.3.0.M3" //% "compileonly"
+libraryDependencies += "io.projectreactor" % "reactor-core" % "3.3.0.M3"
 //libraryDependencies += "io.projectreactor" % "reactor-test" % "3.3.0.M3" //% Test // no longer needed! now directly include test
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"
@@ -32,11 +31,6 @@ libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2" // except
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % Test
 addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.3") // add runs to sbt
 logBuffered in Test := false
-
-// https://stackoverflow.com/questions/21515325/add-a-compile-time-only-dependency-in-sbt
-// appending everything from 'compileonly' to unmanagedClasspath
-//unmanagedClasspath in Compile ++=
-//  update.value.select(configurationFilter("compileonly"))
 
 Compile / unmanagedSourceDirectories += baseDirectory.value / "src/main/reactor"
 Test / unmanagedSourceDirectories += baseDirectory.value / "src/test/reactor"
