@@ -11,7 +11,6 @@ import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import reactor.core.{Disposable, publisher}
 import reactor.core.publisher.FluxSink.OverflowStrategy
 import reactor.core.publisher.{BufferOverflowStrategy, FluxSink, Signal, SignalType, SynchronousSink, Flux => JFlux, Mono => JMono}
-import reactor.test.StepVerifier
 import reactor.test.scheduler.VirtualTimeScheduler
 import reactor.util.concurrent.Queues.{SMALL_BUFFER_SIZE, XS_BUFFER_SIZE}
 import core.JavaInterop._
@@ -26,8 +25,8 @@ import reactor.core.scheduler.Scheduler
 import reactor.util.Logger
 import reactor.util.context.Context
 import reactor.util.function.Tuples
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scala.collection.convert.Wrappers.IterableWrapper
 import scala.collection.immutable.Queue
 import scala.collection.{JavaConverters, mutable}
@@ -493,8 +492,8 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def onBackpressureLatest(): Flux[T] = wrapFlux[T](delegate.onBackpressureLatest())
 
-  def onErrorContinue(errorConsumer: (Throwable, Object) => Unit): Flux[T] = wrapFlux[T](delegate.onErrorContinue(errorConsumer))
-  def onErrorContinue[E <: Throwable](errorPredicate: E => Boolean, errorConsumer: (Throwable, Object) => Unit): Flux[T] = wrapFlux[T](delegate.onErrorContinue(errorPredicate, errorConsumer))
+  def onErrorContinue(errorConsumer: (Throwable, Any) => Unit): Flux[T] = wrapFlux[T](delegate.onErrorContinue(errorConsumer))
+  def onErrorContinue[E <: Throwable](errorPredicate: E => Boolean, errorConsumer: (Throwable, Any) => Unit): Flux[T] = wrapFlux[T](delegate.onErrorContinue(errorPredicate, errorConsumer))
 
   def onErrorStop(): Flux[T] = wrapFlux[T](delegate.onErrorStop())
 
@@ -508,6 +507,7 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def onErrorReturn(fallbackValue: T): Flux[T] = wrapFlux[T](delegate.onErrorReturn(fallbackValue))
   def onErrorReturn[E <: Throwable](classType: Class[E], fallbackValue: T): Flux[T] = wrapFlux[T](delegate.onErrorReturn(classType, fallbackValue))
+  def onErrorReturn(predicate: Throwable => Boolean, fallbackValue: T): Flux[T] = wrapFlux[T](delegate.onErrorReturn(predicate, fallbackValue))
 
   def onTerminateDetach(): Flux[T] = wrapFlux[T](delegate.onTerminateDetach())
 
@@ -599,6 +599,8 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def subscribe(consumer: T => Unit): Disposable = delegate.subscribe(consumer)
   def subscribe(consumer: T => Unit, errorConsumer: Throwable => Unit): Disposable = delegate.subscribe(consumer, errorConsumer)
   def subscribe(consumer: T => Unit, errorConsumer: Throwable => Unit, completeConsumer: () => Unit): Disposable = delegate.subscribe(consumer, errorConsumer, completeConsumer)
+  def subscribe(consumer: T => Unit, errorConsumer: Throwable => Unit, completeConsumer: () => Unit, subscriptionConsumer: Subscription => Unit): Disposable = delegate.subscribe(consumer, errorConsumer, completeConsumer, subscriptionConsumer)
+  def subscribe(consumer: T => Unit, errorConsumer: Throwable => Unit, completeConsumer: () => Unit, initialContext: Context): Disposable = delegate.subscribe(consumer, errorConsumer, completeConsumer, initialContext)
 
   ///
   /// BRIDGE METHOD Subscribe

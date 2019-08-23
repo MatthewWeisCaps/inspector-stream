@@ -2,10 +2,9 @@ package core
 
 import org.reactivestreams.Publisher
 import org.scalatest.FunSuite
-import reactor.test.StepVerifier
 import reactor.core.publisher.{Flux => JFlux}
-
-//import scala.language.implicitConversions
+import reactor.test.StepVerifier
+import test.StepVerifierExt._
 
 class SwitchOnNextTest extends FunSuite {
 

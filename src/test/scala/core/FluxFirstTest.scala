@@ -2,6 +2,7 @@ package core
 
 import org.scalatest.FunSuite
 import reactor.test.StepVerifier
+import test.StepVerifierExt._
 
 class FluxFirstTest extends FunSuite {
 

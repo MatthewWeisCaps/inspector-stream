@@ -2,8 +2,9 @@ package core
 
 import org.reactivestreams.{Subscriber, Subscription}
 import org.scalatest.FunSuite
-import reactor.test.StepVerifier
 import org.scalatest.Assertions._
+import reactor.test.StepVerifier
+import test.StepVerifierExt._
 
 import scala.concurrent.duration._
 

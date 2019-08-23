@@ -3,6 +3,7 @@ package core
 import org.reactivestreams.Publisher
 import org.scalatest.FunSuite
 import reactor.test.StepVerifier
+import test.StepVerifierExt._
 
 //import scala.language.implicitConversions
 

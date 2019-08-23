@@ -2,6 +2,7 @@ package core
 
 import org.scalatest.{Assertions, FunSuite}
 import reactor.test.StepVerifier
+import test.StepVerifierExt._
 
 import scala.collection.mutable
 

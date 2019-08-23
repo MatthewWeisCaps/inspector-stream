@@ -18,8 +18,8 @@ package reactor.test
 
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.test.StepVerifier.Assertions
-import reactor.test.StepVerifier.LastStep
+import reactor.reactor.test.StepVerifier.Assertions
+import reactor.reactor.test.StepVerifier.LastStep
 import java.time.Duration
 import kotlin.reflect.KClass
 

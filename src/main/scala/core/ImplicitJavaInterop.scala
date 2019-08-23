@@ -38,6 +38,8 @@ import scala.collection.convert.Wrappers
 import scala.collection.convert.Wrappers.JIterableWrapper
 import scala.concurrent.Future
 
+
+// todo remove these or use PimpMyLibrary pattern
 trait ImplicitJavaInterop {
 
 //  implicit def toScalaBoolean(boolean: JBoolean): Boolean = boolean.asInstanceOf[Boolean]
