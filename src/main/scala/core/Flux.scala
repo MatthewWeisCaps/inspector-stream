@@ -241,19 +241,19 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def cache(): Flux[T] = wrapFlux[T](delegate.cache())
   def cache(history: Int): Flux[T] = wrapFlux[T](delegate.cache(history))
   def cache(ttl: Duration): Flux[T] = ttl match {
-    case _: Infinite => ???
+    case _: Infinite => cache()
     case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(finiteDuration))
   }
   def cache(ttl: Duration, timer: Scheduler): Flux[T] = ttl match {
-    case _: Infinite => ???
+    case _: Infinite => cache()
     case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(finiteDuration, timer))
   }
   def cache(history: Int, ttl: Duration): Flux[T] = ttl match {
-    case _: Infinite => ???
+    case _: Infinite => cache(history)
     case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(history, finiteDuration))
   }
   def cache(history: Int, ttl: Duration, timer: Scheduler): Flux[T] = ttl match {
-    case _: Infinite => ???
+    case _: Infinite => cache(history)
     case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(history, finiteDuration, timer))
   }
 
