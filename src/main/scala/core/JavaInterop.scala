@@ -1,6 +1,7 @@
 package core
 
 import reactor.core.publisher.{Flux => JFlux}
+import reactor.core.publisher.{ConnectableFlux => JConnectableFlux}
 import reactor.core.publisher.{Mono => JMono}
 import java.lang.{Iterable => JIterable}
 import java.time.{Duration => JDuration}
@@ -26,6 +27,7 @@ import scala.concurrent.duration.FiniteDuration
 object JavaInterop {
 
   def wrapFlux[T](jFlux: JFlux[T]): Flux[T] = new FluxImpl[T](jFlux)
+  def wrapConnectableFlux[T](jConnectableFlux: JConnectableFlux[T]): ConnectableFlux[T] = new ConnectableFlux[T](jConnectableFlux)
   def wrapGroupedFlux[K, V](jGroupedFlux: JGroupedFlux[K, V]): GroupedFlux[K, V] = new GroupedFlux[K, V](jGroupedFlux)
   def wrapMono[T](jMono: JMono[T]): Mono[T] = new MonoImpl[T](jMono)
 

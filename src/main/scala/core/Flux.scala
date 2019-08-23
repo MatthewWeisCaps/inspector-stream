@@ -1,38 +1,27 @@
 package core
 
-import java.{lang, util}
-import java.util.function.{BiFunction, Consumer, Supplier, Function => JFunction}
-import java.time.{Duration => JDuration}
 import java.util.concurrent.Callable
+import java.util.function
+import java.util.function.BiFunction
 import java.util.logging.Level
 import java.util.stream.Collector
+import java.{lang, util}
 
+import core.JavaInterop._
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
-import reactor.core.{Disposable, publisher}
+import reactor.core.Disposable
 import reactor.core.publisher.FluxSink.OverflowStrategy
-import reactor.core.publisher.{BufferOverflowStrategy, FluxSink, Signal, SignalType, SynchronousSink, Flux => JFlux, Mono => JMono}
-import reactor.test.scheduler.VirtualTimeScheduler
-import reactor.util.concurrent.Queues.{SMALL_BUFFER_SIZE, XS_BUFFER_SIZE}
-import reactor.util.function.{Tuple2 => JTuple2}
-import reactor.util.function.{Tuple3 => JTuple3}
-import reactor.util.function.{Tuple4 => JTuple4}
-import reactor.util.function.{Tuple5 => JTuple5}
-import reactor.util.function.{Tuple6 => JTuple6}
-import reactor.util.function.{Tuple7 => JTuple7}
-import reactor.util.function.{Tuple8 => JTuple8}
+import reactor.core.publisher.{BufferOverflowStrategy, FluxSink, Signal, SignalType, SynchronousSink, Flux => JFlux}
 import reactor.core.scheduler.Scheduler
 import reactor.util.Logger
 import reactor.util.context.Context
-import reactor.util.function.Tuples
+import reactor.util.function.{Tuple2 => JTuple2, Tuple3 => JTuple3, Tuple4 => JTuple4, Tuple5 => JTuple5, Tuple6 => JTuple6, Tuple7 => JTuple7, Tuple8 => JTuple8}
 
 import scala.collection.JavaConverters._
-import scala.collection.convert.Wrappers.IterableWrapper
-import scala.collection.immutable.Queue
-import scala.collection.{JavaConverters, mutable}
-import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.collection.mutable
 import scala.concurrent.duration.Duration.Infinite
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.language.{existentials, higherKinds}
-import core.JavaInterop._
 
 
 
@@ -104,7 +93,7 @@ object Flux extends ImplicitJavaInterop {
   def interval[T, S](delay: Duration, period: Duration): Flux[Long] = (delay, period) match {
     case (_: Infinite, _: Infinite) => wrapFlux(JFlux.never())
     case (_: Infinite, period: FiniteDuration) => wrapFlux(JFlux.never())
-    case (delay: FiniteDuration, _: Infinite) => ??? // todo implement once more timing methods added
+    case (delay: FiniteDuration, _: Infinite) => Mono.just(0L).delayElement(delay).concatWith(Flux.never())
     case (delay: FiniteDuration, period: FiniteDuration) => wrapFlux(JFlux.interval(delay, period).map(Long2long))
   }
 
@@ -116,7 +105,7 @@ object Flux extends ImplicitJavaInterop {
   def interval[T, S](delay: Duration, period: Duration, timer: Scheduler): Flux[Long] = (delay, period) match {
     case (_: Infinite, _: Infinite) => wrapFlux(JFlux.never())
     case (_: Infinite, period: FiniteDuration) => wrapFlux(JFlux.never())
-    case (delay: FiniteDuration, _: Infinite) => ??? // todo implement once more timing methods added
+    case (delay: FiniteDuration, _: Infinite) => Mono.just(0L).delayElement(delay).concatWith(Flux.never())
     case (delay: FiniteDuration, period: FiniteDuration) => wrapFlux(JFlux.interval(delay, period, timer).map(Long2long))
   }
 
@@ -519,11 +508,11 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 //  def parallel(parallelism: Int): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel(parallelism))
 //  def parallel(): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel())
 
-  // todo: uncomment these methods after creating a scala ConnectableFlux wrapper
-//  def publish(): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.publish())
-//  def publish(prefetch: Int): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.publish(prefetch))
-//  def publish(transform: Flux[T] => Publisher[R]): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.publish(transform))
-//  def publish(transform: Flux[T] => Publisher[R], prefetch: Int): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.publish(transform, prefetch))
+  def publish(): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.publish())
+  def publish(prefetch: Int): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.publish(prefetch))
+  def publish[R](transform: Flux[T] => Publisher[R]): Flux[R] = wrapFlux[R](delegate.publish[R]((jflux: JFlux[T]) => transform(wrapFlux(jflux))))
+  def publish[R](transform: Flux[T] => Publisher[R], prefetch: Int): Flux[R] = wrapFlux[R](delegate.publish[R]((jflux: JFlux[T]) => transform(wrapFlux(jflux)), prefetch))
+
 
   def publishNext(): Mono[T] = wrapMono[T](delegate.publishNext())
 
@@ -541,12 +530,12 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def repeat(numRepeat: Long, predicate: () => Boolean): Flux[T] = wrapFlux[T](delegate.repeat(numRepeat, predicate))
   def repeatWhen(repeatFactory: Flux[Long] => Publisher[_]): Flux[T] = wrapFlux[T](delegate.repeatWhen((flux: JFlux[lang.Long]) => wrapFlux(flux).map(long2Long(_))))
 
-//  def replay(): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay())
-//  def replay(history: Int): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(history))
-//  def replay(ttl: FiniteDuration): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(ttl))
-//  def replay(history: Int, ttl: FiniteDuration): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(history, ttl))
-//  def replay(ttl: FiniteDuration, timer: Scheduler): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(ttl, timer))
-//  def replay(history: Int, ttl: Duration, timer: Scheduler): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(history, ttl, timer))
+  def replay(): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay())
+  def replay(history: Int): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(history))
+  def replay(ttl: FiniteDuration): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(ttl))
+  def replay(history: Int, ttl: FiniteDuration): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(history, ttl))
+  def replay(ttl: FiniteDuration, timer: Scheduler): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(ttl, timer))
+  def replay(history: Int, ttl: FiniteDuration, timer: Scheduler): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(history, ttl, timer))
 
   def retry(): Flux[T] = wrapFlux[T](delegate.retry())
   def retry(numRetries: Long): Flux[T] = wrapFlux[T](delegate.retry(numRetries))
@@ -593,7 +582,6 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def startWith(iterable: Iterable[T]): Flux[T] = wrapFlux[T](delegate.startWith(iterable))
   def startWith(values: T*): Flux[T] = wrapFlux[T](delegate.startWith(values:_*))
   def startWith(publisher: Publisher[T]): Flux[T] = wrapFlux[T](delegate.startWith(publisher))
-
 
   // todo add optional alternatives or extra overloads to subscribe(...)? note these are nullable values in public api
   def subscribe(): Disposable = delegate.subscribe()
@@ -701,7 +689,6 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def zipWithIterable[T2](iterable: Iterable[T2]): Flux[(T, T2)] = wrapFlux[(T, T2)](delegate.zipWithIterable(iterable).map(toScalaTuple2(_)))
   def zipWithIterable[T2, V](iterable: Iterable[T2], zipper: (T, T2) => V): Flux[V] = wrapFlux[V](delegate.zipWithIterable(iterable, zipper))
-
 
 }
 
