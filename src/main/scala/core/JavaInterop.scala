@@ -5,11 +5,13 @@ import reactor.core.publisher.{Mono => JMono}
 import java.lang.{Iterable => JIterable}
 import java.time.{Duration => JDuration}
 import java.lang.{Runnable => JRunnable}
+import java.lang.{Iterable => JIterable}
 import java.util.{Map => JMap}
 import java.util
 import java.util.function.{Consumer => JConsumer}
 import java.util.function.{Function => JFunction}
 import java.util.function.{BiFunction => JBiFunction}
+import reactor.core.publisher.{GroupedFlux => JGroupedFlux}
 
 import org.reactivestreams.Publisher
 import reactor.util.function.Tuples
@@ -21,20 +23,22 @@ import scala.concurrent.duration.FiniteDuration
 
 object JavaInterop {
 
-  def wrapFlux[T](jFlux: JFlux[T]): Flux[T] = new Flux[T](jFlux)
+  def wrapFlux[T](jFlux: JFlux[T]): Flux[T] = new FluxImpl[T](jFlux)
+  def wrapGroupedFlux[K, V](jGroupedFlux: JGroupedFlux[K, V]): GroupedFlux[K, V] = new GroupedFlux[K, V](jGroupedFlux)
   def wrapMono[T](jMono: JMono[T]): Mono[T] = new Mono[T](jMono)
 
-  def toSeq[T](list: java.util.List[T]): Seq[T] = JavaConverters.asScalaIteratorConverter(list.iterator()).asScala.toSeq
-  def toMap[K, V](map: java.util.Map[K, V]): Map[K, V] = JavaConverters.mapAsScalaMapConverter(map).asScala.toMap
+  def toScalaSeq[T](list: java.util.List[T]): Seq[T] = JavaConverters.asScalaIteratorConverter(list.iterator()).asScala.toSeq
+  def toScalaMap[K, V](map: java.util.Map[K, V]): Map[K, V] = JavaConverters.mapAsScalaMapConverter(map).asScala.toMap
 
-  def asJavaMap[K, V](map: Map[K, V]): JMap[K, V] = JavaConverters.mapAsJavaMap(map)
-  def asJavaMutableMap[K, V](map: mutable.Map[K, V]): JMap[K, V] = JavaConverters.mutableMapAsJavaMap(map)
+  def toJavaMap[K, V](map: Map[K, V]): JMap[K, V] = JavaConverters.mapAsJavaMap(map)
+  def toJavaMutableMap[K, V](map: mutable.Map[K, V]): JMap[K, V] = JavaConverters.mutableMapAsJavaMap(map)
 
 
 
-  def toIterable[T](collection: util.Collection[T]): Iterable[T] = JavaConverters.collectionAsScalaIterable(collection)
-  def asJavaCollection[T](iterable: mutable.Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
-  def asJavaCollection[T](iterable: Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
+  def toScalaIterable[T](collection: util.Collection[T]): Iterable[T] = JavaConverters.collectionAsScalaIterable(collection)
+  def toScalaIterable[T](iterable: JIterable[T]): Iterable[T] = JavaConverters.iterableAsScalaIterable(iterable)
+  def toJavaCollection[T](iterable: mutable.Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
+  def toJavaCollection[T](iterable: Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
 
 
   // tuples

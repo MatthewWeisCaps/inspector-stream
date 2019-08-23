@@ -12,6 +12,7 @@ import java.time.{Duration => JDuration}
 import java.util.function.{Consumer => JConsumer}
 import java.util.function.{LongConsumer => JLongConsumer}
 import java.util.function.{Supplier => JSupplier}
+import java.util.function.{BooleanSupplier => JBooleanSupplier}
 import java.lang.{Boolean => JBoolean}
 import java.lang.{Long => JLong}
 import java.util.stream.{Stream => JStream}
@@ -71,12 +72,13 @@ trait ImplicitJavaInterop {
   implicit def asJavaRunnable(runnable: () => Unit): JRunnable = () => runnable.apply()
 
   // Known as a LongConsumer in the java world
-  implicit def asJavaLongConsumer(consumer: Long => Unit): JLongConsumer = (n: Long) => consumer.apply(n)
+  implicit def asJavaLongConsumer(consumer: Long => Unit): JLongConsumer = (n: Long) => consumer.apply(long2Long(n)) // todo long2Long needed?
 
   // Known as a Consumer in the java world
   implicit def asJavaConsumer[T](consumer: T => Unit): JConsumer[T] = (t: T) => consumer.apply(t)
 
   // Known as a Consumer in the java world
+  implicit def asJavaBooleanSupplier(supplier: () => Boolean): JBooleanSupplier = () => boolean2Boolean(supplier.apply()) // todo boolean2Boolean needed?
   implicit def asJavaSupplier[T](supplier: () => T): JSupplier[T] = () => supplier.apply()
 
   // Known as a Predicate in the java world
