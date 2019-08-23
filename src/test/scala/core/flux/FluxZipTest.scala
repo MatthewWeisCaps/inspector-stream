@@ -1,14 +1,32 @@
-package core
+package core.flux
 
+import core.Flux
 import org.scalatest.FunSuite
 import reactor.test.StepVerifier
-import test.StepVerifierExt._
 
-//import scala.language.implicitConversions
+class FluxZipTest extends FunSuite {
 
-class ZipTest extends FunSuite {
+  test("flux zip3 singles") {
+    val flux = Flux.zip(Flux.just("a"), Flux.just("b"), Flux.just("c"))
 
-  test("zip2") {
+    StepVerifier.create(flux)
+      .expectSubscription()
+      .expectNext(("a", "b", "c"))
+      .expectComplete()
+      .verify()
+  }
+
+  test("flux zipMap") {
+    val flux = Flux.zip(Flux.just("a"), Flux.just("b"), Flux.just("c"))
+
+    StepVerifier.create(flux.map(((a: String, b: String, c: String) => a + b + c).tupled))
+      .expectSubscription()
+      .expectNext("abc")
+      .expectComplete()
+      .verify()
+  }
+
+  test("flux zip2") {
 
     val letters = Flux.just("a", "b", "c")
     val numbers = Flux.just(1, 2, 3)
@@ -24,7 +42,7 @@ class ZipTest extends FunSuite {
       .verify()
   }
 
-  test("zip3") {
+  test("flux zip3 with 3 elements") {
 
     val numbers = Flux.just(1, 2, 3)
     val letters = Flux.just("a", "b", "c")
@@ -41,7 +59,7 @@ class ZipTest extends FunSuite {
       .verify()
   }
 
-  test("zip4") {
+  test("flux zip4") {
 
     val numbers = Flux.just(1, 2, 3)
     val letters = Flux.just("a", "b", "c")
@@ -59,7 +77,7 @@ class ZipTest extends FunSuite {
       .verify()
   }
 
-  test("zipIterable") {
+  test("flux zipIterable") {
 
     val numbers = Flux.just(1, 2, 3) // requires boxing in StepVerifier below!
     val letters = Flux.just("a", "b", "c")
@@ -76,7 +94,7 @@ class ZipTest extends FunSuite {
       .verify()
   }
 
-  test("zipPublisher") {
+  test("flux zipPublisher") {
 
     val numbers = Flux.just(1, 2, 3) // requires boxing in StepVerifier below!
     val letters = Flux.just("a", "b", "c")

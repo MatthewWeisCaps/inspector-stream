@@ -1,11 +1,8 @@
-package core
+package core.flux
 
-import org.reactivestreams.Publisher
-import reactor.core.publisher.{Flux => JFlux}
+import core.Flux
 import org.scalatest.FunSuite
-import reactor.test.StepVerifierOptions
 import reactor.test.StepVerifier
-import test.StepVerifierExt._
 
 class FluxJustTest extends FunSuite {
 

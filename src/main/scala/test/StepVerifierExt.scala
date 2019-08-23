@@ -19,13 +19,13 @@ object StepVerifierExt {
 //    }
 //  }
 
-  object StepVerifierVirtualTime extends AnyVal {
-    def withVirtualTime[T](scenarioSupplier: () => Publisher[T]): StepVerifier.FirstStep[T] = {
-      StepVerifier.withVirtualTime[T](scalaToJavaSupplier(scenarioSupplier))
-    }
-  }
-
-  implicit def stepVerifier_Ext(stepVerifier: StepVerifier.type): StepVerifierVirtualTime.type = StepVerifierVirtualTime
+//  object StepVerifierVirtualTime extends AnyVal {
+//    def withVirtualTime[T](scenarioSupplier: () => Publisher[T]): StepVerifier.FirstStep[T] = {
+//      StepVerifier.withVirtualTime[T](scalaToJavaSupplier(scenarioSupplier))
+//    }
+//  }
+//
+//  implicit def stepVerifier_Ext(stepVerifier: StepVerifier.type): StepVerifierVirtualTime.type = StepVerifierVirtualTime
 
 
 

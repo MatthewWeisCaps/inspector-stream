@@ -1,8 +1,8 @@
-package core
+package core.mono
 
+import core.Mono
 import org.scalatest.FunSuite
 import reactor.test.StepVerifier
-import test.StepVerifierExt._
 
 class MonoZipWithTest extends FunSuite {
 

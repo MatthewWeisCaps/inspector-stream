@@ -1,8 +1,7 @@
-package core
+package core.flux
 
+import core.Flux
 import org.scalatest.FunSuite
-
-import scala.collection.mutable
 
 class FluxCollectMultiMapTest extends FunSuite {
 

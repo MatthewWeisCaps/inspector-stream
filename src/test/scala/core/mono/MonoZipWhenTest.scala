@@ -1,12 +1,13 @@
-package core
+package core.mono
 
 import java.util.concurrent.TimeUnit
 
+import core.Mono
 import org.scalatest.FunSuite
 import reactor.test.StepVerifier
 import test.StepVerifierExt._
 
-import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.concurrent.duration.Duration
 
 class MonoZipWhenTest extends FunSuite {
 

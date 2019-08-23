@@ -1,8 +1,7 @@
-package core
+package core.flux
 
-import org.scalatest.{Assertions, FunSuite}
-import reactor.test.StepVerifier
-import test.StepVerifierExt._
+import core.Flux
+import org.scalatest.FunSuite
 
 import scala.collection.mutable
 

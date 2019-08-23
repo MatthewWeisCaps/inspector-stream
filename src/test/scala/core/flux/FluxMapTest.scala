@@ -1,8 +1,8 @@
-package core
+package core.flux
 
+import core.Flux
 import org.scalatest.FunSuite
 import reactor.test.StepVerifier
-import test.StepVerifierExt._
 
 class FluxMapTest extends FunSuite {
 

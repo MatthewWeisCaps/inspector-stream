@@ -1,12 +1,7 @@
-package core
+package core.flux
 
-import org.reactivestreams.{Subscriber, Subscription}
+import core.Flux
 import org.scalatest.FunSuite
-import org.scalatest.Assertions._
-import reactor.test.StepVerifier
-import test.StepVerifierExt._
-
-import scala.concurrent.duration._
 
 class FluxDoOnNextTest extends FunSuite {
 

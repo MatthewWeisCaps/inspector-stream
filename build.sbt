@@ -36,3 +36,8 @@ Compile / unmanagedSourceDirectories += baseDirectory.value / "src/main/reactor"
 Test / unmanagedSourceDirectories += baseDirectory.value / "src/test/reactor"
 //scalaSource in Compile := baseDirectory.value / "src/main/reactor"
 //scalaSource in Test := baseDirectory.value / "src/test/reactor"
+
+//libraryDependencies += "org.reactivestreams" % "reactive-streams-tck-flow" % "1.0.3"
+libraryDependencies += "org.reactivestreams" % "reactive-streams-tck" % "1.0.3"
+//libraryDependencies += "org.reactivestreams" % "reactive-streams-flow" % "1.0.3"
+libraryDependencies += "org.reactivestreams" % "reactive-streams" % "1.0.3"

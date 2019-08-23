@@ -1,15 +1,14 @@
-package core
+package core.flux
 
-import org.reactivestreams.Publisher
+import core.Flux
 import org.scalatest.FunSuite
 import reactor.test.StepVerifier
-import test.StepVerifierExt._
 
 //import scala.language.implicitConversions
 
-class CombineLatestTest extends FunSuite {
+class FluxCombineLatestTest extends FunSuite {
 
-  test("combineLatest") {
+  test("flux combineLatest") {
 
     val letters = Flux.just("a", "b", "c")
     val numbers = Flux.just(1, 2, 3)
