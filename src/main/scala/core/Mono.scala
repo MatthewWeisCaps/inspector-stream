@@ -3,7 +3,6 @@ package core
 import java.lang
 import java.util.concurrent.{Callable, CompletionStage}
 
-import core.JavaInterop._
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import reactor.core.publisher.FluxSink.OverflowStrategy
 import reactor.core.Disposable
@@ -20,9 +19,7 @@ import reactor.util.function.{Tuple5 => JTuple5}
 import reactor.util.function.{Tuple6 => JTuple6}
 import reactor.util.function.{Tuple7 => JTuple7}
 import reactor.util.function.{Tuple8 => JTuple8}
-import core.Flux.{toScalaTuple2, toScalaTuple3, toScalaTuple4, toScalaTuple5, toScalaTuple6, toScalaTuple7, toScalaTuple8}
 import reactor.util.context.Context
-import core.JavaInterop._
 import reactor.util.Logger
 
 import scala.collection.JavaConverters
@@ -30,6 +27,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration.Duration.Infinite
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.language.{existentials, higherKinds}
+import core.JavaInterop._
 
 object Mono extends ImplicitJavaInterop {
 

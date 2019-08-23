@@ -1,4 +1,4 @@
-package core.flux
+package test.flux
 
 import core.Flux
 import org.scalatest.{Assertions, FunSuite}

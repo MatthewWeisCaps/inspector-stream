@@ -13,7 +13,6 @@ import reactor.core.publisher.FluxSink.OverflowStrategy
 import reactor.core.publisher.{BufferOverflowStrategy, FluxSink, Signal, SignalType, SynchronousSink, Flux => JFlux, Mono => JMono}
 import reactor.test.scheduler.VirtualTimeScheduler
 import reactor.util.concurrent.Queues.{SMALL_BUFFER_SIZE, XS_BUFFER_SIZE}
-import core.JavaInterop._
 import reactor.util.function.{Tuple2 => JTuple2}
 import reactor.util.function.{Tuple3 => JTuple3}
 import reactor.util.function.{Tuple4 => JTuple4}
@@ -33,6 +32,8 @@ import scala.collection.{JavaConverters, mutable}
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.concurrent.duration.Duration.Infinite
 import scala.language.{existentials, higherKinds}
+import core.JavaInterop._
+
 
 
 // TODO make sure any and all @Nullable methods are converted to Option

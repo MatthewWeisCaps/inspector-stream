@@ -1,4 +1,4 @@
-package core.mono
+package test.mono
 
 import core.{Flux, Mono}
 import org.scalatest.FunSuite
