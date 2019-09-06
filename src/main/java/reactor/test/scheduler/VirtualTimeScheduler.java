@@ -325,7 +325,7 @@ public class VirtualTimeScheduler implements Scheduler {
 
 				while (!queue.isEmpty()) {
 					TimedRunnable current = queue.peek();
-					if (current == null || current.time > targetNanoTime) {
+					if (current == null || current.time > targetNanoTime /*|| current.time == Instant.EPOCH.getNano()*/) { // THIS LINE HAS BEEN MODIFIED FROM ITS ORIGINAL SOURCE FILE. Original code: "if (current == null || current.time > targetNanoTime) { "
 						break;
 					}
 					//for the benefit of tasks that call `now()`

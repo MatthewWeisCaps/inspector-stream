@@ -10,8 +10,8 @@ import java.{lang, util}
 import core.JavaInterop._
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import reactor.core.Disposable
-import reactor.core.publisher.FluxSink.OverflowStrategy
-import reactor.core.publisher.{BufferOverflowStrategy, FluxSink, Signal, SignalType, SynchronousSink, Flux => JFlux}
+import reactor.core.{Scannable => JScannable}
+import reactor.core.publisher.{BufferOverflowStrategy, FluxSink => JFluxSink, Signal, SignalType, SynchronousSink, Flux => JFlux}
 import reactor.core.scheduler.Scheduler
 import reactor.util.Logger
 import reactor.util.context.Context
@@ -53,11 +53,11 @@ object Flux extends ImplicitJavaInterop {
   def concatDelayError[T](sources: Publisher[_ <: Publisher[T]], delayUntilEnd: Boolean, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.concatDelayError(sources, delayUntilEnd, prefetch))
   def concatDelayError[T](sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.concatDelayError(sources:_*))
 
-  def create[T](emitter: FluxSink[T] => Unit): Flux[T] = wrapFlux[T](JFlux.create(emitter))
-  def create[T](emitter: FluxSink[T] => Unit, backpressure: OverflowStrategy): Flux[T] = wrapFlux[T](JFlux.create(emitter, backpressure))
+  def create[T](emitter: FluxSink[T] => Unit): Flux[T] = wrapFlux[T](JFlux.create((jfluxSink: JFluxSink[T]) => emitter(FluxSink.wrap(jfluxSink))))
+  def create[T](emitter: FluxSink[T] => Unit, backpressure: FluxSink.OverflowStrategy): Flux[T] = wrapFlux[T](JFlux.create((jfluxSink: JFluxSink[T]) => emitter(FluxSink.wrap(jfluxSink)), backpressure.asInstanceOf[JFluxSink.OverflowStrategy]))
 
-  def push[T](emitter: FluxSink[T] => Unit): Flux[T] = wrapFlux[T](JFlux.create(emitter))
-  def push[T](emitter: FluxSink[T] => Unit, backpressure: OverflowStrategy): Flux[T] = wrapFlux[T](JFlux.create(emitter, backpressure))
+  def push[T](emitter: FluxSink[T] => Unit): Flux[T] = wrapFlux[T](JFlux.push((jfluxSink: JFluxSink[T]) => emitter(FluxSink.wrap(jfluxSink))))
+  def push[T](emitter: FluxSink[T] => Unit, backpressure: FluxSink.OverflowStrategy): Flux[T] = wrapFlux[T](JFlux.push((jfluxSink: JFluxSink[T]) => emitter(FluxSink.wrap(jfluxSink)), backpressure.asInstanceOf[JFluxSink.OverflowStrategy]))
 
   def defer[T](supplier: () => Publisher[T]): Flux[T] = wrapFlux[T](JFlux.defer(supplier))
   def deferWithContext[T](supplier: Context => Publisher[T]): Flux[T] = wrapFlux[T](JFlux.deferWithContext(supplier))
@@ -81,8 +81,8 @@ object Flux extends ImplicitJavaInterop {
 //  def fromStream[T](streamSupplier: () => Stream[T]): Flux[T] = wrap(JFlux.fromStream(streamSupplier))
 
   def generate[T](generator: SynchronousSink[T] => Unit): Flux[T] = wrapFlux[T](JFlux.generate(generator))
-  def generate[T, S](stateSupplier: Callable[S], generator: (S, SynchronousSink[T]) => S): Flux[T] = wrapFlux[T](JFlux.generate(stateSupplier, generator))
-  def generate[T, S](stateSupplier: Callable[S], generator: (S, SynchronousSink[T]) => S, stateConsumer: S => Unit): Flux[T] = wrapFlux[T](JFlux.generate(stateSupplier, generator, stateConsumer))
+  def generate[T, S](stateSupplier: () => S, generator: (S, SynchronousSink[T]) => S): Flux[T] = wrapFlux[T](JFlux.generate(stateSupplier, generator))
+  def generate[T, S](stateSupplier: () => S, generator: (S, SynchronousSink[T]) => S, stateConsumer: S => Unit): Flux[T] = wrapFlux[T](JFlux.generate(stateSupplier, generator, stateConsumer))
 
 
   def interval[T, S](period: Duration): Flux[Long] = period match {
@@ -692,6 +692,7 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
 }
 
-private[core] class FluxImpl[T](publisher: Publisher[T]) extends Flux[T] {
+private[core] class FluxImpl[T](publisher: Publisher[T]) extends Flux[T] with Scannable {
   override private[core] val delegate = JFlux.from(publisher)
+  override private[core] val jscannable = JScannable.from(delegate)
 }

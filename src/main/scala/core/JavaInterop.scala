@@ -13,10 +13,20 @@ import java.util.concurrent.{CompletableFuture => JCompletableFuture, Completion
 import java.util.function.{Consumer => JConsumer}
 import java.util.function.{Function => JFunction}
 import java.util.function.{BiFunction => JBiFunction}
+import java.util.function.{LongConsumer => JLongConsumer}
+
+
 
 import reactor.core.publisher.{GroupedFlux => JGroupedFlux}
 import org.reactivestreams.Publisher
 import reactor.util.function.Tuples
+import reactor.util.function.{Tuple2 => JTuple2}
+import reactor.util.function.{Tuple3 => JTuple3}
+import reactor.util.function.{Tuple4 => JTuple4}
+import reactor.util.function.{Tuple5 => JTuple5}
+import reactor.util.function.{Tuple6 => JTuple6}
+import reactor.util.function.{Tuple7 => JTuple7}
+import reactor.util.function.{Tuple8 => JTuple8}
 
 import scala.collection.{JavaConverters, mutable}
 import scala.collection.JavaConverters.asJavaIterable
@@ -37,6 +47,8 @@ object JavaInterop {
   def toJavaMap[K, V](map: Map[K, V]): JMap[K, V] = JavaConverters.mapAsJavaMap(map)
   def toJavaMutableMap[K, V](map: mutable.Map[K, V]): JMap[K, V] = JavaConverters.mutableMapAsJavaMap(map)
 
+  def asJavaLongConsumer(consumer: Long => Unit): JLongConsumer = (n: Long) => consumer.apply(long2Long(n))
+
 
   def toScalaFuture[T](completableFuture: CompletionStage[T]): Future[T] = scala.compat.java8.FutureConverters.toScala(completableFuture)
 //  def toScalaFuture[T](completableFuture: JCompletableFuture[T]): Future[T] = scala.compat.java8.FutureConverters.toScala(completableFuture)
@@ -56,6 +68,14 @@ object JavaInterop {
   def toReactorTuple6[T1, T2, T3, T4, T5, T6](tuple: (T1, T2, T3, T4, T5, T6)): reactor.util.function.Tuple6[T1, T2, T3, T4, T5, T6] = Tuples.of(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6)
   def toReactorTuple7[T1, T2, T3, T4, T5, T6, T7](tuple: (T1, T2, T3, T4, T5, T6, T7)): reactor.util.function.Tuple7[T1, T2, T3, T4, T5, T6, T7] = Tuples.of(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7)
   def toReactorTuple8[T1, T2, T3, T4, T5, T6, T7, T8](tuple: (T1, T2, T3, T4, T5, T6, T7, T8)): reactor.util.function.Tuple8[T1, T2, T3, T4, T5, T6, T7, T8] = Tuples.of(tuple._1, tuple._2, tuple._3, tuple._4, tuple._5, tuple._6, tuple._7, tuple._8)
+
+  def toScalaTuple2[T1, T2](tuple2: JTuple2[T1, T2]): (T1, T2) = (tuple2.getT1, tuple2.getT2)
+  def toScalaTuple3[T1, T2, T3](tuple3: JTuple3[T1, T2, T3]): (T1, T2, T3) = (tuple3.getT1, tuple3.getT2, tuple3.getT3)
+  def toScalaTuple4[T1, T2, T3, T4](tuple4: JTuple4[T1, T2, T3, T4]): (T1, T2, T3, T4) = (tuple4.getT1, tuple4.getT2, tuple4.getT3, tuple4.getT4)
+  def toScalaTuple5[T1, T2, T3, T4, T5](tuple5: JTuple5[T1, T2, T3, T4, T5]): (T1, T2, T3, T4, T5) = (tuple5.getT1, tuple5.getT2, tuple5.getT3, tuple5.getT4, tuple5.getT5)
+  def toScalaTuple6[T1, T2, T3, T4, T5, T6](tuple6: JTuple6[T1, T2, T3, T4, T5, T6]): (T1, T2, T3, T4, T5, T6) = (tuple6.getT1, tuple6.getT2, tuple6.getT3, tuple6.getT4, tuple6.getT5, tuple6.getT6)
+  def toScalaTuple7[T1, T2, T3, T4, T5, T6, T7](tuple7: JTuple7[T1, T2, T3, T4, T5, T6, T7]): (T1, T2, T3, T4, T5, T6, T7) = (tuple7.getT1, tuple7.getT2, tuple7.getT3, tuple7.getT4, tuple7.getT5, tuple7.getT6, tuple7.getT7)
+  def toScalaTuple8[T1, T2, T3, T4, T5, T6, T7, T8](tuple8: JTuple8[T1, T2, T3, T4, T5, T6, T7, T8]): (T1, T2, T3, T4, T5, T6, T7, T8) = (tuple8.getT1, tuple8.getT2, tuple8.getT3, tuple8.getT4, tuple8.getT5, tuple8.getT6, tuple8.getT7, tuple8.getT8)
 
   //  def asJavaCollection[T](iterable: Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
 //  def asJavaIterable[T](iterable: Iterable[T]): JIterable[T] = asJavaIterable(iterable)

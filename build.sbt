@@ -19,6 +19,7 @@ addCompilerPlugin("org.sireum" %% "scalac-plugin" % sireumScalacVersion)
 libraryDependencies += "org.sireum.runtime" %% "library" % runtimeVersion
 
 libraryDependencies += "io.projectreactor" % "reactor-core" % "3.3.0.M3"
+libraryDependencies += "io.projectreactor.addons" % "reactor-extra" % "3.3.0.M1"
 //libraryDependencies += "io.projectreactor" % "reactor-test" % "3.3.0.M3" //% Test // no longer needed! now directly include test
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0"

@@ -838,7 +838,7 @@ public interface StepVerifier {
 		 *
 		 * @return this builder
 		 */
-		Step<T> then(Runnable task);
+		Step<T> thenRun(Runnable task); // THIS LINE HAS BEEN MODIFIED FROM ITS ORIGINAL SOURCE FILE. (rename then to thenRun)
 
 		/**
 		 * Mark a Pause in the expectation evaluation.

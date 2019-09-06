@@ -32,3 +32,8 @@ ALL MODIFICATIONS MADE WILL BE LISTED IN THIS README AS WELL AS IN A COMMENT WRI
 
 StepVerifier.java - line 726 - renamed method "expectNext(T... ts)" to "expectNextValues(T... ts)" (helps Scala avoid vararg method ambiguity)
 DefaultStepVerifierBuilder.java - line 479 - renamed method "expectNext(T... ts)" to "expectNextValues(T... ts)" (helps Scala avoid vararg method ambiguity)
+
+StepVerifier.java - line 841 - renamed method "then(Runnable task)" to "thenRun(Runnable task)" because usage of "then" as an identifier was depreciated in scala 2.10.0
+DefaultStepVerifierBuilder.java - line 615 - renamed method "then(Runnable task)" to "thenRun(Runnable task)" because usage of "then" as an identifier was depreciated in scala 2.10.0
+
+util.VirtualTimeScheduler.java - line 328 - added clause to loop drain for VirtualTimeSchedulers at the epoch

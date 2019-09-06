@@ -16,11 +16,13 @@ import java.util.function.{BooleanSupplier => JBooleanSupplier}
 import java.lang.{Boolean => JBoolean}
 import java.lang.{Long => JLong}
 import java.util.stream.{Stream => JStream}
+import reactor.core.publisher.{FluxSink => JFluxSink, Flux => JFlux}
 import java.util.{Comparator => JComparator}
 import java.lang.{Runnable => JRunnable}
 import java.util
 import java.util.{Optional => JOptional}
 import java.util.concurrent.CompletionStage
+import java.util.concurrent.{Callable => JCallable}
 
 import reactor.util.function.{Tuple2 => JTuple2}
 import reactor.util.function.{Tuple3 => JTuple3}
@@ -70,8 +72,11 @@ trait ImplicitJavaInterop {
 
   // FUNCTIONS
 
+  implicit def asJFluxSink[T](jfluxSink: JFluxSink[T]): FluxSink[T] = FluxSink.wrap(jfluxSink)
+
   // Known as a Runnable in the java world
   implicit def asJavaRunnable(runnable: () => Unit): JRunnable = () => runnable.apply()
+  implicit def asJavaCallable[T](callable: () => T): JCallable[T] = () => callable.apply()
 
   // Known as a LongConsumer in the java world
   implicit def asJavaLongConsumer(consumer: Long => Unit): JLongConsumer = (n: Long) => consumer.apply(long2Long(n)) // todo long2Long needed?

@@ -6,7 +6,7 @@ import java.util.concurrent.{Callable, CompletionStage}
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import reactor.core.publisher.FluxSink.OverflowStrategy
 import reactor.core.Disposable
-import reactor.core.publisher.{FluxSink, MonoProcessor, MonoSink, Signal, SignalType, SynchronousSink, Flux => JFlux, Mono => JMono}
+import reactor.core.publisher.{MonoSink, Signal, SignalType, SynchronousSink, Flux => JFlux, Mono => JMono}
 import reactor.core.scheduler.Scheduler
 import java.util.concurrent.{Future => JFuture}
 import java.util.function
@@ -56,8 +56,8 @@ object Mono extends ImplicitJavaInterop {
 
   def from[T](source: Publisher[T]): Mono[T] = wrapMono(JMono.from(source))
   def fromCallable[T](supplier: Callable[T]): Mono[T] = wrapMono(JMono.fromCallable(supplier))
-//  def fromCompletionStage[T](completionStage: CompletionStage[T]): Mono[T] = wrap(JMono.fromCompletionStage(completionStage))
-//  def fromCompletionStage[T](stageSupplier: () => CompletionStage[T]): Mono[T] = wrap(JMono.fromCompletionStage(stageSupplier))
+//  def fromCompletionStage[T](completionStage: CompletionStage[T]): Mono[T] = wrapMono(JMono.fromCompletionStage(completionStage)) // became fromFuture
+//  def fromCompletionStage[T](stageSupplier: () => CompletionStage[T]): Mono[T] = wrapMono(JMono.fromCompletionStage(stageSupplier)) // became fromFuture
   def fromDirect[I](source: Publisher[I]): Mono[I] = wrapMono(JMono.fromDirect(source))
   def fromFuture[T](future: Future[T]): Mono[T] = wrapMono(JMono.fromCompletionStage(future)) // completionStage is java equiv of Future
   def fromFutureSupplier[T](futureSupplier: () => Future[T]): Mono[T] = wrapMono(JMono.fromCompletionStage(() => futureSupplier.apply()))
@@ -88,11 +88,9 @@ object Mono extends ImplicitJavaInterop {
   def when(source: Publisher[Any], sources: Publisher[Any]*): Mono[_] = when(source +: sources)
   def when(sources: Iterable[_ <: Publisher[Any]]): Mono[_] = wrapMono(JMono.when(sources))
 
-
   def whenDelayError(): Mono[_] = whenDelayError(Seq())
   def whenDelayError(source: Publisher[Any], sources: Publisher[Any]*): Mono[_] = whenDelayError(source +: sources)
   def whenDelayError(sources: Iterable[_ <: Publisher[Any]]): Mono[_] = wrapMono(JMono.whenDelayError(sources))
-
 
   def zip[T1, T2, O](p1: Mono[T1], p2: Mono[T2], combinator: (T1, T2) => O): Mono[O] = wrapMono(JMono.zip(p1.delegate, p2.delegate, combinator))
 
@@ -147,20 +145,20 @@ trait Mono[T] extends Publisher[T] with ImplicitJavaInterop {
   }
 
   def cache(): Mono[T] = wrapMono[T](delegate.cache())
-  def cache(ttl: FiniteDuration): Mono[T] = wrapMono[T](delegate.cache(ttl))
-  def cache(ttl: FiniteDuration, timer: Scheduler): Mono[T] = wrapMono[T](delegate.cache(ttl, timer))
+//  def cache(ttl: FiniteDuration): Mono[T] = wrapMono[T](delegate.cache(ttl))
+//  def cache(ttl: FiniteDuration, timer: Scheduler): Mono[T] = wrapMono[T](delegate.cache(ttl, timer))
   def cache(ttlForValue: T => FiniteDuration, ttlForError: Throwable => FiniteDuration, ttlForEmpty: () => FiniteDuration): Mono[T] = wrapMono[T](delegate.cache(ttlForValue.andThen(asJavaDuration), ttlForError.andThen(asJavaDuration), () => asJavaDuration(ttlForEmpty())))
 
   // todo: allow and convert infinite durations?
-//  def cache(ttl: Duration): Mono[T] = ttl match {
-//    case _: Infinite => ???
-//    case finiteDuration: FiniteDuration => wrapMono(delegate.cache(finiteDuration))
-//  }
-//  def cache(ttl: Duration, timer: Scheduler): Mono[T] = ttl match {
-//    case _: Infinite => ???
-//    case finiteDuration: FiniteDuration => wrapMono(delegate.cache(finiteDuration, timer))
-//  }
-//
+  def cache(ttl: Duration): Mono[T] = ttl match {
+    case _: Infinite => cache()
+    case finiteDuration: FiniteDuration => wrapMono(delegate.cache(finiteDuration))
+  }
+  def cache(ttl: Duration, timer: Scheduler): Mono[T] = ttl match {
+    case _: Infinite => cache()
+    case finiteDuration: FiniteDuration => wrapMono(delegate.cache(finiteDuration, timer))
+  }
+
 //  def cache(ttlForValue: T => Duration, ttlForError: Throwable => Duration, ttlForEmpty: () => Duration): Mono[T] = ttlForValue match {
 //    case _: Infinite => ttlForError match {
 //      case _: Infinite => ttlForEmpty match {
