@@ -28,6 +28,7 @@ import scala.concurrent.duration.Duration.Infinite
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.language.{existentials, higherKinds}
 import core.JavaInterop._
+import org.junit.jupiter.api.Assertions
 
 object Mono extends ImplicitJavaInterop {
 
@@ -46,8 +47,8 @@ object Mono extends ImplicitJavaInterop {
 
   def empty[T](): Mono[T] = wrapMono(JMono.empty())
 
-  def error[T](error: Throwable): Mono[T] = wrapMono(JMono.error(error))
-  def error[T](errorSupplier: () => Throwable): Mono[T] = wrapMono(JMono.error(errorSupplier))
+  def error[T](error: Throwable): Mono[T] = wrapMono[T](JMono.error(error))
+  def error[T](errorSupplier: () => Throwable): Mono[T] = wrapMono[T](JMono.error(errorSupplier))
 
   // todo apply varargs pattern to other cases (especially needed in flux)
   def first[T](): Mono[T] = first(Seq())
@@ -121,6 +122,38 @@ object Mono extends ImplicitJavaInterop {
 trait Mono[T] extends Publisher[T] with ImplicitJavaInterop {
 
   private[core] val delegate: JMono[T]
+
+  ///
+  /// CUSTOM METHODS
+  ///
+
+  def fail(): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.fail()))
+  def fail(message: String): Mono[T] = wrapMono[T](delegate.doOnNext(_ => Assertions.fail(message)))
+  def fail(cause: Throwable): Mono[T] = wrapMono[T](delegate.doOnNext(_ => Assertions.fail(cause)))
+  def fail(messageSupplier: () => String): Mono[T] = wrapMono[T](delegate.doOnNext(_ => Assertions.fail(messageSupplier)))
+  def fail(message: String, cause: Throwable): Mono[T] = wrapMono[T](delegate.doOnNext(_ => Assertions.fail(message, cause)))
+
+  def assertAlways(predicate: T => Boolean): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.assertTrue(predicate(it))))
+  def assertAlways(predicate: T => Boolean, message: String): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.assertTrue(predicate(it), message)))
+  def assertAlways(message: String, predicate: T => Boolean): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.assertTrue(predicate(it), message)))
+  def assertAlways(predicate: T => Boolean, messageSupplier: () => String): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.assertTrue(predicate(it), messageSupplier())))
+  def assertAlways(predicate: T => Boolean, messageFn: T => String): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.assertTrue(predicate(it), messageFn(it))))
+
+  def assertNever(predicate: T => Boolean): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.assertFalse(predicate(it))))
+  def assertNever(predicate: T => Boolean, message: String): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.assertFalse(predicate(it), message)))
+  def assertNever(predicate: T => Boolean, messageSupplier: () => String): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.assertFalse(predicate(it), messageSupplier())))
+  def assertNever(predicate: T => Boolean, messageFn: T => String): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.assertFalse(predicate(it), messageFn(it))))
+
+  def assertEmpty(): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.fail("An element was emitted despite assertEmpty() assertion")))
+  def assertEmpty(message: String): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.fail(message)))
+  def assertEmpty(cause: Throwable): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.fail("An element was emitted despite assertEmpty() assertion", cause)))
+  def assertEmpty(message: String, cause: Throwable): Mono[T] = wrapMono[T](delegate.doOnNext(it => Assertions.fail(message, cause)))
+
+  // in Flux, the delegate's switchIfEmpty takes a Publisher (so Flux.error works fine). In Mono, the delegate's switchIfEmpty takes a JMono
+  def assertNotEmpty(): Mono[T] = wrapMono(delegate.switchIfEmpty(JMono.error(new AssertionError("Flux was empty despite assertNotEmpty() assertion"))))
+  def assertNotEmpty(message: String): Mono[T] = wrapMono(delegate.switchIfEmpty(JMono.error(new AssertionError(message))))
+  def assertNotEmpty(cause: Throwable): Mono[T] = wrapMono(delegate.switchIfEmpty(JMono.error(new AssertionError("Flux was empty despite assertNotEmpty() assertion", cause))))
+  def assertNotEmpty(message: String, cause: Throwable): Mono[T] = wrapMono(delegate.switchIfEmpty(JMono.error(new AssertionError(message, cause))))
 
   ///
   /// API METHODS

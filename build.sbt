@@ -33,6 +33,8 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % Test
 addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.3") // add runs to sbt
 logBuffered in Test := false
 
+libraryDependencies += "org.junit.jupiter" % "junit-jupiter-api" % "5.5.2"
+
 Compile / unmanagedSourceDirectories += baseDirectory.value / "src/main/reactor"
 Test / unmanagedSourceDirectories += baseDirectory.value / "src/test/reactor"
 //scalaSource in Compile := baseDirectory.value / "src/main/reactor"

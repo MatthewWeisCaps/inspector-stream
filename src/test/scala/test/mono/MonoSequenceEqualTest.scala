@@ -1,8 +1,13 @@
 package test.mono
 
+import java.util
+import java.util.concurrent.{Callable, Executor, ExecutorService, Executors, Future, TimeUnit}
+
 import core.{Flux, Mono}
 import org.scalatest.FunSuite
+import reactor.core.scheduler.Schedulers
 import reactor.test.StepVerifier
+import reactor.test.scheduler.VirtualTimeScheduler
 
 class MonoSequenceEqualTest extends FunSuite {
 

@@ -16,7 +16,7 @@ class FluxRepeatTest extends FunSuite {
   test("flux repeat repeats elements") {
     val flux: Flux[String] = Flux.just("a", "b", "c").repeat()
 
-    val s = StepVerifier.create(flux.take(6))
+    StepVerifier.create(flux.take(6))
       .expectSubscription()
       .expectNext("a", "b", "c")
       .expectNext("a", "b", "c")
@@ -30,7 +30,7 @@ class FluxRepeatTest extends FunSuite {
 
     val flux: Flux[String] = Flux.just("a", "b", "c").delaySequence(Duration(1, SECONDS)).repeat()
 
-    val s = StepVerifier.withVirtualTime(() => flux.take(6))
+    StepVerifier.withVirtualTime(() => flux.take(6))
       .expectSubscription()
       .expectNoEvent(Duration(1, SECONDS))
       .expectNext("a", "b", "c")

@@ -8,10 +8,11 @@ import java.util.stream.Collector
 import java.{lang, util}
 
 import core.JavaInterop._
+import org.junit.jupiter.api.Assertions
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import reactor.core.Disposable
 import reactor.core.{Scannable => JScannable}
-import reactor.core.publisher.{BufferOverflowStrategy, FluxSink => JFluxSink, Signal, SignalType, SynchronousSink, Flux => JFlux}
+import reactor.core.publisher.{BufferOverflowStrategy, Signal, SignalType, SynchronousSink, Flux => JFlux, FluxSink => JFluxSink}
 import reactor.core.scheduler.Scheduler
 import reactor.util.Logger
 import reactor.util.context.Context
@@ -178,6 +179,35 @@ object Flux extends ImplicitJavaInterop {
 trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   private[core] val delegate: JFlux[T]
+
+  ///
+  /// CUSTOM METHODS
+  ///
+
+  def fail(): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.fail()))
+  def fail(message: String): Flux[T] = wrapFlux[T](delegate.doOnNext(_ => Assertions.fail(message)))
+  def fail(cause: Throwable): Flux[T] = wrapFlux[T](delegate.doOnNext(_ => Assertions.fail(cause)))
+  def fail(messageSupplier: () => String): Flux[T] = wrapFlux[T](delegate.doOnNext(_ => Assertions.fail(messageSupplier)))
+  def fail(message: String, cause: Throwable): Flux[T] = wrapFlux[T](delegate.doOnNext(_ => Assertions.fail(message, cause)))
+
+  def assertAlways(predicate: T => Boolean): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.assertTrue(predicate(it))))
+  def assertAlways(predicate: T => Boolean, message: String): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.assertTrue(predicate(it), message)))
+  def assertAlways(predicate: T => Boolean, messageSupplier: () => String): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.assertTrue(predicate(it), messageSupplier())))
+  def assertAlways(predicate: T => Boolean, messageFn: T => String): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.assertTrue(predicate(it), messageFn(it))))
+
+  def assertNever(predicate: T => Boolean): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.assertFalse(predicate(it))))
+  def assertNever(predicate: T => Boolean, message: String): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.assertFalse(predicate(it), message)))
+  def assertNever(predicate: T => Boolean, messageSupplier: () => String): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.assertFalse(predicate(it), messageSupplier())))
+  def assertNever(predicate: T => Boolean, messageFn: T => String): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.assertFalse(predicate(it), messageFn(it))))
+
+  def assertEmpty(): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.fail("An element was emitted despite assertEmpty() assertion")))
+  def assertEmpty(message: String): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.fail(message)))
+  def assertEmpty(cause: Throwable): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.fail("An element was emitted despite assertEmpty() assertion", cause)))
+  def assertEmpty(message: String, cause: Throwable): Flux[T] = wrapFlux[T](delegate.doOnNext(it => Assertions.fail(message, cause)))
+  def assertNotEmpty(): Flux[T] = wrapFlux[T](delegate.switchIfEmpty(Flux.error(new AssertionError("Flux was empty despite assertNotEmpty() assertion"))))
+  def assertNotEmpty(message: String): Flux[T] = wrapFlux[T](delegate.switchIfEmpty(Flux.error(new AssertionError(message))))
+  def assertNotEmpty(cause: Throwable): Flux[T] = wrapFlux[T](delegate.switchIfEmpty(Flux.error(new AssertionError("Flux was empty despite assertNotEmpty() assertion", cause))))
+  def assertNotEmpty(message: String, cause: Throwable): Flux[T] = wrapFlux[T](delegate.switchIfEmpty(Flux.error(new AssertionError(message, cause))))
 
   ///
   /// API METHODS
