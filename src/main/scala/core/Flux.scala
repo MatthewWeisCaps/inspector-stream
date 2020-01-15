@@ -136,7 +136,7 @@ object Flux extends ImplicitJavaInterop {
 
   def never[T](): Flux[T] = wrapFlux[T](JFlux.never())
 
-  def range(start: Int, count: Int): Flux[Int] = wrapFlux[Int](JFlux.range(start, count).map(Integer2int(_).toInt))
+  def range(start: Int, count: Int): Flux[Int] = wrapFlux[Int](JFlux.range(start, count).map(Integer2int(_)))
 
   def switchOnNext[T](mergedPublishers: Publisher[_ <: Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.switchOnNext(mergedPublishers))
   def switchOnNext[T](mergedPublishers: Publisher[_ <: Publisher[T]], prefetch: Int): Flux[T] = wrapFlux[T](JFlux.switchOnNext(mergedPublishers, prefetch))
