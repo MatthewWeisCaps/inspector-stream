@@ -1,38 +1,16 @@
 package core
 
-import reactor.core.publisher.{Flux => JFlux}
-import reactor.core.publisher.{ConnectableFlux => JConnectableFlux}
-import reactor.core.publisher.{Mono => JMono}
 import java.lang.{Iterable => JIterable}
-import java.time.{Duration => JDuration}
-import java.lang.{Runnable => JRunnable}
-import java.lang.{Iterable => JIterable}
-import java.util.{Map => JMap}
 import java.util
-import java.util.concurrent.{CompletableFuture => JCompletableFuture, CompletionStage}
-import java.util.function.{Consumer => JConsumer}
-import java.util.function.{Function => JFunction}
-import java.util.function.{BiFunction => JBiFunction}
+import java.util.concurrent.CompletionStage
 import java.util.function.{LongConsumer => JLongConsumer}
+import java.util.{Map => JMap}
 
-
-
-import reactor.core.publisher.{GroupedFlux => JGroupedFlux}
-import org.reactivestreams.Publisher
-import reactor.util.function.Tuples
-import reactor.util.function.{Tuple2 => JTuple2}
-import reactor.util.function.{Tuple3 => JTuple3}
-import reactor.util.function.{Tuple4 => JTuple4}
-import reactor.util.function.{Tuple5 => JTuple5}
-import reactor.util.function.{Tuple6 => JTuple6}
-import reactor.util.function.{Tuple7 => JTuple7}
-import reactor.util.function.{Tuple8 => JTuple8}
+import reactor.core.publisher.{ConnectableFlux => JConnectableFlux, Flux => JFlux, GroupedFlux => JGroupedFlux, Mono => JMono}
+import reactor.util.function.{Tuples, Tuple2 => JTuple2, Tuple3 => JTuple3, Tuple4 => JTuple4, Tuple5 => JTuple5, Tuple6 => JTuple6, Tuple7 => JTuple7, Tuple8 => JTuple8}
 
 import scala.collection.{JavaConverters, mutable}
-import scala.collection.JavaConverters.asJavaIterable
-import scala.collection.parallel.immutable
 import scala.concurrent.Future
-import scala.concurrent.duration.FiniteDuration
 
 object JavaInterop {
 
