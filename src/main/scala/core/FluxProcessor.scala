@@ -1,12 +1,9 @@
 package core
 
 import org.reactivestreams.{Processor, Publisher, Subscriber, Subscription}
-import reactor.core.publisher.{FluxProcessor => JFluxProcessor, FluxSink => JFluxSink}
-import reactor.core.{Disposable, Scannable => JScannable}
-import reactor.util.context.Context
-
-import scala.collection.JavaConverters._
-import scala.concurrent.duration.Duration
+import reactor.core.Disposable
+import reactor.core.publisher.{FluxProcessor => JFluxProcessor}
+import core.JavaInterop._
 
 trait FluxProcessor[IN, OUT]/*(private val processorDelegate: JFluxProcessor[IN, OUT])*/ extends Flux[OUT] with Processor[IN, OUT] /*with Publisher[OUT] with Subscriber[IN]*/ with Disposable with Scannable {
 
@@ -29,7 +26,7 @@ trait FluxProcessor[IN, OUT]/*(private val processorDelegate: JFluxProcessor[IN,
 
   override def isDisposed: Boolean = delegate.isDisposed
 
-  override def inners: Stream[Scannable] = delegate.inners.iterator().asScala.toStream.map(scannable => new Scannable {
+  override def inners: Stream[Scannable] = asScalaIterator(delegate.inners.iterator()).toStream.map(scannable => new Scannable {
     override private[core] def jscannable = scannable
   })
 

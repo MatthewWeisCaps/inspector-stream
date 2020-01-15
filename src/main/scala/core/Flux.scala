@@ -16,7 +16,6 @@ import reactor.util.Logger
 import reactor.util.context.Context
 import reactor.util.function.{Tuple2 => JTuple2, Tuple3 => JTuple3, Tuple4 => JTuple4, Tuple5 => JTuple5, Tuple6 => JTuple6, Tuple7 => JTuple7, Tuple8 => JTuple8}
 
-import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.concurrent.duration.Duration.Infinite
 import scala.concurrent.duration.{Duration, FiniteDuration}
@@ -25,7 +24,7 @@ import scala.language.{existentials, higherKinds}
 
 
 // TODO make sure any and all @Nullable methods are converted to Option
-object Flux extends ImplicitJavaInterop {
+object Flux {
 
   ///
   /// API METHODS
@@ -682,8 +681,8 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def toSeq: Iterable[T] = toScalaIterable(delegate.toIterable()).toSeq
   def toSeq(batchSize: Int): Iterable[T] = toScalaIterable(delegate.toIterable(batchSize)).toSeq
 
-  def toStream: Stream[T] = asScalaIteratorConverter(delegate.toStream().iterator()).asScala.toStream
-  def toStream(batchSize: Int): Stream[T] = asScalaIteratorConverter(delegate.toStream(batchSize).iterator()).asScala.toStream
+  def toStream: Stream[T] = asScalaIterator(delegate.toStream().iterator()).toStream
+  def toStream(batchSize: Int): Stream[T] = asScalaIterator(delegate.toStream(batchSize).iterator()).toStream
 
   def transform[V](transformer: Flux[T] => Publisher[V]): Flux[V] = wrapFlux(delegate.transform[V](asJavaFn1((jflux: JFlux[T]) => transformer(wrapFlux(jflux)))))
   def transformDeferred[V](transformer: Flux[T] => Publisher[V]): Flux[V] = wrapFlux(delegate.transformDeferred[V](asJavaFn1((jflux: JFlux[T]) => transformer(wrapFlux(jflux)))))

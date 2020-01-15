@@ -19,7 +19,7 @@ import scala.concurrent.duration.Duration.Infinite
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.language.{existentials, higherKinds}
 
-object Mono extends ImplicitJavaInterop {
+object Mono {
 
   ///
   /// API METHODS

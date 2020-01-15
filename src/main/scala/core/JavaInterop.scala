@@ -1,16 +1,19 @@
 package core
 
-import java.lang.{Iterable => JIterable}
+import java.lang.{Boolean => JBoolean, Iterable => JIterable, Long => JLong, Runnable => JRunnable}
+import java.time.{Duration => JDuration}
 import java.util
-import java.util.concurrent.CompletionStage
-import java.util.function.{LongConsumer => JLongConsumer}
-import java.util.{Map => JMap}
+import java.util.{Iterator => JIterator}
+import java.util.concurrent.{CompletionStage, Callable => JCallable}
+import java.util.function.{BiConsumer => JBiConsumer, BiFunction => JBiFunction, BiPredicate => JBiPredicate, BooleanSupplier => JBooleanSupplier, Consumer => JConsumer, Function => JFunction, LongConsumer => JLongConsumer, Predicate => JPredicate, Supplier => JSupplier}
+import java.util.{Map => JMap, Optional => JOptional}
 
-import reactor.core.publisher.{ConnectableFlux => JConnectableFlux, Flux => JFlux, GroupedFlux => JGroupedFlux, Mono => JMono}
+import reactor.core.publisher.{ConnectableFlux => JConnectableFlux, Flux => JFlux, FluxSink => JFluxSink, GroupedFlux => JGroupedFlux, Mono => JMono}
 import reactor.util.function.{Tuples, Tuple2 => JTuple2, Tuple3 => JTuple3, Tuple4 => JTuple4, Tuple5 => JTuple5, Tuple6 => JTuple6, Tuple7 => JTuple7, Tuple8 => JTuple8}
 
 import scala.collection.{JavaConverters, mutable}
 import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 
 object JavaInterop {
 
@@ -27,16 +30,13 @@ object JavaInterop {
 
   def asJavaLongConsumer(consumer: Long => Unit): JLongConsumer = (n: Long) => consumer.apply(long2Long(n))
 
-
   def toScalaFuture[T](completableFuture: CompletionStage[T]): Future[T] = scala.compat.java8.FutureConverters.toScala(completableFuture)
 //  def toScalaFuture[T](completableFuture: JCompletableFuture[T]): Future[T] = scala.compat.java8.FutureConverters.toScala(completableFuture)
-
 
   def toScalaIterable[T](collection: util.Collection[T]): Iterable[T] = JavaConverters.collectionAsScalaIterable(collection)
   def toScalaIterable[T](iterable: JIterable[T]): Iterable[T] = JavaConverters.iterableAsScalaIterable(iterable)
   def toJavaCollection[T](iterable: mutable.Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
   def toJavaCollection[T](iterable: Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
-
 
   // tuples
   def toReactorTuple2[T1, T2](tuple: (T1, T2)): reactor.util.function.Tuple2[T1, T2] = Tuples.of(tuple._1, tuple._2)
@@ -55,34 +55,62 @@ object JavaInterop {
   def toScalaTuple7[T1, T2, T3, T4, T5, T6, T7](tuple7: JTuple7[T1, T2, T3, T4, T5, T6, T7]): (T1, T2, T3, T4, T5, T6, T7) = (tuple7.getT1, tuple7.getT2, tuple7.getT3, tuple7.getT4, tuple7.getT5, tuple7.getT6, tuple7.getT7)
   def toScalaTuple8[T1, T2, T3, T4, T5, T6, T7, T8](tuple8: JTuple8[T1, T2, T3, T4, T5, T6, T7, T8]): (T1, T2, T3, T4, T5, T6, T7, T8) = (tuple8.getT1, tuple8.getT2, tuple8.getT3, tuple8.getT4, tuple8.getT5, tuple8.getT6, tuple8.getT7, tuple8.getT8)
 
-  //  def asJavaCollection[T](iterable: Iterable[T]): util.Collection[T] = JavaConverters.asJavaCollection(iterable)
-//  def asJavaIterable[T](iterable: Iterable[T]): JIterable[T] = asJavaIterable(iterable)
+  ///
+  /// UTILITY
+  ///
 
-  //  def asJavaDuration(finiteDuration: FiniteDuration): JDuration = JDuration.ofNanos(finiteDuration.toNanos)
-//
-//
-//  // Known as a Runnable in the java world
-//  def asJavaRunnable[T](runnable: () => Unit): JRunnable = () => runnable.apply()
-//
-//  // Known as a Consumer in the java world
-//  def asJavaConsumer[T](consumer: T => Unit): JConsumer[T] = (t: T) => consumer.apply(t)
-//
-//  // Known as a Function in the java world
-//  def asJavaFn1[T, R](function: T => R): JFunction[T, R] = (t: T) => function.apply(t)
-//
-//  // Known as a BiFunction in the java world
-//  def asJavaFn2[T, U, R](function: (T, U) => R): JBiFunction[T, U, R] = (t: T, u: U) => function.apply(t, u)
-//
-//  // Does not exist in the java world (without @FunctionalInterface), so follow convention of reactor by converting to function of Array[AnyRef]
-//  def asJavaFn3[T1 >: AnyRef, T2 >: AnyRef, T3 >: AnyRef, R](function: (T1, T2, T3) => R): JFunction[Array[AnyRef], R] = (arr: Array[AnyRef]) => function.apply(arr(0), arr(1), arr(2))
-//
-//  // Does not exist in the java world (without @FunctionalInterface), so follow convention of reactor by converting to function of Array[AnyRef]
-//  def asJavaFn4[T1 >: AnyRef, T2 >: AnyRef, T3 >: AnyRef, T4 >: AnyRef, R](function: (T1, T2, T3, T4) => R): JFunction[Array[AnyRef], R] = (arr: Array[AnyRef]) => function.apply(arr(0), arr(1), arr(2), arr(3))
-//
-//  // Does not exist in the java world (without @FunctionalInterface), so follow convention of reactor by converting to function of Array[AnyRef]
-//  def asJavaFn5[T1 >: AnyRef, T2 >: AnyRef, T3 >: AnyRef, T4 >: AnyRef, T5 >: AnyRef, R](function: (T1, T2, T3, T4, T5) => R): JFunction[Array[AnyRef], R] = (arr: Array[AnyRef]) => function.apply(arr(0), arr(1), arr(2), arr(3), arr(4))
-//
-//  // Does not exist in the java world (without @FunctionalInterface), so follow convention of reactor by converting to function of Array[AnyRef]
-//  def asJavaFn6[T1 >: AnyRef, T2 >: AnyRef, T3 >: AnyRef, T4 >: AnyRef, T5 >: AnyRef, T6 >: AnyRef, R](function: (T1, T2, T3, T4, T5, T6) => R): JFunction[Array[AnyRef], R] = (arr: Array[AnyRef]) => function.apply(arr(0), arr(1), arr(2), arr(3), arr(4), arr(5))
+  def asJavaDuration(finiteDuration: FiniteDuration): JDuration = JDuration.ofNanos(finiteDuration.toNanos)
+  def asJavaCompletionStage[T](future: Future[T]): CompletionStage[T] = scala.compat.java8.FutureConverters.toJava(future)
+
+  def asJavaOptional[T](option: Option[T]): JOptional[T] = scala.compat.java8.OptionConverters.toJava(option)
+  def asJavaBoolean(boolean: Boolean): JBoolean = boolean2Boolean(boolean)
+  def asJavaLong(long: Long): JLong = long2Long(long)
+
+  // COLLECTIONS
+
+  def asJavaIterable[T](iterable: Iterable[T]): JIterable[T] = JavaConverters.asJavaIterable(iterable)
+  def asScalaIterator[T](iterator: JIterator[T]): Iterator[T] = JavaConverters.asScalaIterator(iterator)
+
+  // FUNCTIONS
+
+  def asJFluxSink[T](jfluxSink: JFluxSink[T]): FluxSink[T] = FluxSink.wrap(jfluxSink)
+
+  // Known as a Runnable in the java world
+  def asJavaRunnable(runnable: () => Unit): JRunnable = () => runnable.apply()
+  def asJavaCallable[T](callable: () => T): JCallable[T] = () => callable.apply()
+
+  // Known as a Consumer in the java world
+  def asJavaConsumer[T](consumer: T => Unit): JConsumer[T] = (t: T) => consumer.apply(t)
+
+  // Known as a Consumer in the java world
+  def asJavaBooleanSupplier(supplier: () => Boolean): JBooleanSupplier = () => supplier.apply()
+  def asJavaSupplier[T](supplier: () => T): JSupplier[T] = () => supplier.apply()
+
+  // Known as a Predicate in the java world
+  def asJavaPredicate[T](predicate: T => Boolean): JPredicate[T] = (t: T) => predicate.apply(t)
+
+  // Known as a Function in the java world
+  def asJavaFn1[T, R](function: T => R): JFunction[T, R] = (t: T) => function.apply(t)
+
+  // Known as BiPredicate in the java world
+  def asJavaBiConsumer[T, U](biConsumer: (T, U) => Unit): JBiConsumer[T, U] = (t: T, u: U) => biConsumer.apply(t, u)
+
+  // Known as BiPredicate in the java world
+  def asJavaBiPredicate[T, U](biPredicate: (T, U) => Boolean): JBiPredicate[T, U] = (t: T, u: U) => biPredicate.apply(t, u)
+
+  // Known as a BiFunction in the java world
+  def asJavaFn2[T, U, R](function: (T, U) => R): JBiFunction[T, U, R] = (t: T, u: U) => function.apply(t, u)
+
+  // Does not exist in the java world (without @FunctionalInterface), so follow convention of reactor by converting to function of Array[AnyRef]
+  def asJavaFn3[T1 >: AnyRef, T2 >: AnyRef, T3 >: AnyRef, R](function: (T1, T2, T3) => R): JFunction[Array[AnyRef], R] = (arr: Array[AnyRef]) => function.apply(arr(0), arr(1), arr(2))
+
+  // Does not exist in the java world (without @FunctionalInterface), so follow convention of reactor by converting to function of Array[AnyRef]
+  def asJavaFn4[T1 >: AnyRef, T2 >: AnyRef, T3 >: AnyRef, T4 >: AnyRef, R](function: (T1, T2, T3, T4) => R): JFunction[Array[AnyRef], R] = (arr: Array[AnyRef]) => function.apply(arr(0), arr(1), arr(2), arr(3))
+
+  // Does not exist in the java world (without @FunctionalInterface), so follow convention of reactor by converting to function of Array[AnyRef]
+  def asJavaFn5[T1 >: AnyRef, T2 >: AnyRef, T3 >: AnyRef, T4 >: AnyRef, T5 >: AnyRef, R](function: (T1, T2, T3, T4, T5) => R): JFunction[Array[AnyRef], R] = (arr: Array[AnyRef]) => function.apply(arr(0), arr(1), arr(2), arr(3), arr(4))
+
+  // Does not exist in the java world (without @FunctionalInterface), so follow convention of reactor by converting to function of Array[AnyRef]
+  def asJavaFn6[T1 >: AnyRef, T2 >: AnyRef, T3 >: AnyRef, T4 >: AnyRef, T5 >: AnyRef, T6 >: AnyRef, R](function: (T1, T2, T3, T4, T5, T6) => R): JFunction[Array[AnyRef], R] = (arr: Array[AnyRef]) => function.apply(arr(0), arr(1), arr(2), arr(3), arr(4), arr(5))
 
 }
