@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import reactor.core.publisher.{BufferOverflowStrategy, Signal, SignalType, SynchronousSink, Flux => JFlux, FluxSink => JFluxSink}
 import reactor.core.scheduler.Scheduler
-import reactor.core.{Disposable, Scannable => JScannable}
+import reactor.core.{CoreSubscriber, Disposable, Scannable => JScannable}
 import reactor.util.Logger
 import reactor.util.context.Context
 import reactor.util.function.{Tuple2 => JTuple2, Tuple3 => JTuple3, Tuple4 => JTuple4, Tuple5 => JTuple5, Tuple6 => JTuple6, Tuple7 => JTuple7, Tuple8 => JTuple8}
@@ -532,9 +532,9 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def or(other: Publisher[T]): Flux[T] = wrapFlux[T](delegate.or(other))
 
   // todo: uncomment these methods after creating a scala ParallelFlux wrapper
-//  def parallel(): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel())
-//  def parallel(parallelism: Int): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel(parallelism))
-//  def parallel(): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel())
+  def parallel(): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel())
+  def parallel(parallelism: Int): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel(parallelism))
+  def parallel(parallelism: Int, prefetch: Int): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel(parallelism, prefetch))
 
   def publish(): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.publish())
   def publish(prefetch: Int): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.publish(prefetch))

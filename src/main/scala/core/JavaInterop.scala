@@ -6,18 +6,20 @@ import java.util
 import java.util.{Iterator => JIterator}
 import java.util.concurrent.{CompletionStage, Callable => JCallable}
 import java.util.function.{BiConsumer => JBiConsumer, BiFunction => JBiFunction, BiPredicate => JBiPredicate, BooleanSupplier => JBooleanSupplier, Consumer => JConsumer, Function => JFunction, LongConsumer => JLongConsumer, Predicate => JPredicate, Supplier => JSupplier}
-import java.util.{Map => JMap, Optional => JOptional}
+import java.util.{Map => JMap, Optional => JOptional, List => JList}
 
-import reactor.core.publisher.{ConnectableFlux => JConnectableFlux, Flux => JFlux, FluxSink => JFluxSink, GroupedFlux => JGroupedFlux, Mono => JMono}
+import reactor.core.publisher.{ConnectableFlux => JConnectableFlux, Flux => JFlux, FluxSink => JFluxSink, GroupedFlux => JGroupedFlux, Mono => JMono, ParallelFlux => JParallelFlux}
 import reactor.util.function.{Tuples, Tuple2 => JTuple2, Tuple3 => JTuple3, Tuple4 => JTuple4, Tuple5 => JTuple5, Tuple6 => JTuple6, Tuple7 => JTuple7, Tuple8 => JTuple8}
 
 import scala.collection.{JavaConverters, mutable}
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 
 object JavaInterop {
 
   def wrapFlux[T](jFlux: JFlux[T]): Flux[T] = new FluxImpl[T](jFlux)
+  def wrapParallelFlux[T](jParallelFlux: JParallelFlux[T]): ParallelFlux[T] = new ParallelFlux[T](jParallelFlux)
   def wrapConnectableFlux[T](jConnectableFlux: JConnectableFlux[T]): ConnectableFlux[T] = new ConnectableFlux[T](jConnectableFlux)
   def wrapGroupedFlux[K, V](jGroupedFlux: JGroupedFlux[K, V]): GroupedFlux[K, V] = new GroupedFlux[K, V](jGroupedFlux)
   def wrapMono[T](jMono: JMono[T]): Mono[T] = new MonoImpl[T](jMono)
@@ -70,6 +72,7 @@ object JavaInterop {
 
   def asJavaIterable[T](iterable: Iterable[T]): JIterable[T] = JavaConverters.asJavaIterable(iterable)
   def asScalaIterator[T](iterator: JIterator[T]): Iterator[T] = JavaConverters.asScalaIterator(iterator)
+  def asScalaList[T](list: JList[T]): List[T] = list.asScala.toList
 
   // FUNCTIONS
 
