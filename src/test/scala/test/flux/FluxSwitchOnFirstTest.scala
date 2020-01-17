@@ -1,12 +1,12 @@
 package test.flux
 
 import core.Flux
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.test.StepVerifier
 
 //import scala.language.implicitConversions
 
-class FluxSwitchOnFirstTest extends FunSuite {
+class FluxSwitchOnFirstTest extends AnyFunSuite {
 
   test("flux switchOnFirst") {
 

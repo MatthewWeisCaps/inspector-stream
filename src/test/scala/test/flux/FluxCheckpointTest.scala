@@ -1,10 +1,11 @@
 package test.flux
 
 import core.Flux
-import org.scalatest.{Assertions, FunSuite}
+import org.scalatest.Assertions
 import reactor.test.StepVerifier
+import org.scalatest.funsuite.AnyFunSuite
 
-class FluxCheckpointTest extends FunSuite {
+class FluxCheckpointTest extends AnyFunSuite {
 
 //  test("flux checkpoint") {
 //

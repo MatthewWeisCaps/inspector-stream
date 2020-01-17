@@ -1,12 +1,12 @@
 package test.flux
 
 import core.Flux
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.test.StepVerifier
 
 //import scala.language.implicitConversions
 
-class FluxCombineLatestTest extends FunSuite {
+class FluxCombineLatestTest extends AnyFunSuite {
 
   test("flux combineLatest") {
 

@@ -1,10 +1,10 @@
 package test.flux
 
 import core.Flux
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.test.StepVerifier
 
-class FluxJustTest extends FunSuite {
+class FluxJustTest extends AnyFunSuite {
 
   test("just") {
     StepVerifier.create(Flux.just("apple"))

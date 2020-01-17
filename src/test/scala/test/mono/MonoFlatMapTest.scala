@@ -1,10 +1,10 @@
 package test.mono
 
 import core.Mono
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.test.StepVerifier
 
-class MonoFlatMapTest extends FunSuite {
+class MonoFlatMapTest extends AnyFunSuite {
 
   test("mono flatMap") {
 

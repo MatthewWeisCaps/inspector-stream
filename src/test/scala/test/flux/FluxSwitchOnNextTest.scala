@@ -2,10 +2,10 @@ package test.flux
 
 import core.Flux
 import org.reactivestreams.Publisher
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.test.StepVerifier
 
-class FluxSwitchOnNextTest extends FunSuite {
+class FluxSwitchOnNextTest extends AnyFunSuite {
 
   test("flux switchOnNext") {
 

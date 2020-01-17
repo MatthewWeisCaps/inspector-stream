@@ -1,11 +1,11 @@
 package test.mono
 
 import core.Mono
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import scala.util.{Failure, Success, Try}
 
-class MonoFutureTest extends FunSuite {
+class MonoFutureTest extends AnyFunSuite {
 
   test("mono future success") {
     val future = Mono.just("apple").toFuture

@@ -1,9 +1,9 @@
 package test.flux
 
 import core.Flux
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class FluxDoOnNextTest extends FunSuite {
+class FluxDoOnNextTest extends AnyFunSuite {
 
   test("doOnNextAssignment") {
     var sideEffect = "banana"

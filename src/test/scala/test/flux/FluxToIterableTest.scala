@@ -1,9 +1,10 @@
 package test.flux
 
 import core.Flux
-import org.scalatest.{Assertions, FunSuite}
+import org.scalatest.Assertions
+import org.scalatest.funsuite.AnyFunSuite
 
-class FluxToIterableTest extends FunSuite {
+class FluxToIterableTest extends AnyFunSuite {
 
   test("flux toIterable") {
     val iterable = Flux.just("a", "b", "c", "d", "e").toIterable.toSeq

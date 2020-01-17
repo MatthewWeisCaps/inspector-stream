@@ -1,10 +1,10 @@
 package test.flux
 
 import core.Flux
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.test.StepVerifier
 
-class FluxConcatMapIterableTest extends FunSuite {
+class FluxConcatMapIterableTest extends AnyFunSuite {
 
   test("flux concatMapIterable") {
     val flux = Flux.just(1, 2, 3).concatMapIterable(Seq("a", "b", "c").take)

@@ -1,10 +1,10 @@
 package test.flux
 
 import core.Flux
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.test.StepVerifier
 
-class FluxFirstTest extends FunSuite {
+class FluxFirstTest extends AnyFunSuite {
 
   test("first_1") {
     val a: Flux[Any] = Flux.just(1, 2, 3)

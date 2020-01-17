@@ -4,14 +4,14 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.SECONDS
 
 import core.Flux
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.test.StepVerifier
 import reactor.test.scheduler.VirtualTimeScheduler
 import test.StepVerifierExt._
 
 import scala.concurrent.duration.{Duration, FiniteDuration}
 
-class FluxAssertionsTest extends FunSuite {
+class FluxAssertionsTest extends AnyFunSuite {
 
   test("flux always positive test passing") {
     val flux: Flux[Int] = Flux.range(1, 100)

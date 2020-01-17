@@ -3,7 +3,7 @@ package test.flux
 import java.util.concurrent.TimeUnit.SECONDS
 
 import core.Flux
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.test.StepVerifier
 import reactor.test.scheduler.VirtualTimeScheduler
 
@@ -11,7 +11,7 @@ import scala.concurrent.duration.Duration
 
 import test.StepVerifierExt._
 
-class FluxRepeatTest extends FunSuite {
+class FluxRepeatTest extends AnyFunSuite {
 
   test("flux repeat repeats elements") {
     val flux: Flux[String] = Flux.just("a", "b", "c").repeat()

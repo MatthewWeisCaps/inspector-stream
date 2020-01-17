@@ -1,10 +1,10 @@
 package test.flux
 
 import core.Flux
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.test.StepVerifier
 
-class FluxZipTest extends FunSuite {
+class FluxZipTest extends AnyFunSuite {
 
   test("flux zip3 singles") {
     val flux = Flux.zip(Flux.just("a"), Flux.just("b"), Flux.just("c"))

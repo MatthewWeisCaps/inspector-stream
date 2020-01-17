@@ -1,10 +1,10 @@
 package test.mono
 
 import core.{Flux, Mono}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.test.StepVerifier
 
-class MonoAssertionsTest extends FunSuite {
+class MonoAssertionsTest extends AnyFunSuite {
 
   test("mono assertAlways test passing") {
     val mono: Mono[String] = Mono.just("abc").assertAlways(_.matches("[a-z]*"))

@@ -1,11 +1,11 @@
 package test.flux
 
 import core.Flux
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.mutable
 
-class FluxCollectMapTest extends FunSuite {
+class FluxCollectMapTest extends AnyFunSuite {
 
   /**
     * IMPORTANT: collectMap returns a map allowing one value per key. See collectMultiMap for 1 key to N value mappings.

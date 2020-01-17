@@ -1,10 +1,10 @@
 package test.flux
 
 import core.Flux
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.test.StepVerifier
 
-class FluxMapTest extends FunSuite {
+class FluxMapTest extends AnyFunSuite {
 
   test("map") {
     StepVerifier.create(Flux.just(99).map(_ + 1))

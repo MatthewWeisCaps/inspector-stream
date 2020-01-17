@@ -1,8 +1,9 @@
 package core
 
 import java.util.concurrent.Callable
-import java.util.function.BiFunction
+import java.util.function.{BiFunction, Supplier}
 import java.util.logging.Level
+import java.util.{function, stream}
 import java.util.stream.Collector
 import java.{lang, util}
 
@@ -20,6 +21,7 @@ import scala.collection.mutable
 import scala.concurrent.duration.Duration.Infinite
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.language.{existentials, higherKinds}
+import scala.reflect.ClassTag
 
 
 
@@ -32,11 +34,17 @@ object Flux {
 
   def combineLatest[T, V](combinator: Array[AnyRef] => V, sources: Publisher[T]*): Flux[V] = wrapFlux[V](JFlux.combineLatest(asJavaFn1(combinator), sources:_*))
   def combineLatest[T, V](combinator: Array[AnyRef] => V, prefetch: Int, sources: Publisher[T]*): Flux[V] = wrapFlux[V](JFlux.combineLatest(asJavaFn1(combinator), prefetch, sources:_*))
-  def combineLatest[T1, T2, V](source1: Publisher[T1], source2: Publisher[T2], combinator: (_ >: T1, _ >: T2) => _ <: V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, asJavaFn2(combinator)))
-  def combineLatest[T1 >: Any, T2 >: Any, T3 >: Any, V <: Any](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], combinator: (_ >: T1, _ >: T2, _ >: T3) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, asJavaFn3(combinator)))
-  def combineLatest[T1 >: Any, T2 >: Any, T3 >: Any, T4 >: Any, V <: Any](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], source4: Publisher[T4], combinator: (_ >: T1, _ >: T2, _ >: T3, _ >: T4) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, source4, asJavaFn4(combinator)))
-  def combineLatest[T1 >: Any, T2 >: Any, T3 >: Any, T4 >: Any, T5 >: Any, V <: Any](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], source4: Publisher[T4], source5: Publisher[T5], combinator: (_ >: T1, _ >: T2, _ >: T3, _ >: T4, _ >: T5) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, source4, source5, asJavaFn5(combinator)))
-  def combineLatest[T1 >: Any, T2 >: Any, T3 >: Any, T4 >: Any, T5 >: Any, T6 >: Any, V <: Any](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], source4: Publisher[T4], source5: Publisher[T5], source6: Publisher[T6], combinator: (_ >: T1, _ >: T2, _ >: T3, _ >: T4, _ >: T5, _ >: T6) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, source4, source5, source6, asJavaFn6(combinator)))
+  def combineLatest[T1, T2, V](source1: Publisher[T1], source2: Publisher[T2], combinator: (T1, T2) => _ <: V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, asJavaFn2(combinator)))
+//  def combineLatest3[T1, T2, T3, V](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], combinator: (T1, T2, T3) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, asJavaFn3(combinator)))
+//  def combineLatest4[T1, T2, T3, T4, V](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], source4: Publisher[T4], combinator: (T1, T2, T3, T4) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, source4, asJavaFn4(combinator)))
+//  def combineLatest5[T1, T2, T3, T4, T5, V](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], source4: Publisher[T4], source5: Publisher[T5], combinator: (T1, T2, T3, T4, T5) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, source4, source5, asJavaFn5(combinator)))
+//  def combineLatest6[T1, T2, T3, T4, T5, T6, V](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], source4: Publisher[T4], source5: Publisher[T5], source6: Publisher[T6], combinator: (T1, T2, T3, T4, T5, T6) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, source4, source5, source6, asJavaFn6(combinator)))
+
+  def combineLatest[T1, T2, T3, V](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], combinator: (T1, T2, T3) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, asJavaFn3(combinator)))
+  def combineLatest[T1, T2, T3, T4, V](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], source4: Publisher[T4], combinator: (T1, T2, T3, T4) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, source4, asJavaFn4(combinator)))
+  def combineLatest[T1, T2, T3, T4, T5, V](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], source4: Publisher[T4], source5: Publisher[T5], combinator: (T1, T2, T3, T4, T5) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, source4, source5, asJavaFn5(combinator)))
+  def combineLatest[T1, T2, T3, T4, T5, T6, V](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], source4: Publisher[T4], source5: Publisher[T5], source6: Publisher[T6], combinator: (T1, T2, T3, T4, T5, T6) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, source4, source5, source6, asJavaFn6(combinator)))
+
   def combineLatest[T, V](sources: Iterable[_ <: Publisher[T]], combinator: Array[AnyRef] => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(asJavaIterable(sources), asJavaFn1(combinator)))
   def combineLatest[T, V](sources: Iterable[_ <: Publisher[T]], prefetch: Int, combinator: Array[AnyRef] => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(asJavaIterable(sources), prefetch, asJavaFn1(combinator)))
 
@@ -70,13 +78,21 @@ object Flux {
   def first[T](sources: Iterable[_ <: Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.first(asJavaIterable(sources)))
 
   def from[T](source: Publisher[T]): Flux[T] = wrapFlux[T](JFlux.from(source))
-  def fromArray[T >: AnyRef](source: Array[T with AnyRef]): Flux[T] = wrapFlux[T](JFlux.fromArray(source))
+  def fromArray[T](source: Array[T with Object]): Flux[T] = wrapFlux[T](JFlux.fromArray(source))
   def fromIterable[T](source: Iterable[T]): Flux[T] = wrapFlux[T](JFlux.fromIterable(asJavaIterable(source)))
 
   // scala stream can't directly map to java stream, so ignore this (since fromIterable will work with this)
 //  def fromStream[T](stream: Stream[T]): Flux[T] = wrap(JFlux.fromStream(stream))
-  def fromStream[T](stream: Stream[T]): Flux[T] = wrapFlux[T](JFlux.fromIterable(asJavaIterable(stream)))
-//  def fromStream[T](streamSupplier: () => Stream[T]): Flux[T] = wrap(JFlux.fromStream(streamSupplier))
+//  def fromStream[T](stream: Stream[T]): Flux[T] = wrapFlux[T](JFlux.fromIterable(asJavaIterable(stream)))
+  def fromStream[T](stream: Stream[T]): Flux[T] = wrapFlux[T](JFlux.fromStream(toJavaStream(stream)))
+
+//  // todo
+//  def fromStream[T](streamSupplier: () => Stream[T]): Flux[T] = {
+//    //    val ss: java.util.function.Supplier[java.util.stream.Stream[_ <: T]] = asJavaSupplier(() => toJavaStream(streamSupplier.apply()))
+//    //    val st: JFlux[T] = JFlux.fromStream(ss)
+//        val value: Supplier[stream.Stream[T]] = asJavaSupplier(() => toJavaStream(streamSupplier.apply()))
+//    wrapFlux(JFlux.fromStream(value))
+//  }
 
   def generate[T](generator: SynchronousSink[T] => Unit): Flux[T] = wrapFlux[T](JFlux.generate(asJavaConsumer(generator)))
   def generate[T, S](stateSupplier: () => S, generator: (S, SynchronousSink[T]) => S): Flux[T] = wrapFlux[T](JFlux.generate(asJavaCallable(stateSupplier), asJavaFn2(generator)))
@@ -112,21 +128,24 @@ object Flux {
   def merge[T](source: Publisher[Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.merge(source))
   def merge[T](source: Publisher[Publisher[T]], concurrency: Int): Flux[T] = wrapFlux[T](JFlux.merge(source, concurrency))
   def merge[T](source: Publisher[Publisher[T]], concurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.merge(source, concurrency, prefetch))
-  def merge[T](sources: Iterable[Publisher[T]], concurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.merge(asJavaIterable(sources)))
+  def merge[T](sources: Iterable[Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.merge(asJavaIterable(sources)))
   def merge[T](sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.merge(sources:_*))
   def merge[T](prefetch: Int, sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.merge(sources:_*))
 
-  def mergeDelayError[T](prefetch: Int, sources: Publisher[T]): Flux[T] = wrapFlux[T](JFlux.mergeDelayError(prefetch, sources))
+  def mergeDelayError[T](prefetch: Int, sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeDelayError(prefetch, sources:_*))
 
   // todo reason to have T in publisher? compiles either way and reduces freedom?
-  def mergeOrdered[T <: Ordered[T]](sources: Publisher[T]): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(sources))
-  def mergeOrdered[T](ordering: Ordering[T], sources: Publisher[T]): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(ordering, sources))
-  def mergeOrdered[T](prefetch: Int, ordering: Ordering[T], sources: Publisher[T]): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(prefetch, ordering, sources))
+//  def mergeOrdered[T <: Ordered[T]](sources: Publisher[Ordered[T]]): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(sources))
+//  def mergeOrdered[T](ordering: Ordering[T], sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(ordering, sources:_*))
+  def mergeOrdered[T](ordering: Ordering[T], sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(ordering, sources:_*))
+//  def mergeOrderedPrefetch[T](prefetch: Int, ordering: Ordering[T], sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(prefetch, ordering, sources:_*))
+  def mergeOrderedPrefetch[T](prefetch: Int, ordering: Ordering[T], sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(prefetch, ordering, sources:_*))
 
   def mergeSequential[T](sources: Publisher[_ <: Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.mergeSequential(sources))
   def mergeSequential[T](sources: Publisher[_ <: Publisher[T]], maxConcurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.mergeSequential(sources, maxConcurrency, prefetch))
   def mergeSequentialDelayError[T](sources: Publisher[_ <: Publisher[T]], maxConcurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.mergeSequentialDelayError(sources, maxConcurrency, prefetch))
-  def mergeSequential[T](sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeSequential(sources:_*))
+  // todo
+  def mergeSequentialVarargs[T](sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeSequential(sources:_*))
   def mergeSequential[T](prefetch: Int, sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeSequential(prefetch, sources:_*))
   def mergeSequentialDelayError[T](prefetch: Int, sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeSequentialDelayError(prefetch, sources:_*))
   def mergeSequential[T](sources: Iterable[_ <: Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.mergeSequential(asJavaIterable(sources)))
@@ -207,6 +226,15 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def assertNotEmpty(cause: Throwable): Flux[T] = wrapFlux[T](delegate.switchIfEmpty(Flux.error(new AssertionError("Flux was empty despite assertNotEmpty() assertion", cause))))
   def assertNotEmpty(message: String, cause: Throwable): Flux[T] = wrapFlux[T](delegate.switchIfEmpty(Flux.error(new AssertionError(message, cause))))
 
+  def head(): Mono[T] = wrapMono(delegate.take(1).singleOrEmpty())
+  def first(): Mono[T] = head()
+
+  def min(ordering: Ordering[T]): Mono[T] = wrapMono(delegate.reduce(ordering.min))
+  def max(ordering: Ordering[T]): Mono[T] = wrapMono(delegate.reduce(ordering.max))
+
+  def isEmpty(): Mono[Boolean] = hasElements
+  def isNonEmpty(): Mono[Boolean] = hasElements.map(b => !b)
+
   ///
   /// API METHODS
   ///
@@ -220,7 +248,7 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def blockFirst(timeout: Duration): Option[T] = timeout match {
     case _: Infinite => Option(delegate.blockFirst())
-    case finiteDuration: FiniteDuration => Option(delegate.blockLast(asJavaDuration(finiteDuration)))
+    case finiteDuration: FiniteDuration => Option(delegate.blockFirst(asJavaDuration(finiteDuration)))
   }
 
   def blockLast(): Option[T] = Option(delegate.blockLast())
@@ -241,6 +269,17 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def buffer(bufferingTimespan: FiniteDuration, openBufferEvery: FiniteDuration): Flux[Seq[T]] = wrapFlux(delegate.buffer(asJavaDuration(bufferingTimespan), asJavaDuration(openBufferEvery))).map(toScalaSeq)
   def buffer(bufferingTimespan: FiniteDuration, timer: Scheduler): Flux[Seq[T]] = wrapFlux(delegate.buffer(asJavaDuration(bufferingTimespan), timer)).map(toScalaSeq)
   def buffer(bufferingTimespan: FiniteDuration, openBufferEvery: FiniteDuration, timer: Scheduler): Flux[Seq[T]] = wrapFlux(delegate.buffer(asJavaDuration(bufferingTimespan), asJavaDuration(openBufferEvery), timer)).map(toScalaSeq)
+
+//  def buffer[C >: mutable.Buffer[T]](maxSize: Int, bufferSupplier: () => C): Flux[Seq[T]] = {
+//
+////    val supplier: Supplier[C] = asJavaSupplier(() => toJavaCollection(bufferSupplier()))
+//    val supplier: Supplier[C] = asJavaSupplier(() => toJavaList(bufferSupplier().asInstanceOf[mutable.Buffer[T]]))
+//    val ms: Integer = maxSize
+//    val value: JFlux[C] = delegate.buffer(maxSize.asInstanceOf[Integer], supplier)
+//    wrapFlux(value)
+//  }
+//  def buffer[C <: mutable.Iterable[_]](maxSize: Int, skip: Int, bufferSupplier: () => C): Flux[C] = wrapFlux(delegate.buffer(maxSize, skip, asJavaSupplier(() => toJavaCollection(bufferSupplier()))))
+//  def buffer[C <: mutable.Iterable[_]](other: Publisher[_], bufferSupplier: () => C): Flux[C] = wrapFlux(delegate.buffer(other, asJavaSupplier(() => toJavaCollection(bufferSupplier()))))
 
   def bufferTimeout(maxSize: Int, maxTime: FiniteDuration): Flux[Seq[T]] = wrapFlux(delegate.bufferTimeout(maxSize, asJavaDuration(maxTime))).map(toScalaSeq)
   // todo missing custom collection wrapper here (see JavaInterop's toIterable(collection: Collection) method)
@@ -289,31 +328,31 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def collect[R, A](collector: Collector[T, A, R]): Mono[R] = wrapMono(delegate.collect(collector))
   def collectSeq(): Mono[Seq[T]] = wrapMono(delegate.collectList()).map(toScalaSeq)
 
-  def collectMap[K](keyExtractor: T => K): Mono[_ <: Map[K, T]] = {
+  def collectMap[K](keyExtractor: T => K): Mono[Map[K, T]] = {
     // this explicit type def is required
     val mono: Mono[util.Map[K, T]] = wrapMono(delegate.collectMap(asJavaFn1(keyExtractor)))
     mono.map(toScalaMap)
   }
 
-  def collectMap[K, V](keyExtractor: T => K, valueExtractor: T => V): Mono[_ <: Map[K, V]] = {
+  def collectMap[K, V](keyExtractor: T => K, valueExtractor: T => V): Mono[Map[K, V]] = {
     // this explicit type def is required
     val mono: Mono[util.Map[K, V]] = wrapMono(delegate.collectMap(asJavaFn1(keyExtractor), asJavaFn1(valueExtractor)))
     mono.map(toScalaMap)
   }
 
-  def collectMap[K, V](keyExtractor: T => K, valueExtractor: T => V, mapSupplier: () => mutable.Map[K, V]): Mono[_ <: Map[K, V]] = {
+  def collectMap[K, V](keyExtractor: T => K, valueExtractor: T => V, mapSupplier: () => mutable.Map[K, V]): Mono[Map[K, V]] = {
     // this explicit type def is required
     val mono: Mono[util.Map[K, V]] = wrapMono(delegate.collectMap(asJavaFn1(keyExtractor), asJavaFn1(valueExtractor), () => toJavaMutableMap(mapSupplier())))
     mono.map(toScalaMap)
   }
 
-  def collectMultimap[K](keyExtractor: T => K): Mono[_ <: Map[K, Iterable[T]]] = {
+  def collectMultimap[K](keyExtractor: T => K): Mono[Map[K, Iterable[T]]] = {
     // this explicit type def is required
     val mono: Mono[util.Map[K, util.Collection[T]]] = wrapMono(delegate.collectMultimap(asJavaFn1(keyExtractor)))
     mono.map(toScalaMap).map(map => map.mapValues(toScalaIterable))
   }
 
-  def collectMultimap[K, V](keyExtractor: T => K, valueExtractor: T => V): Mono[_ <: Map[K, Iterable[V]]] = {
+  def collectMultimap[K, V](keyExtractor: T => K, valueExtractor: T => V): Mono[Map[K, Iterable[V]]] = {
     // this explicit type def is required
     val mono: Mono[util.Map[K, util.Collection[V]]] = wrapMono(delegate.collectMultimap(asJavaFn1(keyExtractor), asJavaFn1(valueExtractor)))
     mono.map(toScalaMap).map(map => map.mapValues(toScalaIterable))
@@ -459,7 +498,7 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def join[TRight, TLeftEnd, TRightEnd, R](other: Publisher[TRight], leftEnd: T => Publisher[TLeftEnd], rightEnd: TRight => Publisher[TRightEnd], resultSelector: (T, TRight) => R): Flux[R] = wrapFlux[R](delegate.join(other, asJavaFn1(leftEnd), asJavaFn1(rightEnd), asJavaFn2(resultSelector)))
 
-  def last: Mono[T] = wrapMono[T](delegate.last())
+  def last(): Mono[T] = wrapMono[T](delegate.last())
   def last(defaultValue: T): Mono[T] = wrapMono[T](delegate.last(defaultValue))
 
   def limitRate(prefetchRate: Int): Flux[T] = wrapFlux[T](delegate.limitRate(prefetchRate))
@@ -492,7 +531,7 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def next(): Mono[T] = wrapMono[T](delegate.next())
 
-  def ofType[U](clazz: Class[U]): Flux[U] = wrapFlux[U](delegate.ofType(clazz))
+  def ofType[U](clazz: Class[U]): Flux[U] = wrapFlux[U](delegate.ofType[U](clazz))
 
   def onBackpressureBuffer(): Flux[T] = wrapFlux[T](delegate.onBackpressureBuffer())
   def onBackpressureBuffer(maxSize: Int): Flux[T] = wrapFlux[T](delegate.onBackpressureBuffer(maxSize))
@@ -673,15 +712,15 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def timestamp(): Flux[(Long, T)] = wrapFlux[(Long, T)](delegate.timestamp().map(t => toScalaTuple2(t.mapT1(t1 => Long2long(t1)))))
   def timestamp(scheduler: Scheduler): Flux[(Long, T)] = wrapFlux[(Long, T)](delegate.timestamp(scheduler).map(t => toScalaTuple2(t.mapT1(t1 => Long2long(t1)))))
 
-  def toIterable: Iterable[T] = toScalaIterable(delegate.toIterable())
+  def toIterable(): Iterable[T] = toScalaIterable(delegate.toIterable())
   def toIterable(batchSize: Int): Iterable[T] = toScalaIterable(delegate.toIterable(batchSize))
   def toIterable(batchSize: Int, queueProvider: () => util.Queue[T]): Iterable[T] = toScalaIterable(delegate.toIterable(batchSize, asJavaSupplier(queueProvider)))
 
   // toSeq is not part of Java api. Added for convenience.
-  def toSeq: Iterable[T] = toScalaIterable(delegate.toIterable()).toSeq
+  def toSeq(): Iterable[T] = toScalaIterable(delegate.toIterable()).toSeq
   def toSeq(batchSize: Int): Iterable[T] = toScalaIterable(delegate.toIterable(batchSize)).toSeq
 
-  def toStream: Stream[T] = asScalaIterator(delegate.toStream().iterator()).toStream
+  def toStream(): Stream[T] = asScalaIterator(delegate.toStream().iterator()).toStream
   def toStream(batchSize: Int): Stream[T] = asScalaIterator(delegate.toStream(batchSize).iterator()).toStream
 
   def transform[V](transformer: Flux[T] => Publisher[V]): Flux[V] = wrapFlux(delegate.transform[V](asJavaFn1((jflux: JFlux[T]) => transformer(wrapFlux(jflux)))))

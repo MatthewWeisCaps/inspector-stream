@@ -4,12 +4,12 @@ import java.util
 import java.util.concurrent.{Callable, Executor, ExecutorService, Executors, Future, TimeUnit}
 
 import core.{Flux, Mono}
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 import reactor.core.scheduler.Schedulers
 import reactor.test.StepVerifier
 import reactor.test.scheduler.VirtualTimeScheduler
 
-class MonoSequenceEqualTest extends FunSuite {
+class MonoSequenceEqualTest extends AnyFunSuite {
 
   test("mono_sequenceEqual_True") {
 

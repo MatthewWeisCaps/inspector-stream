@@ -1,9 +1,9 @@
 package test.flux
 
 import core.Flux
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class FluxCollectMultiMapTest extends FunSuite {
+class FluxCollectMultiMapTest extends AnyFunSuite {
 
   test("flux collect Multimap") {
 

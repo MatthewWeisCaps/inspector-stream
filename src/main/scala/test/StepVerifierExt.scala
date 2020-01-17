@@ -3,8 +3,7 @@ package test
 import java.time.{Duration => JDuration}
 import java.util.function.{Supplier => JSupplier}
 
-import org.reactivestreams.Publisher
-import reactor.test.{StepVerifier, StepVerifierOptions}
+import reactor.test.StepVerifier
 
 import scala.concurrent.duration.FiniteDuration
 import scala.language.implicitConversions

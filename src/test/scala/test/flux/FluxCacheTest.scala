@@ -5,7 +5,7 @@
 //import java.util.concurrent.TimeUnit._
 //
 //import core.Flux
-//import org.scalatest.{Assertions, FunSuite}
+//import org.scalatest.Assertions
 //import reactor.core.publisher.SynchronousSink
 //import reactor.test.StepVerifierOptions.create
 //import reactor.test.{StepVerifier, StepVerifierOptions}
@@ -14,7 +14,7 @@
 //import scala.concurrent.duration.Duration
 //import test.StepVerifierExt._
 //
-//class FluxCacheTest extends FunSuite {
+//class FluxCacheTest extends AnyFunSuite {
 //
 //  test("flux cache respec") {
 //
