@@ -28,7 +28,8 @@ object JavaInterop {
 
   def toJavaStream[T](stream: Stream[T]): java.util.stream.Stream[T] = StreamSupport.stream(stream.toIterable.asJava.spliterator(), false)
 
-  def toScalaSeq[T](list: java.util.List[T]): Seq[T] = JavaConverters.asScalaIteratorConverter(list.iterator()).asScala.toSeq
+  def toScalaSeq[T](collection: java.util.Collection[T]): Seq[T] = JavaConverters.asScalaIteratorConverter(collection.iterator()).asScala.toSeq
+//  def toScalaSeq[T](list: java.util.Iterator[T]): Seq[T] = JavaConverters.asScalaIteratorConverter(list).asScala.toSeq
   def toScalaMap[K, V](map: java.util.Map[K, V]): Map[K, V] = JavaConverters.mapAsScalaMapConverter(map).asScala.toMap
 
   def toJavaList[T](buffer: mutable.Buffer[T]): util.List[T] = JavaConverters.bufferAsJavaList(buffer)

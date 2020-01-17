@@ -232,8 +232,8 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def min(ordering: Ordering[T]): Mono[T] = wrapMono(delegate.reduce(ordering.min))
   def max(ordering: Ordering[T]): Mono[T] = wrapMono(delegate.reduce(ordering.max))
 
-  def isEmpty(): Mono[Boolean] = hasElements
-  def isNonEmpty(): Mono[Boolean] = hasElements.map(b => !b)
+  def isEmpty(): Mono[Boolean] = hasElements.map(value => !value)
+  def isNonEmpty(): Mono[Boolean] = hasElements
 
   ///
   /// API METHODS
@@ -346,16 +346,16 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
     mono.map(toScalaMap)
   }
 
-  def collectMultimap[K](keyExtractor: T => K): Mono[Map[K, Iterable[T]]] = {
+  def collectMultimap[K](keyExtractor: T => K): Mono[Map[K, Seq[T]]] = {
     // this explicit type def is required
     val mono: Mono[util.Map[K, util.Collection[T]]] = wrapMono(delegate.collectMultimap(asJavaFn1(keyExtractor)))
-    mono.map(toScalaMap).map(map => map.mapValues(toScalaIterable))
+    mono.map(toScalaMap).map(map => map.mapValues(toScalaSeq))
   }
 
-  def collectMultimap[K, V](keyExtractor: T => K, valueExtractor: T => V): Mono[Map[K, Iterable[V]]] = {
+  def collectMultimap[K, V](keyExtractor: T => K, valueExtractor: T => V): Mono[Map[K, Seq[V]]] = {
     // this explicit type def is required
     val mono: Mono[util.Map[K, util.Collection[V]]] = wrapMono(delegate.collectMultimap(asJavaFn1(keyExtractor), asJavaFn1(valueExtractor)))
-    mono.map(toScalaMap).map(map => map.mapValues(toScalaIterable))
+    mono.map(toScalaMap).map(map => map.mapValues(toScalaSeq))
   }
 
   // todo find out if this can be implemented without copying the map, since the intent is to have the map be mutable
@@ -449,8 +449,8 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def expandDeep(expander: T => Publisher[T]): Flux[T] = wrapFlux[T](delegate.expandDeep(asJavaFn1(expander)))
   def expandDeep(expander: T => Publisher[T], capacityHint: Int): Flux[T] = wrapFlux[T](delegate.expandDeep(asJavaFn1(expander), capacityHint))
 
-  def expand(expander: T => Publisher[T]): Flux[T] = wrapFlux[T](delegate.expandDeep(asJavaFn1(expander)))
-  def expand(expander: T => Publisher[T], capacityHint: Int): Flux[T] = wrapFlux[T](delegate.expandDeep(asJavaFn1(expander), capacityHint))
+  def expand(expander: T => Publisher[T]): Flux[T] = wrapFlux[T](delegate.expand(asJavaFn1(expander)))
+  def expand(expander: T => Publisher[T], capacityHint: Int): Flux[T] = wrapFlux[T](delegate.expand(asJavaFn1(expander), capacityHint))
 
   def filter(predicate: T => Boolean): Flux[T] = wrapFlux[T](delegate.filter(asJavaPredicate(predicate)))
 
@@ -460,14 +460,16 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def flatMap[R](mapper: T => Publisher[R]): Flux[R] = wrapFlux[R](delegate.flatMap(asJavaFn1(mapper)))
   def flatMap[V](mapper: T => Publisher[V], concurrency: Int): Flux[V] = wrapFlux[V](delegate.flatMap(asJavaFn1(mapper), concurrency))
   def flatMap[V](mapper: T => Publisher[V], concurrency: Int, prefetch: Int): Flux[V] = wrapFlux[V](delegate.flatMap(asJavaFn1(mapper), concurrency, prefetch))
-  def flatMapDelayError[V](mapper: T => Publisher[V], concurrency: Int, prefetch: Int): Flux[V] = wrapFlux[V](delegate.flatMapDelayError(asJavaFn1(mapper), concurrency, prefetch))
   def flatMap[R](mapperOnNext: T => Publisher[R], mapperOnError: Throwable => Publisher[R], mapperOnComplete: () => Publisher[R]): Flux[R] = wrapFlux[R](delegate.flatMap(asJavaFn1(mapperOnNext), asJavaFn1(mapperOnError), asJavaSupplier(mapperOnComplete)))
+  def flatMapDelayError[V](mapper: T => Publisher[V], concurrency: Int, prefetch: Int): Flux[V] = wrapFlux[V](delegate.flatMapDelayError(asJavaFn1(mapper), concurrency, prefetch))
+
   def flatMapIterable[R](mapper: T => Iterable[R]): Flux[R] = wrapFlux[R](delegate.flatMapIterable((t: T) => asJavaIterable(mapper(t))))
   def flatMapIterable[R](mapper: T => Iterable[R], prefetch: Int): Flux[R] = wrapFlux[R](delegate.flatMapIterable((t: T) => asJavaIterable(mapper(t)), prefetch))
+
   def flatMapSequential[R](mapper: T => Publisher[R]): Flux[R] = wrapFlux[R](delegate.flatMapSequential(asJavaFn1(mapper)))
   def flatMapSequential[R](mapper: T => Publisher[R], maxConcurrency: Int): Flux[R] = wrapFlux[R](delegate.flatMapSequential(asJavaFn1(mapper), maxConcurrency))
   def flatMapSequential[R](mapper: T => Publisher[R], maxConcurrency: Int, prefetch: Int): Flux[R] = wrapFlux[R](delegate.flatMapSequential(asJavaFn1(mapper), maxConcurrency, prefetch))
-  def flatMapSequentialDelayError[R](mapper: T => Publisher[R], maxConcurrency: Int, prefetch: Int): Flux[R] = wrapFlux[R](delegate.flatMapSequential(asJavaFn1(mapper), maxConcurrency, prefetch))
+  def flatMapSequentialDelayError[R](mapper: T => Publisher[R], maxConcurrency: Int, prefetch: Int): Flux[R] = wrapFlux[R](delegate.flatMapSequentialDelayError(asJavaFn1(mapper), maxConcurrency, prefetch))
 
   def getPrefetch: Int = delegate.getPrefetch
 

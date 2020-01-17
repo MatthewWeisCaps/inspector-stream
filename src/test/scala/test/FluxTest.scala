@@ -46,8 +46,9 @@ import scala.util.{Failure, Try}
 
 /**
   * A copy of:
-  *
   * https://github.com/reactor/reactor-scala-extensions/blob/master/src/test/scala/reactor/core/scala/publisher/FluxTest.scala
+  *
+  * With changes made to support api differences
   */
 class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks with TestSupport with IdiomaticMockito with ArgumentMatchersSugar {
 
@@ -2052,7 +2053,7 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
               .verify()
           }
           "with firstTimeout, nextTimeoutFactory and fallback should fallback if any of the item is not emitted within the timeout period" in {
-            StepVerifier.withVirtualTime(() => Flux.just(1, 2, 3).delayElements(2 seconds).timeout(Mono.just(1).delaySubscription(3 seconds), t => Mono.just(1).delaySubscription(Duration(3, SECONDS)), Flux.just(10, 20, 30)))
+            StepVerifier.withVirtualTime(() => Flux.just(1, 2, 3).delayElements(2 seconds).timeout(Mono.just(1).delaySubscription(3 seconds), (t: Int) => Mono.just(1).delaySubscription(FiniteDuration(t, SECONDS)), Flux.just(10, 20, 30)))
               .thenAwait(5 seconds)
               .expectNext(1, 10, 20, 30)
               .verifyComplete()
