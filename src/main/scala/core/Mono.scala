@@ -58,6 +58,14 @@ object Mono {
 
   def just[T](data: T): Mono[T] = wrapMono(JMono.just(data))
   def justOrEmpty[T](data: Option[T]): Mono[T] = wrapMono(JMono.justOrEmpty(asJavaOptional(data)))
+  def justOrEmpty[T](data: T): Mono[T] = {
+    java.util.Optional.ofNullable()
+    if (data == null) {
+      wrapMono(JMono.justOrEmpty(asJavaOptional(None)))
+    } else {
+      wrapMono(JMono.justOrEmpty(asJavaOptional(Some(data))))
+    }
+  }
 
   def never[T](): Mono[T] = wrapMono(JMono.never())
 
@@ -75,11 +83,13 @@ object Mono {
   def usingWhen[T, D](resourceSupplier: Publisher[D], resourceClosure: D => Mono[T], asyncComplete: D => Publisher[_], asyncError: D => Publisher[_], asyncCancel: D => Publisher[_]): Mono[T] = wrapMono(JMono.usingWhen(resourceSupplier, asJavaFn1(resourceClosure.andThen(_.delegate)), asJavaFn1(asyncComplete), asJavaFn1(asyncError), asJavaFn1(asyncCancel)))
 
   def when(): Mono[_] = when(Seq())
-  def when(source: Publisher[Any], sources: Publisher[Any]*): Mono[_] = when((source +: sources) (Seq.canBuildFrom))
-  def when(sources: Iterable[_ <: Publisher[Any]]): Mono[_] = wrapMono(JMono.when(asJavaIterable(sources)))
+//  def when(source: Publisher[Any], sources: Publisher[Any]*): Mono[_] = when((source +: sources) (Seq.canBuildFrom))
+  def when(sources: Publisher[Any]*): Mono[_] = when(sources)
+  def when(sources: Iterable[Publisher[Any]]): Mono[_] = wrapMono(JMono.when(asJavaIterable(sources)))
 
   def whenDelayError(): Mono[_] = whenDelayError(Seq())
-  def whenDelayError(source: Publisher[Any], sources: Publisher[Any]*): Mono[_] = whenDelayError((source +: sources) (Seq.canBuildFrom))
+//  def whenDelayError(source: Publisher[Any], sources: Publisher[Any]*): Mono[_] = whenDelayError((source +: sources) (Seq.canBuildFrom))
+  def whenDelayError(sources: Publisher[Any]*): Mono[_] = whenDelayError(sources)
   def whenDelayError(sources: Iterable[_ <: Publisher[Any]]): Mono[_] = wrapMono(JMono.whenDelayError(asJavaIterable(sources)))
 
   def zip[T1, T2, O](p1: Mono[T1], p2: Mono[T2], combinator: (T1, T2) => O): Mono[O] = wrapMono(JMono.zip(p1.delegate, p2.delegate, asJavaFn2(combinator)))

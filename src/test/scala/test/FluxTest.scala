@@ -44,15 +44,14 @@ import scala.math.Ordering.IntOrdering
 import scala.math.ScalaNumber
 import scala.util.{Failure, Try}
 
-/**
+/*
   * A copy of:
-  * https://github.com/reactor/reactor-scala-extensions/blob/master/src/test/scala/reactor/core/scala/publisher/FluxTest.scala
+  * https://github.com/reactor/reactor-scala-extensions/blob/master/src/test/scala/reactor/core/scala/publisher/SFluxTest.scala
   *
   * With changes made to support api differences
   */
 class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks with TestSupport with IdiomaticMockito with ArgumentMatchersSugar {
 
-//  implicit def toJavaDuration(f: FiniteDuration): java.time.Duration = JavaInterop.asJavaDuration(f)
   implicit def toJavaDuration(f: Duration): java.time.Duration = JavaInterop.asJavaDuration(f)
   implicit def asJavaSupplier[T](supplier: () => T): JSupplier[T] = () => supplier.apply()
 
