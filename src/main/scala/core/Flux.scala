@@ -10,7 +10,7 @@ import java.{lang, util}
 import core.JavaInterop._
 import org.junit.jupiter.api.Assertions
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
-import reactor.core.publisher.{BufferOverflowStrategy, Signal, SignalType, SynchronousSink, Flux => JFlux, FluxSink => JFluxSink}
+import reactor.core.publisher.{BufferOverflowStrategy, Signal, SignalType, SynchronousSink, Mono => JMono, Flux => JFlux, FluxSink => JFluxSink}
 import reactor.core.scheduler.Scheduler
 import reactor.core.{CoreSubscriber, Disposable, Scannable => JScannable}
 import reactor.util.Logger
@@ -698,6 +698,9 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def takeUntilOther(other: Publisher[_]): Flux[T] = wrapFlux[T](delegate.takeUntilOther(other))
 
   def takeWhile(continuePredicate: T => Boolean): Flux[T] = wrapFlux[T](delegate.takeWhile(asJavaPredicate(continuePredicate)))
+
+  def then(): Mono[Unit] = wrapMono[Void](delegate.`then`()).map(_ => ())
+  def then[V](other: Mono[V]): Mono[V] = wrapMono[V](delegate.`then`(other.delegate.asInstanceOf[JMono[V]]))
 
   def thenEmpty(other: Publisher[Unit]): Mono[Unit] = wrapMono[Unit](delegate.thenEmpty(Flux.from(other).map[Void](_ => null: Void)).map(_ => Unit))
 

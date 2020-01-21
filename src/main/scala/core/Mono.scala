@@ -34,6 +34,11 @@ object Mono {
     case finiteDuration: FiniteDuration => wrapMono(JMono.delay(asJavaDuration(finiteDuration)).map(Long2long))
   }
 
+  def delay(duration: Duration, timer: Scheduler): Mono[Long] = duration match {
+    case _: Infinite => wrapMono(JMono.never())
+    case finiteDuration: FiniteDuration => wrapMono(JMono.delay(asJavaDuration(finiteDuration), timer).map(Long2long))
+  }
+
   def empty[T](): Mono[T] = wrapMono(JMono.empty())
 
   def error[T](error: Throwable): Mono[T] = wrapMono[T](JMono.error(error))
@@ -84,13 +89,13 @@ object Mono {
 
   def when(): Mono[_] = when(Seq())
 //  def when(source: Publisher[Any], sources: Publisher[Any]*): Mono[_] = when((source +: sources) (Seq.canBuildFrom))
-  def when(sources: Publisher[Any]*): Mono[_] = when(sources)
-  def when(sources: Iterable[Publisher[Any]]): Mono[_] = wrapMono(JMono.when(asJavaIterable(sources)))
+  def when(sources: Publisher[_]*): Mono[_] = wrapMono(JMono.when(sources:_*))
+  def when(sources: Iterable[Publisher[_]]): Mono[_] = wrapMono(JMono.when(asJavaIterable(sources)))
 
-  def whenDelayError(): Mono[_] = whenDelayError(Seq())
-//  def whenDelayError(source: Publisher[Any], sources: Publisher[Any]*): Mono[_] = whenDelayError((source +: sources) (Seq.canBuildFrom))
-  def whenDelayError(sources: Publisher[Any]*): Mono[_] = whenDelayError(sources)
-  def whenDelayError(sources: Iterable[_ <: Publisher[Any]]): Mono[_] = wrapMono(JMono.whenDelayError(asJavaIterable(sources)))
+  def whenDelayError(): Mono[Unit] = whenDelayError(Seq())
+//  def whenDelayError(source: Publisher[Any], sources: Publisher[Any]*): Mono[Unit] = whenDelayError((source +: sources) (Seq.canBuildFrom))
+  def whenDelayError(sources: Publisher[_]*): Mono[Unit] = wrapMono(JMono.whenDelayError(sources:_*)).map(_ => ())
+  def whenDelayError(sources: Iterable[Publisher[_]]): Mono[Unit] = wrapMono(JMono.whenDelayError(asJavaIterable(sources))).map(_ => ())
 
   def zip[T1, T2, O](p1: Mono[T1], p2: Mono[T2], combinator: (T1, T2) => O): Mono[O] = wrapMono(JMono.zip(p1.delegate, p2.delegate, asJavaFn2(combinator)))
 
@@ -341,9 +346,23 @@ trait Mono[T] extends Publisher[T] with ImplicitJavaInterop {
   def repeat(predicate: () => Boolean): Flux[T] = wrapFlux[T](delegate.repeat(asJavaBooleanSupplier(predicate)))
   def repeat(numRepeat: Long): Flux[T] = wrapFlux[T](delegate.repeat(numRepeat))
   def repeat(numRepeat: Long, predicate: () => Boolean): Flux[T] = wrapFlux[T](delegate.repeat(numRepeat, asJavaBooleanSupplier(predicate)))
-  def repeatWhen(repeatFactory: Flux[Long] => Publisher[_]): Flux[T] = wrapFlux[T](delegate.repeatWhen((flux: JFlux[lang.Long]) => wrapFlux(flux).map(Long2long)))
-  def repeatWhenEmpty(repeatFactory: Flux[Long] => Publisher[_]): Mono[T] = wrapMono[T](delegate.repeatWhenEmpty((flux: JFlux[lang.Long]) => wrapFlux(flux).map(Long2long)))
-  def repeatWhenEmpty(maxRepeat: Int, repeatFactory: Flux[Long] => Publisher[_]): Mono[T] = wrapMono[T](delegate.repeatWhenEmpty(maxRepeat, (flux: JFlux[lang.Long]) => wrapFlux(flux).map(Long2long)))
+
+//  def repeatWhen(repeatFactory: Flux[Long] => Publisher[_]): Flux[T] = wrapFlux[T](delegate.repeatWhen((flux: JFlux[lang.Long]) => repeatFactory(wrapFlux(flux).map(Long2long))))
+  def repeatWhen(repeatFactory: Flux[Long] => Publisher[_]): Flux[T] = {
+    val fn = (f: JFlux[lang.Long]) => repeatFactory.apply(wrapFlux(f.map(long => long2Long(long))))
+    wrapFlux[T](delegate.repeatWhen(asJavaFn1(fn)))
+  }
+
+//  def repeatWhenEmpty(repeatFactory: Flux[Long] => Publisher[_]): Mono[T] = wrapMono[T](delegate.repeatWhenEmpty((flux: JFlux[lang.Long]) => wrapFlux(flux).map(Long2long)))
+  def repeatWhenEmpty(repeatFactory: Flux[Long] => Publisher[_]): Mono[T] = {
+    val fn = (f: JFlux[lang.Long]) => repeatFactory.apply(wrapFlux(f.map(long => long2Long(long))))
+    wrapMono[T](delegate.repeatWhenEmpty(asJavaFn1(fn)))
+  }
+//  def repeatWhenEmpty(maxRepeat: Int, repeatFactory: Flux[Long] => Publisher[_]): Mono[T] = wrapMono[T](delegate.repeatWhenEmpty(maxRepeat, (flux: JFlux[lang.Long]) => wrapFlux(flux).map(Long2long)))
+  def repeatWhenEmpty(maxRepeat: Int, repeatFactory: Flux[Long] => Publisher[_]): Mono[T] = {
+    val fn = (f: JFlux[lang.Long]) => repeatFactory.apply(wrapFlux(f.map(long => long2Long(long))))
+    wrapMono[T](delegate.repeatWhenEmpty(maxRepeat, asJavaFn1(fn)))
+  }
 
   def retry(): Mono[T] = wrapMono[T](delegate.retry())
   def retry(numRetries: Long): Mono[T] = wrapMono[T](delegate.retry(numRetries))
@@ -390,6 +409,9 @@ trait Mono[T] extends Publisher[T] with ImplicitJavaInterop {
   def take(timespan: FiniteDuration, scheduler: Scheduler): Mono[T] = wrapMono[T](delegate.take(asJavaDuration(timespan), scheduler))
 
   def takeUntilOther(other: Publisher[_]): Mono[T] = wrapMono[T](delegate.takeUntilOther(other))
+
+  def then(): Mono[Unit] = wrapMono[Void](delegate.`then`()).map(_ => ())
+  def then[V](other: Mono[V]): Mono[V] = wrapMono[V](delegate.`then`(other.delegate.asInstanceOf[JMono[V]]))
 
   def thenReturn[V](value: V): Mono[V] = wrapMono[V](delegate.thenReturn(value))
   def thenEmpty(other: Publisher[Unit]): Mono[Unit] = wrapMono[Unit](delegate.thenEmpty(Mono.from(other).map[Void](_ => null: Void)).map(_ => Unit))

@@ -61,7 +61,7 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
       "duration in millis with given TimeScheduler" in {
         val vts = VirtualTimeScheduler.getOrSet()
         StepVerifier.create(Mono.delay(50 seconds, vts))
-          .`then`(() => vts.advanceTimeBy(50 seconds))
+          .thenRun(() => vts.advanceTimeBy(50 seconds))
           .expectNextCount(1)
           .expectComplete()
           .verify()
@@ -282,14 +282,14 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
       "with iterable" - {
         "of publisher of unit should return when all of the sources has fulfilled" in {
           val completed = new ConcurrentHashMap[String, Boolean]()
-          val mono = Mono.whenDelayError(Iterable(
+          val mono: Mono[Unit] = Mono.whenDelayError(
             just[Unit]({
               completed.put("first", true)
             }),
             just[Unit]({
               completed.put("second", true)
             })
-          ))
+          )
           StepVerifier.create(mono)
             .expectComplete()
           completed should contain key "first"
@@ -465,7 +465,7 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
           .verifyComplete()
       }
       "with timer should delay using timer" in {
-        StepVerifier.withVirtualTime(() => just(randomValue).delayElement(5 seconds, Schedulers.immediate()))
+        StepVerifier.withVirtualTime(() => just(randomValue).delayElement(5 seconds, Schedulers.elastic()))
           .thenAwait(5 seconds)
           .expectNext(randomValue)
           .verifyComplete()
@@ -510,18 +510,18 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
     ".doAfterSuccessOrError should call the callback function after the mono is terminated" in {
       val atomicBoolean = new AtomicBoolean(false)
       StepVerifier.create(just(randomValue)
-        .doAfterSuccessOrError { t =>
+        .doAfterSuccessOrError { (success, error) =>
           atomicBoolean.compareAndSet(false, true) shouldBe true
-          t shouldBe Success(randomValue)
+          success shouldBe randomValue
         })
         .expectNext(randomValue)
         .verifyComplete()
       atomicBoolean shouldBe Symbol("get")
       val exception = new RuntimeException
-      StepVerifier.create(Mono.raiseError[Long](exception)
-        .doAfterSuccessOrError { t =>
+      StepVerifier.create(Mono.error[Long](exception)
+        .doAfterSuccessOrError { (success, error) =>
           atomicBoolean.compareAndSet(true, false) shouldBe true
-          t shouldBe Failure(exception)
+          error shouldBe exception
         })
         .expectError()
         .verify()
@@ -585,7 +585,7 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
     ".doOnError" - {
       "with callback function should call the callback function when the mono encounter error" in {
         val atomicBoolean = new AtomicBoolean(false)
-        StepVerifier.create(Mono.raiseError(new RuntimeException())
+        StepVerifier.create(Mono.error(new RuntimeException())
           .doOnError(_ => atomicBoolean.compareAndSet(false, true) shouldBe true))
           .expectError(classOf[RuntimeException])
           .verify()
@@ -639,7 +639,7 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
         StepVerifier.create(just(randomValue)
           .delaySubscription(1 second, virtualTimeScheduler)
           .elapsed(virtualTimeScheduler), 1)
-          .`then`(() => virtualTimeScheduler.advanceTimeBy(1 second))
+          .thenRun(() => virtualTimeScheduler.advanceTimeBy(1 second))
           .expectNextMatches((t: (Long, Long)) => t match {
             case (time, data) => time >= 1000 && data == randomValue
           })
@@ -761,8 +761,8 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
     ".mapError" - {
       class MyCustomException(val message: String) extends Exception(message)
       "with mapper should map the error to another error" in {
-        StepVerifier.create(Mono.raiseError[Int](new RuntimeException("runtimeException"))
-          .onErrorMap { case t: Throwable => new MyCustomException(t.getMessage) })
+        StepVerifier.create(Mono.error[Int](new RuntimeException("runtimeException"))
+          .onErrorMap { t: Throwable => new MyCustomException(t.getMessage) })
           .expectErrorMatches((t: Throwable) => {
             t.getMessage shouldBe "runtimeException"
             t should not be a[RuntimeException]
@@ -773,7 +773,7 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
       }
       "with an error type and mapper should" - {
         "map the error to another type if the exception is according to the provided type" in {
-          StepVerifier.create(Mono.raiseError[Int](new RuntimeException("runtimeException"))
+          StepVerifier.create(Mono.error[Int](new RuntimeException("runtimeException"))
             .onErrorMap { case t: RuntimeException => new MyCustomException(t.getMessage) })
             .expectErrorMatches((t: Throwable) => {
               t.getMessage shouldBe "runtimeException"
@@ -784,10 +784,16 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
             .verify()
         }
         "not map the error if the exception is not the type of provided exception class" in {
-          StepVerifier.create(Mono.raiseError[Int](new Exception("runtimeException"))
-            .onErrorMap {
-              case t: RuntimeException => new MyCustomException(t.getMessage)
-            })
+          val e = new Exception("runtimeException")
+          StepVerifier.create(Mono.error[Int](e)
+            .onErrorMap { case t: RuntimeException => {
+              new MyCustomException(t.getMessage)
+            }
+            case t: Exception => {
+              t // implementing partial function handler todo make automatic?
+            }
+            }
+          )
             .expectErrorMatches((t: Throwable) => {
               t.getMessage shouldBe "runtimeException"
               t should not be a[MyCustomException]
@@ -799,13 +805,13 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
       }
       "with a predicate and mapper should" - {
         "map the error to another type if the predicate returns true" in {
-          StepVerifier.create(Mono.raiseError[Int](new RuntimeException("should map"))
+          StepVerifier.create(Mono.error[Int](new RuntimeException("should map"))
             .onErrorMap { case t: Throwable if t.getMessage == "should map" => new MyCustomException(t.getMessage) })
             .expectError(classOf[MyCustomException])
             .verify()
         }
         "not map the error to another type if the predicate returns false" in {
-          StepVerifier.create(Mono.raiseError[Int](new RuntimeException("should not map"))
+          StepVerifier.create(Mono.error[Int](new RuntimeException("should not map"))
             .onErrorMap { case t: Throwable if t.getMessage == "should map" => new MyCustomException(t.getMessage) })
             .expectError(classOf[RuntimeException])
             .verify()
@@ -838,20 +844,20 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
     }
     ".ofType should" - {
       "convert the Mono value type to the provided type if it can be casted" in {
-        StepVerifier.create(just(BigDecimal("1")).ofType[ScalaNumber])
+        StepVerifier.create(just(BigDecimal("1")).ofType(classOf[ScalaNumber]))
           .expectNextCount(1)
           .verifyComplete()
       }
       "ignore the Mono value if it can't be casted" in {
-        StepVerifier.create(just(1).ofType[String])
+        StepVerifier.create(just(1).ofType(classOf[String]))
           .verifyComplete()
       }
     }
 
     ".onErrorRecover" - {
       "should recover with a Mono of element that has been recovered" in {
-        StepVerifier.create(Mono.raiseError(new RuntimeException("oops"))
-          .onErrorRecover { case _ => Truck(5) })
+        StepVerifier.create(Mono.error(new RuntimeException("oops"))
+          .onErrorReturn(Truck(5)))
           .expectNext(Truck(5))
           .verifyComplete()
       }
@@ -859,25 +865,25 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
 
     ".onErrorResume" - {
       "will fallback to the provided value when error happens" in {
-        StepVerifier.create(Mono.raiseError(new RuntimeException()).onErrorResume(_ => just(-1)))
+        StepVerifier.create(Mono.error(new RuntimeException()).onErrorResume(_ => just(-1)))
           .expectNext(-1)
           .verifyComplete()
       }
       "with class type and fallback function will fallback to the provided value when the exception is of provided type" in {
-        StepVerifier.create(Mono.raiseError(new RuntimeException()).onErrorResume {
+        StepVerifier.create(Mono.error(new RuntimeException()).onErrorResume {
           case _: Exception => just(-1)
         })
           .expectNext(-1)
           .verifyComplete()
 
-        StepVerifier.create(Mono.raiseError(new Exception()).onErrorResume {
+        StepVerifier.create(Mono.error(new Exception()).onErrorResume {
           case _: RuntimeException => just(-1)
         })
           .expectError(classOf[Exception])
           .verify()
       }
       "with predicate and fallback function will fallback to the provided value when the predicate returns true" in {
-        StepVerifier.create(Mono.raiseError(new RuntimeException("fallback")).onErrorResume {
+        StepVerifier.create(Mono.error(new RuntimeException("fallback")).onErrorResume {
           case t if t.getMessage == "fallback" => just(-1)
         })
           .expectNext(-1)
@@ -975,7 +981,7 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
 
     ".repeatWhenEmpty should emit resubscribe to this mono when the companion is empty" in {
       val counter = new AtomicInteger(0)
-      StepVerifier.create(Mono.empty.doOnSubscribe(_ => counter.incrementAndGet()).repeatWhenEmpty((_: Flux[Long]) => Flux.just(-1, -2, -3)))
+      StepVerifier.create(Mono.empty().doOnSubscribe(_ => counter.incrementAndGet()).repeatWhenEmpty((_: Flux[Long]) => Flux.just(-1, -2, -3)))
         .verifyComplete()
       counter.get() shouldBe 4
     }
@@ -987,7 +993,7 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
           .verifyComplete()
       }
       "should throw exception if it is empty" in {
-        StepVerifier.create(Mono.empty.single())
+        StepVerifier.create(Mono.empty().single())
           .expectError(classOf[NoSuchElementException])
           .verify()
       }
@@ -1006,19 +1012,19 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
       }
       "with consumer and error consumer should invoke the error consumer when error happen" in {
         val counter = new CountDownLatch(1)
-        val disposable = Mono.raiseError[Any](new RuntimeException()).subscribe(_ => (), _ => counter.countDown())
+        val disposable = Mono.error[Any](new RuntimeException()).subscribe(_ => (), _ => counter.countDown())
         disposable shouldBe a[Disposable]
         counter.await(1, TimeUnit.SECONDS) shouldBe true
       }
       "with consumer, error consumer and completeConsumer should invoke the completeConsumer when it's complete" in {
         val counter = new CountDownLatch(2)
-        val disposable = just(randomValue).subscribe(_ => counter.countDown(), _ => (), counter.countDown())
+        val disposable = just(randomValue).subscribe(_ => counter.countDown(), _ => (), () => counter.countDown())
         disposable shouldBe a[Disposable]
         counter.await(1, TimeUnit.SECONDS) shouldBe true
       }
       "with consumer, error consumer, completeConsumer and subscriptionConsumer should invoke the subscriptionConsumer when there is subscription" in {
         val counter = new CountDownLatch(3)
-        val disposable = just(randomValue).subscribe(_ => counter.countDown(), _ => (), counter.countDown(), s => {
+        val disposable = just(randomValue).subscribe(_ => counter.countDown(), _ => (), () => counter.countDown(), s => {
           s.request(1)
           counter.countDown()
         })
@@ -1030,7 +1036,7 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
     ".subscribeContext should pass context properly" in {
       val key = "message"
       val r: Mono[String] = just("Hello")
-        .flatMap(s => Mono.subscribeContext()
+        .flatMap(s => Mono.subscriberContext()
           .map(ctx => s"$s ${ctx.get(key)}"))
         .subscriberContext(ctx => ctx.put(key, "World"))
 
@@ -1048,15 +1054,15 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
     }
 
     ".switchIfEmpty with alternative will emit the value from alternative Mono when this mono is empty" in {
-      StepVerifier.create(Mono.empty.switchIfEmpty(just(-1)))
+      StepVerifier.create(Mono.empty().switchIfEmpty(just(-1)))
         .expectNext(-1)
         .verifyComplete()
     }
 
-    ".tag should tag the Mono and accessible from Scannable" in {
-      val mono = just(randomValue).tag("integer", "one, two, three")
-      Scannable.from(Option(mono)).tags shouldBe Stream("integer" -> "one, two, three")
-    }
+//    ".tag should tag the Mono and accessible from Scannable" in {
+//      val mono = just(randomValue).tag("integer", "one, two, three")
+//      Scannable.from(Option(mono)).tags shouldBe Stream("integer" -> "one, two, three")
+//    }
 
     ".take" - {
       "should complete after duration elapse" in {
@@ -1093,7 +1099,7 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
       val latch = new CountDownLatch(1)
       val mono = just(randomValue)
         .doOnSuccess(_ => latch.countDown())
-        .thenEmpty(Mono.empty)
+        .thenEmpty(Mono.empty[Unit]())
       StepVerifier.create(mono)
         .verifyComplete()
       latch.await(1, TimeUnit.SECONDS) shouldBe true
@@ -1116,26 +1122,26 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
           .verify()
       }
       "should fallback to the provided mono if the value doesn't arrive in given duration" in {
-        StepVerifier.withVirtualTime(() => Mono.delay(10 seconds).timeout(5 seconds, Option(just(1L))))
+        StepVerifier.withVirtualTime(() => Mono.delay(10 seconds).timeout(5 seconds, just(1L)))
           .thenAwait(5 seconds)
           .expectNext(1)
           .verifyComplete()
       }
       "with timeout and timer should signal TimeoutException if the item does not arrive before a given period" in {
         val timer = VirtualTimeScheduler.getOrSet()
-        StepVerifier.withVirtualTime(() => Mono.delay(10 seconds).timeout(5 seconds, timer = timer), () => timer, 1)
+        StepVerifier.withVirtualTime(() => Mono.delay(10 seconds).timeout(5 seconds, timer), () => timer, 1)
           .thenAwait(5 seconds)
           .expectError(classOf[TimeoutException])
           .verify()
       }
       "should raise TimeoutException if this mono has not emit value when the provided publisher has emit value" in {
-        val mono = Mono.delay(10 seconds).timeoutWhen(just("whatever"))
+        val mono = Mono.delay(10 seconds).timeout(just("whatever"))
         StepVerifier.create(mono)
           .expectError(classOf[TimeoutException])
           .verify()
       }
       "should fallback to the provided fallback mono if this mono does not emit value when the provided publisher emits value" in {
-        val mono = Mono.delay(10 seconds).timeoutWhen(just("whatever"), Option(just(-1L)))
+        val mono = Mono.delay(10 seconds).timeout(just("whatever"), just(-1L))
         StepVerifier.create(mono)
           .expectNext(-1)
           .verifyComplete()
@@ -1143,8 +1149,8 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
       "with timeout, fallback and timer should fallback to the given mono if the item does not arrive before a given period" in {
         val timer = VirtualTimeScheduler.getOrSet()
         StepVerifier.create(Mono.delay(10 seconds, timer)
-          .timeout(5 seconds, Option(just(-1)), timer), 1)
-          .`then`(() => timer.advanceTimeBy(5 seconds))
+          .timeout(5 seconds, just(-1), timer), 1)
+          .thenRun(() => timer.advanceTimeBy(5 seconds))
           .expectNext(-1)
           .verifyComplete()
       }
@@ -1156,9 +1162,9 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
         .verifyComplete()
     }
 
-    ".apply should convert to scala" in {
-      val mono = Mono(JMono.just(randomValue))
-      mono shouldBe a[Mono[_]]
-    }
+//    ".apply should convert to scala" in {
+//      val mono = Mono(JMono.just(randomValue))
+//      mono shouldBe a[Mono[_]]
+//    }
   }
 }

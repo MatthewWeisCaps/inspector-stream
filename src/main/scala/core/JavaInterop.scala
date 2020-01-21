@@ -21,10 +21,14 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
 object JavaInterop {
 
   def wrapFlux[T](jFlux: JFlux[T]): Flux[T] = new FluxImpl[T](jFlux)
+//  def wrapFlux[T](jFlux: JFlux[T]): Flux[T] = Flux.from(jFlux) // todo switch to Flux.from except for Object methods? (benchmark)
+
   def wrapParallelFlux[T](jParallelFlux: JParallelFlux[T]): ParallelFlux[T] = new ParallelFlux[T](jParallelFlux)
   def wrapConnectableFlux[T](jConnectableFlux: JConnectableFlux[T]): ConnectableFlux[T] = new ConnectableFlux[T](jConnectableFlux)
   def wrapGroupedFlux[K, V](jGroupedFlux: JGroupedFlux[K, V]): GroupedFlux[K, V] = new GroupedFlux[K, V](jGroupedFlux)
+
   def wrapMono[T](jMono: JMono[T]): Mono[T] = new MonoImpl[T](jMono)
+//  def wrapMono[T](jMono: JMono[T]): Mono[T] = Mono.from(jMono) // todo switch to Mono.from except for Object methods? (benchmark)
 
   def toJavaStream[T](stream: Stream[T]): java.util.stream.Stream[T] = StreamSupport.stream(stream.toIterable.asJava.spliterator(), false)
 

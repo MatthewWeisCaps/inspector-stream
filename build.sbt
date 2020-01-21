@@ -30,14 +30,24 @@ libraryDependencies += "com.google.code.findbugs" % "jsr305" % "3.0.2" // except
 //libraryDependencies += "io.projectreactor" %% "reactor-scala-extensions" % "0.4.1"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.0-M1" % Test
+//libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % Test
+
 libraryDependencies += "org.scalatest" %% "scalatest-freespec" % "3.2.0-M1" % Test
+//libraryDependencies += "org.scalatest" %% "scalatest-freespec" % "3.2.0-M1" % Test
+
+libraryDependencies += "org.testng" % "testng" % "7.0.0" % Test
+
+
+
+//libraryDependencies += "org.scalatest" % "scalatest-testng_2.11" % "3.0.0-SNAP13" % Test
+
+
 libraryDependencies += "org.mockito" %% "mockito-scala" % "1.10.4" % Test
 
 // mockito-inline prevents errors when mocking final classes
 libraryDependencies += "org.mockito" % "mockito-inline" % "3.2.4" % Test
 //libraryDependencies += "org.mockito" %% "mockito-" % "1.10.4" % Test
 //libraryDependencies += "org.mockito" % "mockito-core" % "3.2.4" % Test
-
 
 
 addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.3") // add runs to sbt
