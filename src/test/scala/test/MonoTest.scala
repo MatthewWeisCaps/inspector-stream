@@ -24,7 +24,7 @@ import scala.math.ScalaNumber
 import scala.util.{Failure, Random, Success, Try}
 
 /*
-  * A copy of:
+  * A port of:
   * https://github.com/reactor/reactor-scala-extensions/blob/master/src/test/scala/reactor/core/scala/publisher/SMonoTest.scala
   *
   * With changes made to support api differences
@@ -61,7 +61,7 @@ class SMonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomati
       "duration in millis with given TimeScheduler" in {
         val vts = VirtualTimeScheduler.getOrSet()
         StepVerifier.create(Mono.delay(50 seconds, vts))
-          .thenRun(() => vts.advanceTimeBy(50 seconds))
+          .`then`(() => vts.advanceTimeBy(50 seconds))
           .expectNextCount(1)
           .expectComplete()
           .verify()

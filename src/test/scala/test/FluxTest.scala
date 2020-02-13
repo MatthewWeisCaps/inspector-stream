@@ -45,7 +45,7 @@ import scala.math.ScalaNumber
 import scala.util.{Failure, Try}
 
 /*
-  * A copy of:
+  * A port of:
   * https://github.com/reactor/reactor-scala-extensions/blob/master/src/test/scala/reactor/core/scala/publisher/SFluxTest.scala
   *
   * With changes made to support api differences
