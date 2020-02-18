@@ -29,8 +29,8 @@ libraryDependencies += "org.mockito" %% "mockito-scala" % "1.10.4" % Test
 // mockito-inline prevents errors when mocking final classes
 libraryDependencies += "org.mockito" % "mockito-inline" % "3.2.4" % Test
 
-addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.3") // add runs to sbt
-logBuffered in Test := false
+//addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.3") // add runs to sbt
+//logBuffered in Test := false
 
 libraryDependencies += "org.junit.jupiter" % "junit-jupiter-api" % "5.5.2"
 
