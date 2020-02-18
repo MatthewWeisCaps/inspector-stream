@@ -1,5 +1,7 @@
 # reactor-sireum
 
+todo: ADD LICENSES + CREDIT
+
 potential todo:
 
 - override schedulers with virtual? https://projectreactor.io/docs/core/release/reference/#scheduler-factory
