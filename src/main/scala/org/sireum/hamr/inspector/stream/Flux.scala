@@ -64,7 +64,7 @@ object Flux {
 
   def error[T](error: Throwable): Flux[T] = wrapFlux[T](JFlux.error(error))
   def error[T](errorSupplier: () => Throwable): Flux[T] = wrapFlux[T](JFlux.error(asJavaSupplier(errorSupplier)))
-  def error[T](error: Throwable, whenRequested: Boolean): Flux[T] = wrapFlux[T](JFlux.error(error))
+  def error[T](error: Throwable, whenRequested: Boolean): Flux[T] = wrapFlux[T](JFlux.error(error, whenRequested))
 
   def first[T](source: Publisher[T], sources: Publisher[T]*): Flux[T] = first((source +: sources) (Seq.canBuildFrom))
   def first[T](sources: Iterable[_ <: Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.first(asJavaIterable(sources)))
