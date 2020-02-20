@@ -1,15 +1,13 @@
 package org.sireum.hamr.inspector.stream.flux
 
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.SECONDS
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.sireum.hamr.inspector.stream.Flux
-import reactor.test.StepVerifier
-import reactor.test.scheduler.VirtualTimeScheduler
 import org.sireum.hamr.inspector.stream.StepVerifierExt._
+import reactor.test.StepVerifier
 
-import scala.concurrent.duration.{Duration, FiniteDuration}
+import scala.concurrent.duration.FiniteDuration
 
 class FluxAssertionsTest extends AnyFunSuite {
 

@@ -4,9 +4,9 @@ import java.util.concurrent.TimeUnit
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.sireum.hamr.inspector.stream.Mono
+import org.sireum.hamr.inspector.stream.StepVerifierExt._
 import reactor.test.StepVerifier
 import reactor.test.scheduler.VirtualTimeScheduler
-import org.sireum.hamr.inspector.stream.StepVerifierExt._
 
 import scala.concurrent.duration.Duration
 

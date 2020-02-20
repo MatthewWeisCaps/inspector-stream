@@ -1,13 +1,8 @@
 package org.sireum.hamr.inspector.stream.mono
 
-import java.util
-import java.util.concurrent.{Callable, Executor, ExecutorService, Executors, Future, TimeUnit}
-
 import org.scalatest.funsuite.AnyFunSuite
 import org.sireum.hamr.inspector.stream.{Flux, Mono}
-import reactor.core.scheduler.Schedulers
 import reactor.test.StepVerifier
-import reactor.test.scheduler.VirtualTimeScheduler
 
 class MonoSequenceEqualTest extends AnyFunSuite {
 

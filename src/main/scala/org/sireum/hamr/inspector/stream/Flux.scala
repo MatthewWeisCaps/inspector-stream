@@ -1,18 +1,17 @@
 package org.sireum.hamr.inspector.stream
 
 import java.util.concurrent.Callable
-import java.util.function.{BiFunction, Supplier}
+import java.util.function.BiFunction
 import java.util.logging.Level
-import java.util.{function, stream}
 import java.util.stream.Collector
 import java.{lang, util}
 
-import JavaInterop._
 import org.junit.jupiter.api.Assertions
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
-import reactor.core.publisher.{BufferOverflowStrategy, Signal, SignalType, SynchronousSink, Mono => JMono, Flux => JFlux, FluxSink => JFluxSink}
+import org.sireum.hamr.inspector.stream.JavaInterop._
+import reactor.core.publisher.{BufferOverflowStrategy, Signal, SignalType, SynchronousSink, Flux => JFlux, FluxSink => JFluxSink, Mono => JMono}
 import reactor.core.scheduler.Scheduler
-import reactor.core.{CoreSubscriber, Disposable, Scannable => JScannable}
+import reactor.core.{Disposable, Scannable => JScannable}
 import reactor.util.Logger
 import reactor.util.context.Context
 import reactor.util.function.{Tuple2 => JTuple2, Tuple3 => JTuple3, Tuple4 => JTuple4, Tuple5 => JTuple5, Tuple6 => JTuple6, Tuple7 => JTuple7, Tuple8 => JTuple8}
@@ -21,7 +20,6 @@ import scala.collection.mutable
 import scala.concurrent.duration.Duration.Infinite
 import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.language.{existentials, higherKinds}
-import scala.reflect.ClassTag
 
 object Flux {
 

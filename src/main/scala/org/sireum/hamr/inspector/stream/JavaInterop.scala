@@ -3,18 +3,16 @@ package org.sireum.hamr.inspector.stream
 import java.lang.{Boolean => JBoolean, Iterable => JIterable, Long => JLong, Runnable => JRunnable}
 import java.time.{Duration => JDuration}
 import java.util
-import java.util.{Iterator => JIterator}
 import java.util.concurrent.{CompletionStage, Callable => JCallable}
 import java.util.function.{BiConsumer => JBiConsumer, BiFunction => JBiFunction, BiPredicate => JBiPredicate, BooleanSupplier => JBooleanSupplier, Consumer => JConsumer, Function => JFunction, LongConsumer => JLongConsumer, Predicate => JPredicate, Supplier => JSupplier}
 import java.util.stream.StreamSupport
-import java.util.{List => JList, Map => JMap, Optional => JOptional}
+import java.util.{Iterator => JIterator, List => JList, Map => JMap, Optional => JOptional}
 
 import reactor.core.publisher.{ConnectableFlux => JConnectableFlux, Flux => JFlux, FluxSink => JFluxSink, GroupedFlux => JGroupedFlux, Mono => JMono, ParallelFlux => JParallelFlux}
 import reactor.util.function.{Tuples, Tuple2 => JTuple2, Tuple3 => JTuple3, Tuple4 => JTuple4, Tuple5 => JTuple5, Tuple6 => JTuple6, Tuple7 => JTuple7, Tuple8 => JTuple8}
 
-import scala.collection.{JavaConverters, mutable}
 import scala.collection.JavaConverters._
-import scala.compat.java8.StreamConverters
+import scala.collection.{JavaConverters, mutable}
 import scala.concurrent.Future
 import scala.concurrent.duration.{Duration, FiniteDuration}
 

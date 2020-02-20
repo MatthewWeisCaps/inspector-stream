@@ -1,9 +1,9 @@
 package org.sireum.hamr.inspector.stream
 
 import org.reactivestreams.{Processor, Publisher, Subscriber, Subscription}
+import org.sireum.hamr.inspector.stream.JavaInterop._
 import reactor.core.Disposable
 import reactor.core.publisher.{FluxProcessor => JFluxProcessor}
-import JavaInterop._
 
 trait FluxProcessor[IN, OUT]/*(private val processorDelegate: JFluxProcessor[IN, OUT])*/ extends Flux[OUT] with Processor[IN, OUT] /*with Publisher[OUT] with Subscriber[IN]*/ with Disposable with Scannable {
 

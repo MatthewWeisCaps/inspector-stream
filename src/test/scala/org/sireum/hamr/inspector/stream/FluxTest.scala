@@ -1,26 +1,19 @@
 package org.sireum.hamr.inspector.stream
 
-import java.io.{BufferedReader, File, FileInputStream, InputStreamReader, PrintWriter}
+import java.io._
 import java.nio.file.Files
-import java.util.concurrent.{Callable, TimeoutException}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger, AtomicLong, AtomicReference}
-import java.util.function.{Consumer, Predicate}
-import java.util.function.{Supplier => JSupplier}
+import java.util.function.{Consumer, Predicate, Supplier => JSupplier}
 
-import scala.concurrent.duration._
-import reactor.core.publisher.{BaseSubscriber, Signal, SynchronousSink, Flux => JFlux, Mono => JMono}
-import reactor.core.publisher.BufferOverflowStrategy._
 import org.mockito.{ArgumentMatchersSugar, IdiomaticMockito}
 import org.reactivestreams.Subscription
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
+import reactor.core.publisher.BufferOverflowStrategy._
+import reactor.core.publisher.{BaseSubscriber, Signal, SynchronousSink, Flux => JFlux}
 import reactor.core.scheduler.Schedulers
 import reactor.test.StepVerifier
-
-import scala.collection.mutable
-import scala.concurrent.duration.Duration
-import reactor.test.ValueFormatters._
 import reactor.test.scheduler.VirtualTimeScheduler
 import reactor.util.concurrent.Queues
 
@@ -397,7 +390,7 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
       "with throwable and whenRequest flag should" - {
         "emit onError during onSubscribe if the flag is false" in {
           val flag = new AtomicBoolean(false)
-          val flux = Flux.error(new Exception("Error message"))
+          val flux = Flux.error(new RuntimeException("Error message"))
             .doOnRequest(_ => flag.compareAndSet(false, true))
           Try(flux.subscribe(new BaseSubscriber[Long] {
             override def hookOnSubscribe(subscription: Subscription): Unit = {
@@ -410,7 +403,7 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
         }
         "emit onError during onRequest if the flag is true" in {
           val flag = new AtomicBoolean(false)
-          val flux = Flux.error(new Exception(), whenRequested = true)
+          val flux = Flux.error(new RuntimeException(), whenRequested = true)
             .doOnRequest(_ => flag.compareAndSet(false, true))
           Try(flux.subscribe(new BaseSubscriber[Long] {
             override def hookOnSubscribe(subscription: Subscription): Unit = {

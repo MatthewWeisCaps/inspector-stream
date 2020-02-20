@@ -3,7 +3,7 @@ package org.sireum.hamr.inspector.stream.mono
 import org.scalatest.funsuite.AnyFunSuite
 import org.sireum.hamr.inspector.stream.Mono
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 class MonoFutureTest extends AnyFunSuite {
 

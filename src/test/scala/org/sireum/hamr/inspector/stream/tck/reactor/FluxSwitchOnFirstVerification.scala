@@ -1,15 +1,9 @@
 package org.sireum.hamr.inspector.stream.tck.reactor
 
-import java.util.concurrent.TimeUnit
-
 import org.reactivestreams.Publisher
 import org.reactivestreams.tck.{PublisherVerification, TestEnvironment}
-import org.scalatest.{BeforeAndAfterEach, Suite}
 import org.sireum.hamr.inspector.stream.Flux
 import org.testng.annotations.Test
-import reactor.core.scheduler.{Scheduler, Schedulers}
-
-import scala.concurrent.duration.FiniteDuration
 
 
 /**

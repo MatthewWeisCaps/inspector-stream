@@ -1,16 +1,14 @@
 package org.sireum.hamr.inspector.stream
 
 import java.util
-import java.util.{Comparator, function}
-import java.util.function.{BiConsumer, BiFunction, Consumer, LongConsumer, Predicate, Supplier}
+import java.util.function
 import java.util.logging.Level
 
-import JavaInterop._
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
-import reactor.core.{CoreSubscriber, Disposable, publisher}
-import reactor.core.publisher.{Signal, SignalType, Flux => JFlux, GroupedFlux => JGroupedFlux, ParallelFlux => JParallelFlux}
-import reactor.core.scheduler.{Scheduler, Schedulers}
-import reactor.util.context.Context
+import org.sireum.hamr.inspector.stream.JavaInterop._
+import reactor.core.publisher.{Signal, SignalType, GroupedFlux => JGroupedFlux, ParallelFlux => JParallelFlux}
+import reactor.core.scheduler.Scheduler
+import reactor.core.{Disposable, publisher}
 
 final class ParallelFlux[T](protected val delegate: JParallelFlux[T]) extends Publisher[T] {
 

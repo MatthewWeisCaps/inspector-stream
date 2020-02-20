@@ -1,9 +1,6 @@
 package org.sireum.hamr.inspector.stream.flux
 
-import org.scalatest.Assertions
-import reactor.test.StepVerifier
 import org.scalatest.funsuite.AnyFunSuite
-import org.sireum.hamr.inspector.stream.Flux
 
 class FluxCheckpointTest extends AnyFunSuite {
 

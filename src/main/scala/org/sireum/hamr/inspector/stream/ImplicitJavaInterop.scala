@@ -1,44 +1,18 @@
 package org.sireum.hamr.inspector.stream
 
-import reactor.core.publisher.{Flux => JFlux}
-import java.util.function.{Function => JFunction}
-import java.util.function.{BiFunction => JBiFunction}
-import java.util.function.{Predicate => JPredicate}
-import java.util.function.{BiPredicate => JBiPredicate}
-import java.util.function.{BiConsumer => JBiConsumer}
-import java.lang.{Iterable => JIterable}
-import java.util.{Map => JMap}
+import java.lang.{Boolean => JBoolean, Iterable => JIterable, Long => JLong, Runnable => JRunnable}
 import java.time.{Duration => JDuration}
-import java.util.function.{Consumer => JConsumer}
-import java.util.function.{LongConsumer => JLongConsumer}
-import java.util.function.{Supplier => JSupplier}
-import java.util.function.{BooleanSupplier => JBooleanSupplier}
-import java.lang.{Boolean => JBoolean}
-import java.lang.{Long => JLong}
-import java.util.stream.{Stream => JStream}
-import reactor.core.publisher.{FluxSink => JFluxSink, Flux => JFlux}
-import java.util.{Comparator => JComparator}
-import java.lang.{Runnable => JRunnable}
-import java.util
+import java.util.concurrent.{CompletionStage, Callable => JCallable}
+import java.util.function.{BiConsumer => JBiConsumer, BiFunction => JBiFunction, BiPredicate => JBiPredicate, BooleanSupplier => JBooleanSupplier, Consumer => JConsumer, Function => JFunction, LongConsumer => JLongConsumer, Predicate => JPredicate, Supplier => JSupplier}
 import java.util.{Optional => JOptional}
-import java.util.concurrent.CompletionStage
-import java.util.concurrent.{Callable => JCallable}
 
-import reactor.util.function.{Tuple2 => JTuple2}
-import reactor.util.function.{Tuple3 => JTuple3}
-import reactor.util.function.{Tuple4 => JTuple4}
-import reactor.util.function.{Tuple5 => JTuple5}
-import reactor.util.function.{Tuple6 => JTuple6}
-import reactor.util.function.{Tuple7 => JTuple7}
-import reactor.util.function.{Tuple8 => JTuple8}
+import reactor.core.publisher.{FluxSink => JFluxSink}
+import reactor.util.function.{Tuple2 => JTuple2, Tuple3 => JTuple3, Tuple4 => JTuple4, Tuple5 => JTuple5, Tuple6 => JTuple6, Tuple7 => JTuple7, Tuple8 => JTuple8}
 
-import scala.collection.{JavaConverters, mutable}
+import scala.collection.JavaConverters
+import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 import scala.language.implicitConversions
-import scala.collection.JavaConverters._
-import scala.collection.convert.Wrappers
-import scala.collection.convert.Wrappers.JIterableWrapper
-import scala.concurrent.Future
 
 
 // todo remove these or use PimpMyLibrary pattern

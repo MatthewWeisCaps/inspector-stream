@@ -4,9 +4,9 @@ import java.lang
 import java.util.concurrent.Callable
 import java.util.logging.Level
 
-import JavaInterop._
 import org.junit.jupiter.api.Assertions
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
+import org.sireum.hamr.inspector.stream.JavaInterop._
 import reactor.core.Disposable
 import reactor.core.publisher.{MonoSink, Signal, SignalType, SynchronousSink, Flux => JFlux, Mono => JMono}
 import reactor.core.scheduler.Scheduler

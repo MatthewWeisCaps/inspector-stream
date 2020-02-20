@@ -4,14 +4,14 @@ import java.util.concurrent._
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger, AtomicLong, AtomicReference}
 import java.util.function.{Supplier => JSupplier}
 
-import org.sireum.hamr.inspector.stream.Mono.just
 import org.mockito.{ArgumentMatchersSugar, IdiomaticMockito}
 import org.reactivestreams.Subscription
-import org.scalatest.freespec.{AnyFreeSpec, AsyncFreeSpec}
+import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should.Matchers
+import org.sireum.hamr.inspector.stream.Mono.just
 import reactor.core.Disposable
-import reactor.core.publisher.{BaseSubscriber, Signal, SynchronousSink, Mono => JMono}
-import reactor.core.scheduler.{Scheduler, Schedulers}
+import reactor.core.publisher.{BaseSubscriber, Signal, SynchronousSink}
+import reactor.core.scheduler.Schedulers
 import reactor.test.scheduler.VirtualTimeScheduler
 import reactor.test.{StepVerifier, StepVerifierOptions}
 import reactor.util.context.Context
@@ -20,7 +20,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.math.ScalaNumber
-import scala.util.{Failure, Random, Success, Try}
+import scala.util.Random
 
 /*
   * A port of:

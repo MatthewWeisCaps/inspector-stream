@@ -4,11 +4,11 @@ import java.util.concurrent.TimeUnit.SECONDS
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.sireum.hamr.inspector.stream.Flux
+import org.sireum.hamr.inspector.stream.StepVerifierExt._
 import reactor.test.StepVerifier
 import reactor.test.scheduler.VirtualTimeScheduler
 
 import scala.concurrent.duration.Duration
-import org.sireum.hamr.inspector.stream.StepVerifierExt._
 
 class FluxRepeatTest extends AnyFunSuite {
 

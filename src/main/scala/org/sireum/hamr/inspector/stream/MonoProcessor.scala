@@ -1,16 +1,12 @@
 package org.sireum.hamr.inspector.stream
 
-import java.util.function.LongSupplier
-
-import org.reactivestreams.{Processor, Publisher, Subscription}
-import reactor.core.{Disposable, Scannable => JScannable}
+import org.reactivestreams.{Processor, Subscription}
 import reactor.core.publisher.{MonoProcessor => JMonoProcessor}
-import reactor.core.publisher.{ConnectableFlux => JConnectableFlux}
-import reactor.core.scheduler.Scheduler
+import reactor.core.{Disposable, Scannable => JScannable}
 import reactor.util.context.Context
 
-import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.collection.JavaConverters._
+import scala.concurrent.duration.Duration
 
 class MonoProcessor[O](private val processorDelegate: JMonoProcessor[O]) extends Mono[O] with Processor[O, O] with Disposable with Subscription with Scannable {
 
