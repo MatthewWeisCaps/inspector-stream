@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.github.MatthewWeisCaps</groupId>
         <artifactId>inspector-bom</artifactId>
-        <version>0.1-SNAPSHOT</version>
+        <version>0b6c6d707d</version>
     </parent>
 
     <groupId>org.sireum.hamr</groupId>
