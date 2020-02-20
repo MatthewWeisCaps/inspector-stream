@@ -23,6 +23,11 @@
         </repository>
     </repositories>
 
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.projectreactor</groupId>
@@ -112,6 +117,7 @@
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
+                <version>4.3.1</version>
                 <executions>
                     <execution>
                         <id>scala-compile-first</id>
@@ -130,6 +136,8 @@
                     </execution>
                 </executions>
                 <configuration>
+<!--                    <source>1.8</source>-->
+<!--                    <target>1.8</target>-->
                     <scalaVersion>${scala.version}</scalaVersion>
                 </configuration>
             </plugin>
