@@ -101,6 +101,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
             </plugin>
+            <!-- just updating java versions is not enough. Must also override the compiler config. -->
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
@@ -109,7 +110,6 @@
                         <id>scala-compile-first</id>
                         <phase>process-resources</phase>
                         <goals>
-                            <!--<goal>add-source</goal>-->
                             <goal>compile</goal>
                         </goals>
                     </execution>
