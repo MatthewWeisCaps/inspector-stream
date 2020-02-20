@@ -12,7 +12,7 @@
 
     <groupId>org.sireum.hamr</groupId>
     <artifactId>inspector-stream</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.0.5-SNAPSHOT</version>
     <name>inspector-stream</name>
     <description>A scala port of the Reactor library with modifications for HAMR Inspector real-time rule testing</description>
 
@@ -28,11 +28,6 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
-<!--        <repository>-->
-<!--            <id>artima</id>-->
-<!--            <url>http://repo.artima.com/releases</url>-->
-<!--            <name>Artima Maven Repository</name>-->
-<!--        </repository>-->
     </repositories>
 
     <dependencies>
