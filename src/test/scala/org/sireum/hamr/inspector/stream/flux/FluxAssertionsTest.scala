@@ -1,3 +1,28 @@
+/*
+ * Copyright (c) 2020, Matthew Weis, Kansas State University
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package org.sireum.hamr.inspector.stream.flux
 
 import java.util.concurrent.TimeUnit.SECONDS
@@ -13,7 +38,7 @@ class FluxAssertionsTest extends AnyFunSuite {
 
   test("flux always positive test passing") {
     val flux: Flux[Int] = Flux.range(1, 100)
-      .assertAlways(_ > 0)
+      .assertTrue(_ > 0)
 
     StepVerifier.create(flux)
       .expectSubscription()
@@ -25,7 +50,7 @@ class FluxAssertionsTest extends AnyFunSuite {
   test("flux always positive test failing") {
     val flux: Flux[Int] = Flux.range(1, 100)
       .map(_ - 50)
-      .assertAlways(_ > 0)
+      .assertTrue(_ > 0)
 
     StepVerifier.create(flux)
       .expectSubscription()
@@ -35,7 +60,7 @@ class FluxAssertionsTest extends AnyFunSuite {
 
   test("flux never negative test passing") {
     val flux: Flux[Int] = Flux.range(1, 100)
-      .assertNever(_ < 0)
+      .assertFalse(_ < 0)
 
     StepVerifier.create(flux)
       .expectSubscription()
@@ -47,7 +72,7 @@ class FluxAssertionsTest extends AnyFunSuite {
   test("flux never negative test failing") {
     val flux: Flux[Int] = Flux.range(1, 100)
       .map(_ - 50)
-      .assertNever(_ < 0)
+      .assertFalse(_ < 0)
 
     StepVerifier.create(flux)
       .expectSubscription()
@@ -57,9 +82,9 @@ class FluxAssertionsTest extends AnyFunSuite {
 
   test("flux chaining assertions passing") {
     val flux: Flux[Int] = Flux.range(1, 100)
-      .assertAlways((n: Int) => n > 0, "assertion 1")
+      .assertTrue((n: Int) => n > 0, "assertion 1")
       .map(_ * -1)
-      .assertNever((n: Int) => n > 0, "assertion 2")
+      .assertFalse((n: Int) => n > 0, "assertion 2")
 
     StepVerifier.create(flux)
       .expectSubscription()
@@ -70,9 +95,9 @@ class FluxAssertionsTest extends AnyFunSuite {
 
   test("flux chaining assertions with first failing") {
     val flux: Flux[Int] = Flux.range(1, 100)
-      .assertAlways((n: Int) => n < 0, "assertion 1")
+      .assertTrue((n: Int) => n < 0, "assertion 1")
       .map(_ * -1)
-      .assertNever((n: Int) => n > 0, "assertion 2")
+      .assertFalse((n: Int) => n > 0, "assertion 2")
 
     StepVerifier.create(flux)
       .expectSubscription()
@@ -82,9 +107,9 @@ class FluxAssertionsTest extends AnyFunSuite {
 
   test("flux chaining assertions with second failing") {
     val flux: Flux[Int] = Flux.range(1, 100)
-      .assertAlways((n: Int) => n > 0, "assertion 1")
+      .assertTrue((n: Int) => n > 0, "assertion 1")
       .map(_ * -1)
-      .assertNever((n: Int) => n < 0, "assertion 2")
+      .assertFalse((n: Int) => n < 0, "assertion 2")
 
     StepVerifier.create(flux)
       .expectSubscription()
@@ -95,7 +120,7 @@ class FluxAssertionsTest extends AnyFunSuite {
   test("flux expect error after some pass") {
     val flux: Flux[Int] = Flux.range(1, 100)
       .map(n => 50 - n)
-      .assertAlways(_ > 0)
+      .assertTrue(_ > 0)
 
     StepVerifier.create(flux)
       .expectSubscription()
