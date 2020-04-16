@@ -7,12 +7,12 @@
     <parent>
         <groupId>com.github.MatthewWeisCaps</groupId>
         <artifactId>inspector-bom</artifactId>
-        <version>0.2-SNAPSHOT</version>
+        <version>0.3-SNAPSHOT</version>
     </parent>
 
     <groupId>org.sireum.hamr</groupId>
     <artifactId>inspector-stream</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3-SNAPSHOT</version>
     <name>inspector-stream</name>
     <description>A scala port of the Reactor library with modifications for HAMR Inspector real-time rule testing</description>
 
@@ -80,6 +80,8 @@
             <version>3.2.4</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- Used for its Assertion methods -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
@@ -169,6 +171,18 @@
                         <id>test</id>
                         <goals>
                             <goal>test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
                         </goals>
                     </execution>
                 </executions>
