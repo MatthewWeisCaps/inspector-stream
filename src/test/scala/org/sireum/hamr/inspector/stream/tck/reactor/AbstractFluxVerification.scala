@@ -66,7 +66,7 @@ abstract class AbstractFluxVerification extends PublisherVerification[Int](new T
     }
   }
 
-  override def createFailedPublisher(): Publisher[Int] = Flux.error[Int](new Exception("boom")).transform(this.transformFlux)
+  override def createFailedPublisher(): Publisher[Int] = Flux.error[Int](new Exception("intentional error!")).transform(this.transformFlux)
 
   protected def monitorThreadUse(value: Any): Unit = {
     var counter = counters.get(Thread.currentThread())
