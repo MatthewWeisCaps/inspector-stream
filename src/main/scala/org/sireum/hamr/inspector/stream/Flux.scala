@@ -624,7 +624,7 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def retry(numRetries: Long): Flux[T] = wrapFlux[T](delegate.retry(numRetries))
   def retry(retryMatcher: Throwable => Boolean): Flux[T] = wrapFlux[T](delegate.retry(asJavaPredicate(retryMatcher)))
   def retry(numRetries: Long, retryMatcher: Throwable => Boolean): Flux[T] = wrapFlux[T](delegate.retry(numRetries, asJavaPredicate(retryMatcher)))
-  def retryWhen(whenFactory: Flux[Throwable] => Publisher[_]): Flux[T] = wrapFlux[T](delegate.retryWhen((flux: JFlux[Throwable]) => whenFactory(wrapFlux(flux))))
+//  def retryWhen(whenFactory: Flux[Throwable] => Publisher[_]): Flux[T] = wrapFlux[T](delegate.retryWhen((flux: JFlux[Throwable]) => whenFactory(wrapFlux(flux))))
 
   def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration): Flux[T] = wrapFlux[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff)))
   def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration): Flux[T] = wrapFlux[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff)))
