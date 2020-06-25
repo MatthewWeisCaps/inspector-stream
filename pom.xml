@@ -5,7 +5,7 @@
     <packaging>jar</packaging>
 
     <parent>
-        <groupId>org.sireum.hamr</groupId>
+        <groupId>org.sireum</groupId>
         <artifactId>inspector-bom</artifactId>
         <version>0.5-SNAPSHOT</version>
     </parent>
@@ -35,11 +35,11 @@
 <!--            <groupId>io.projectreactor</groupId>-->
 <!--            <artifactId>reactor-core</artifactId>-->
 <!--        </dependency>-->
-                <dependency>
-                    <groupId>org.sireum.hooks</groupId>
-                    <artifactId>virtual-reactor-hooks</artifactId>
-                    <version>0.1-SNAPSHOT</version>
-                </dependency>
+        <dependency>
+            <groupId>org.sireum</groupId>
+            <artifactId>virtual-reactor-hooks</artifactId>
+            <version>0.2-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
