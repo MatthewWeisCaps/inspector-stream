@@ -7,12 +7,13 @@
     <parent>
         <groupId>org.sireum</groupId>
         <artifactId>inspector-bom</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.6-SNAPSHOT</version>
+        <relativePath>../inspector-bom</relativePath>
     </parent>
 
-    <groupId>org.sireum.hamr</groupId>
+    <groupId>org.sireum</groupId>
     <artifactId>inspector-stream</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.6-SNAPSHOT</version>
     <name>inspector-stream</name>
     <description>A scala port of the Reactor library with modifications for HAMR Inspector real-time rule testing</description>
 
@@ -30,10 +31,10 @@
     </properties>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>io.projectreactor</groupId>-->
-<!--            <artifactId>reactor-core</artifactId>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.sireum.kekinian</groupId>
+            <artifactId>slang-embedded-art_2.13</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.sireum</groupId>
             <artifactId>virtual-reactor-hooks</artifactId>
@@ -60,14 +61,14 @@
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.12</artifactId>
-            <version>3.2.0-M2</version>
+            <artifactId>scalatest_2.13</artifactId>
+            <version>3.2.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
-            <artifactId>scalatest-freespec_2.12</artifactId>
-            <version>3.2.0-M2</version>
+            <artifactId>scalatest-freespec_2.13</artifactId>
+            <version>3.2.3</version>
             <scope>test</scope>
         </dependency>
         <!-- most tests use scalatest but reactive-streams tck requires testng -->
@@ -79,7 +80,7 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-scala_2.12</artifactId>
+            <artifactId>mockito-scala_2.13</artifactId>
             <version>1.10.4</version>
             <scope>test</scope>
         </dependency>
@@ -98,8 +99,8 @@
         </dependency>
         <dependency>
             <groupId>org.scala-lang.modules</groupId>
-            <artifactId>scala-java8-compat_2.12</artifactId>
-            <version>0.9.0</version>
+            <artifactId>scala-java8-compat_2.13</artifactId>
+            <version>0.9.1</version>
         </dependency>
         <!-- javax nullable -->
         <!-- https://stackoverflow.com/questions/19030954/cant-find-nullable-inside-javax-annotation -->

@@ -36,12 +36,8 @@ import org.scalatest.matchers.should.Matchers
 import org.sireum.hamr.inspector.stream.Mono.just
 import reactor.core.Disposable
 import reactor.core.publisher.{BaseSubscriber, Signal, SynchronousSink}
-import reactor.core.scheduler.Schedulers
-import reactor.test.scheduler.VirtualTimeScheduler
-import reactor.test.{StepVerifier, StepVerifierOptions}
-import reactor.util.context.Context
+import reactor.test.StepVerifier
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.math.ScalaNumber
@@ -51,7 +47,7 @@ import scala.util.Random
   * A port of:
   * https://github.com/reactor/reactor-scala-extensions/blob/master/src/test/scala/reactor/core/scala/publisher/SMonoTest.scala
   *
-  * With changes made to support api differences
+  * With changes made to support api differences. Note this file was made by copying & modifying the original.
   */
 class MonoTest extends AnyFreeSpec with Matchers with TestSupport with IdiomaticMockito with ArgumentMatchersSugar {
   private val randomValue = Random.nextLong()
@@ -82,15 +78,15 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
           .expectComplete()
           .verify()
       }
-      "duration in millis with given TimeScheduler" in {
-        val vts = VirtualTimeScheduler.getOrSet()
-        StepVerifier.create(Mono.delay(50 seconds, vts))
-          .`then`(() => vts.advanceTimeBy(50 seconds))
-          .expectNextCount(1)
-          .expectComplete()
-          .verify()
-
-      }
+//      "duration in millis with given TimeScheduler" in {
+//        val vts = VirtualTimeScheduler.getOrSet()
+//        StepVerifier.create(Mono.delay(50 seconds, vts))
+//          .`then`(() => vts.advanceTimeBy(50 seconds))
+//          .expectNextCount(1)
+//          .expectComplete()
+//          .verify()
+//
+//      }
     }
 
     ".empty " - {
@@ -125,20 +121,20 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
           .verify()
       }
 
-      "source direct should return mono of the source" in {
-        StepVerifier.create(Mono.fromDirect(Flux.just(1, 2, 3)))
-          .expectNext(1, 2, 3)
-          .verifyComplete()
-      }
-
-      "a future should result Mono that will return the value from the future object" in {
-        import scala.concurrent.ExecutionContext.Implicits.global
-        StepVerifier.create(Mono.fromFuture(Future[Long] {
-          randomValue
-        }))
-          .expectNext(randomValue)
-          .verifyComplete()
-      }
+//      "source direct should return mono of the source" in {
+//        StepVerifier.create(Mono.fromDirect(Flux.just(1, 2, 3)))
+//          .expectNext(1, 2, 3)
+//          .verifyComplete()
+//      }
+//
+//      "a future should result Mono that will return the value from the future object" in {
+//        import scala.concurrent.ExecutionContext.Implicits.global
+//        StepVerifier.create(Mono.fromFuture(Future[Long] {
+//          randomValue
+//        }))
+//          .expectNext(randomValue)
+//          .verifyComplete()
+//      }
 
       // todo
 //      "a Try should result Mono that when it is a" - {
@@ -223,13 +219,13 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
           .expectNext(true)
           .verifyComplete()
       }
-      "emit true when both publisher emit the same value according to the isEqual function with bufferSize" in {
-        val mono = Mono.sequenceEqual[Int](just(10), just(100), (t1: Int, t2: Int) => t1 % 10 == t2 % 10, 2)
-        StepVerifier.create(mono)
-          .expectNext(true)
-          .verifyComplete()
-
-      }
+//      "emit true when both publisher emit the same value according to the isEqual function with bufferSize" in {
+//        val mono = Mono.sequenceEqual[Int](just(10), just(100), (t1: Int, t2: Int) => t1 % 10 == t2 % 10, 2)
+//        StepVerifier.create(mono)
+//          .expectNext(true)
+//          .verifyComplete()
+//
+//      }
     }
 
     ".raiseError should create Mono that emit error" in {
@@ -368,45 +364,45 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
 //      JMono.just(randomValue).asScala shouldBe an[Mono[_]]
 //    }
 
-    ".block" - {
-      "should block the mono to get the value" in {
-        just(randomValue).block() shouldBe randomValue
-      }
-      "with duration should block the mono up to the duration" in {
-        just(randomValue).block(10 seconds) shouldBe randomValue
-      }
-    }
+//    ".block" - {
+//      "should block the mono to get the value" in {
+//        just(randomValue).block() shouldBe randomValue
+//      }
+//      "with duration should block the mono up to the duration" in {
+//        just(randomValue).block(10 seconds) shouldBe randomValue
+//      }
+//    }
 
-    ".blockOption" - {
-      "without duration" - {
-        "should block the mono to get value" in {
-          just(randomValue).blockOptional() shouldBe Some(randomValue)
-        }
-        "should return None if mono is empty" in {
-          Mono.empty.blockOptional() shouldBe None
-        }
-      }
-      "with duration" - {
-        "should block the mono up to the duration" in {
-          just(randomValue).blockOptional(10 seconds) shouldBe Some(randomValue)
-        }
-        "shouldBlock the mono up to the duration and return None" in {
-          StepVerifier.withVirtualTime(() => just(Mono.empty.blockOptional(10 seconds)))
-            .thenAwait(10 seconds)
-            .expectNext(None)
-            .verifyComplete()
-        }
-      }
-    }
+//    ".blockOption" - {
+//      "without duration" - {
+//        "should block the mono to get value" in {
+//          just(randomValue).blockOptional() shouldBe Some(randomValue)
+//        }
+//        "should return None if mono is empty" in {
+//          Mono.empty.blockOptional() shouldBe None
+//        }
+//      }
+//      "with duration" - {
+//        "should block the mono up to the duration" in {
+//          just(randomValue).blockOptional(10 seconds) shouldBe Some(randomValue)
+//        }
+//        "shouldBlock the mono up to the duration and return None" in {
+//          StepVerifier.withVirtualTime(() => just(Mono.empty.blockOptional(10 seconds)))
+//            .thenAwait(10 seconds)
+//            .expectNext(None)
+//            .verifyComplete()
+//        }
+//      }
+//    }
 
-    ".cast (deprecated) should cast the underlying value" in {
-      val number = just(BigDecimal("123")).cast(classOf[ScalaNumber]).block()
-      number shouldBe a[ScalaNumber]
-    }
-    ".cast should cast the underlying value" in {
-      val number = just(BigDecimal("123")).cast[ScalaNumber](classOf[ScalaNumber]).block()
-      number shouldBe a[ScalaNumber]
-    }
+//    ".cast (deprecated) should cast the underlying value" in {
+//      val number = just(BigDecimal("123")).cast(classOf[ScalaNumber]).block()
+//      number shouldBe a[ScalaNumber]
+//    }
+//    ".cast should cast the underlying value" in {
+//      val number = just(BigDecimal("123")).cast[ScalaNumber](classOf[ScalaNumber]).block()
+//      number shouldBe a[ScalaNumber]
+//    }
 
     ".cache" - {
       "should cache the value" in {
@@ -490,12 +486,12 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
           .expectNext(randomValue)
           .verifyComplete()
       }
-      "with timer should delay using timer" in {
-        StepVerifier.withVirtualTime(() => just(randomValue).delayElement(5 seconds, Schedulers.elastic()))
-          .thenAwait(5 seconds)
-          .expectNext(randomValue)
-          .verifyComplete()
-      }
+//      "with timer should delay using timer" in {
+//        StepVerifier.withVirtualTime(() => just(randomValue).delayElement(5 seconds, Schedulers.elastic()))
+//          .thenAwait(5 seconds)
+//          .expectNext(randomValue)
+//          .verifyComplete()
+//      }
     }
 
     ".delaySubscription" - {
@@ -505,12 +501,12 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
           .expectNext(1)
           .verifyComplete()
       }
-      "with delay duration and scheduler should delay subscription as long as the provided duration" in {
-        StepVerifier.withVirtualTime(() => just(1).delaySubscription(1 hour, Schedulers.single()))
-          .thenAwait(1 hour)
-          .expectNext(1)
-          .verifyComplete()
-      }
+//      "with delay duration and scheduler should delay subscription as long as the provided duration" in {
+//        StepVerifier.withVirtualTime(() => just(1).delaySubscription(1 hour, Schedulers.single()))
+//          .thenAwait(1 hour)
+//          .expectNext(1)
+//          .verifyComplete()
+//      }s
       "with another publisher should delay the current subscription until the other publisher completes" in {
         StepVerifier.withVirtualTime(() => just(1).delaySubscription(just("one").delaySubscription(1 hour)))
           .thenAwait(1 hour)
@@ -661,17 +657,17 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
 //          })
 //          .verifyComplete()
 //      }
-      "with TimedScheduler should provide the time elapsed using the provided scheduler when this mono emit value" in {
-        val virtualTimeScheduler = VirtualTimeScheduler.getOrSet()
-        StepVerifier.create(just(randomValue)
-          .delaySubscription(1 second, virtualTimeScheduler)
-          .elapsed(virtualTimeScheduler), 1)
-          .`then`(() => virtualTimeScheduler.advanceTimeBy(1 second))
-          .expectNextMatches((t: (Long, Long)) => t match {
-            case (time, data) => time >= 1000 && data == randomValue
-          })
-          .verifyComplete()
-      }
+//      "with TimedScheduler should provide the time elapsed using the provided scheduler when this mono emit value" in {
+//        val virtualTimeScheduler = VirtualTimeScheduler.getOrSet()
+//        StepVerifier.create(just(randomValue)
+//          .delaySubscription(1 second, virtualTimeScheduler)
+//          .elapsed(virtualTimeScheduler), 1)
+//          .`then`(() => virtualTimeScheduler.advanceTimeBy(1 second))
+//          .expectNextMatches((t: (Long, Long)) => t match {
+//            case (time, data) => time >= 1000 && data == randomValue
+//          })
+//          .verifyComplete()
+//      }
     }
 
     ".expandDeep" - {
@@ -785,7 +781,7 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
         .verify()
     }
 
-    ".mapError" - {
+    ".smapError" - {
       class MyCustomException(val message: String) extends Exception(message)
       "with mapper should map the error to another error" in {
         StepVerifier.create(Mono.error[Int](new RuntimeException("runtimeException"))
@@ -1060,25 +1056,25 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
       }
     }
 
-    ".subscribeContext should pass context properly" in {
-      val key = "message"
-      val r: Mono[String] = just("Hello")
-        .flatMap(s => Mono.subscriberContext()
-          .map(ctx => s"$s ${ctx.get(key)}"))
-        .subscriberContext(ctx => ctx.put(key, "World"))
-
-      StepVerifier.create(r)
-        .expectNext("Hello World")
-        .verifyComplete()
-
-      StepVerifier.create(just(1).map(i => i + 10),
-        StepVerifierOptions.create().withInitialContext(Context.of("foo", "bar")))
-        .expectAccessibleContext()
-        .contains("foo", "bar")
-        .`then`()
-        .expectNext(11)
-        .verifyComplete()
-    }
+//    ".subscribeContext should pass context properly" in {
+//      val key = "message"
+//      val r: Mono[String] = just("Hello")
+//        .flatMap(s => Mono.subscriberContext()
+//          .map(ctx => s"$s ${ctx.get(key)}"))
+//        .subscriberContext(ctx => ctx.put(key, "World"))
+//
+//      StepVerifier.create(r)
+//        .expectNext("Hello World")
+//        .verifyComplete()
+//
+//      StepVerifier.create(just(1).map(i => i + 10),
+//        StepVerifierOptions.create().withInitialContext(Context.of("foo", "bar")))
+//        .expectAccessibleContext()
+//        .contains("foo", "bar")
+//        .`then`()
+//        .expectNext(11)
+//        .verifyComplete()
+//    }
 
     ".switchIfEmpty with alternative will emit the value from alternative Mono when this mono is empty" in {
       StepVerifier.create(Mono.empty().switchIfEmpty(just(-1)))
@@ -1097,11 +1093,11 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
           .thenAwait(5 seconds)
           .verifyComplete()
       }
-      "with duration and scheduler should complete after duration elapse" in {
-        StepVerifier.withVirtualTime(() => Mono.delay(10 seconds).take(5 seconds, Schedulers.parallel()))
-          .thenAwait(5 seconds)
-          .verifyComplete()
-      }
+//      "with duration and scheduler should complete after duration elapse" in {
+//        StepVerifier.withVirtualTime(() => Mono.delay(10 seconds).take(5 seconds, Schedulers.parallel()))
+//          .thenAwait(5 seconds)
+//          .verifyComplete()
+//      }
     }
 
     ".takeUntilOther should complete if the companion publisher emit any signal first" in {
@@ -1109,18 +1105,18 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
         .verifyComplete()
     }
 
-    ".then" - {
-      "without parameter should only replays complete and error signals from this mono" in {
-        StepVerifier.create(just(randomValue).`then`())
-          .verifyComplete()
-      }
-      "with other mono should ignore element from this mono and transform its completion signal into emission and " +
-        "completion signal of the provided mono" in {
-        StepVerifier.create(just(randomValue).`then`(just("1")))
-          .expectNext("1")
-          .verifyComplete()
-      }
-    }
+//    ".then" - {
+//      "without parameter should only replays complete and error signals from this mono" in {
+//        StepVerifier.create(just(randomValue).`then`())
+//          .verifyComplete()
+//      }
+//      "with other mono should ignore element from this mono and transform its completion signal into emission and " +
+//        "completion signal of the provided mono" in {
+//        StepVerifier.create(just(randomValue).`then`(just("1")))
+//          .expectNext("1")
+//          .verifyComplete()
+//      }
+//    }
 
     ".thenEmpty should complete this mono then for a supplied publisher to also complete" in {
       val latch = new CountDownLatch(1)
@@ -1154,13 +1150,13 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
           .expectNext(1)
           .verifyComplete()
       }
-      "with timeout and timer should signal TimeoutException if the item does not arrive before a given period" in {
-        val timer = VirtualTimeScheduler.getOrSet()
-        StepVerifier.withVirtualTime(() => Mono.delay(10 seconds).timeout(5 seconds, timer), () => timer, 1)
-          .thenAwait(5 seconds)
-          .expectError(classOf[TimeoutException])
-          .verify()
-      }
+//      "with timeout and timer should signal TimeoutException if the item does not arrive before a given period" in {
+//        val timer = VirtualTimeScheduler.getOrSet()
+//        StepVerifier.withVirtualTime(() => Mono.delay(10 seconds).timeout(5 seconds, timer), () => timer, 1)
+//          .thenAwait(5 seconds)
+//          .expectError(classOf[TimeoutException])
+//          .verify()
+//      }
       "should raise TimeoutException if this mono has not emit value when the provided publisher has emit value" in {
         val mono = Mono.delay(10 seconds).timeout(just("whatever"))
         StepVerifier.create(mono)
@@ -1173,21 +1169,21 @@ class MonoTest extends AnyFreeSpec with Matchers with TestSupport with Idiomatic
           .expectNext(-1)
           .verifyComplete()
       }
-      "with timeout, fallback and timer should fallback to the given mono if the item does not arrive before a given period" in {
-        val timer = VirtualTimeScheduler.getOrSet()
-        StepVerifier.create(Mono.delay(10 seconds, timer)
-          .timeout(5 seconds, just(-1), timer), 1)
-          .`then`(() => timer.advanceTimeBy(5 seconds))
-          .expectNext(-1)
-          .verifyComplete()
-      }
+//      "with timeout, fallback and timer should fallback to the given mono if the item does not arrive before a given period" in {
+//        val timer = VirtualTimeScheduler.getOrSet()
+//        StepVerifier.create(Mono.delay(10 seconds, timer)
+//          .timeout(5 seconds, just(-1), timer), 1)
+//          .`then`(() => timer.advanceTimeBy(5 seconds))
+//          .expectNext(-1)
+//          .verifyComplete()
+//      }
     }
 
-    ".transform should transform this mono in order to generate a target mono" in {
-      StepVerifier.create(just(randomValue).transform(ml => just(ml.block().toString)))
-        .expectNext(randomValue.toString)
-        .verifyComplete()
-    }
+//    ".transform should transform this mono in order to generate a target mono" in {
+//      StepVerifier.create(just(randomValue).transform(ml => just(ml.block().toString)))
+//        .expectNext(randomValue.toString)
+//        .verifyComplete()
+//    }
 
 //    ".apply should convert to scala" in {
 //      val mono = Mono(JMono.just(randomValue))

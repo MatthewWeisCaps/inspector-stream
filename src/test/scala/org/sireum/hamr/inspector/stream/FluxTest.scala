@@ -40,7 +40,6 @@ import reactor.core.publisher.{BaseSubscriber, Signal, SynchronousSink, Flux => 
 import reactor.core.scheduler.Schedulers
 import reactor.test.StepVerifier
 import reactor.test.scheduler.VirtualTimeScheduler
-import reactor.util.concurrent.Queues
 
 //import scala.collection.mutable.ListBuffer
 //import scala.io.Source
@@ -54,17 +53,14 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.TimeoutException
 import scala.concurrent.duration.{Duration, _}
-import scala.io.Source
 import scala.language.postfixOps
 import scala.math.Ordering.IntOrdering
-import scala.math.ScalaNumber
-import scala.util.{Failure, Try}
 
 /*
   * A port of:
   * https://github.com/reactor/reactor-scala-extensions/blob/master/src/test/scala/reactor/core/scala/publisher/SFluxTest.scala
   *
-  * With changes made to support api differences
+  * With changes made to support api differences. Note this file was made by copying & modifying the original.
   */
 class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks with TestSupport with IdiomaticMockito with ArgumentMatchersSugar {
 
@@ -166,11 +162,11 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
       }
     }
 
-    ".fromArray should create a flux that emits the items contained in the provided array" in {
-      StepVerifier.create(Flux.fromArray(Array("1", "2", "3")))
-        .expectNext("1", "2", "3")
-        .verifyComplete()
-    }
+//    ".fromArray should create a flux that emits the items contained in the provided array" in {
+//      StepVerifier.create(Flux.fromArray(Array("1", "2", "3")))
+//        .expectNext("1", "2", "3")
+//        .verifyComplete()
+//    }
 
     ".fromIterable should create flux that emit the items contained in the provided iterable" in {
       StepVerifier.create(Flux.fromIterable(Iterable(1, 2, 3)))
@@ -184,14 +180,14 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
         .verifyComplete()
     }
 
-    ".fromStream" - {
-      "with supplier should create flux that emit items contained in the supplier" in {
-//        StepVerifier.create(Flux.fromStream(() => Stream(1, 2, 3))) // todo test supplier
-        StepVerifier.create(Flux.fromStream(Stream(1, 2, 3)))
-          .expectNext(1, 2, 3)
-          .verifyComplete()
-      }
-    }
+//    ".fromStream" - {
+//      "with supplier should create flux that emit items contained in the supplier" in {
+////        StepVerifier.create(Flux.fromStream(() => Stream(1, 2, 3))) // todo test supplier
+//        StepVerifier.create(Flux.fromStream(Stream(1, 2, 3)))
+//          .expectNext(1, 2, 3)
+//          .verifyComplete()
+//      }
+//    }
 
     ".generate" - {
       "with state supplier and state consumer" in {
@@ -290,15 +286,15 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
           .expectNext(1, 10, 2, 20, 3, 30, 4, 40, 5, 50)
           .verifyComplete()
       }
-      "with sequence of publisher and prefetch should merge the underlying publisher" in {
-        StepVerifier.withVirtualTime(() => {
-          val Flux1 = Flux.just(1, 2, 3, 4, 5).delayElements(5 seconds)
-          val Flux2 = Flux.just(10, 20, 30, 40, 50).delayElements(5 seconds).delaySubscription(2500 millisecond)
-          Flux.merge(2, Flux1, Flux2)
-        }).thenAwait(30 seconds)
-          .expectNext(1, 10, 2, 20, 3, 30, 4, 40, 5, 50)
-          .verifyComplete()
-      }
+//      "with sequence of publisher and prefetch should merge the underlying publisher" in {
+//        StepVerifier.withVirtualTime(() => {
+//          val Flux1 = Flux.just(1, 2, 3, 4, 5).delayElements(5 seconds)
+//          val Flux2 = Flux.just(10, 20, 30, 40, 50).delayElements(5 seconds).delaySubscription(2500 millisecond)
+//          Flux.merge(2, Flux1, Flux2)
+//        }).thenAwait(30 seconds)
+//          .expectNext(1, 10, 2, 20, 3, 30, 4, 40, 5, 50)
+//          .verifyComplete()
+//      }
       "with sequence of publisher and prefetch and delayError should merge the underlying publisher" in {
         StepVerifier.withVirtualTime(() => {
           val Flux1 = Flux.just(1, 2, 3, 4, 5).delayElements(5 seconds)
@@ -320,24 +316,24 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
           .expectNext(1, 10, 20, 30, 40, 50, 60, 70, 80)
           .verifyComplete()
       }
-      "with sequence of publisher and prefetch should merge the value in orderly fashion" in {
-        StepVerifier.withVirtualTime(() => {
-          val Flux1: Flux[Int] = Flux.just[Int](1, 20, 40, 60, 80).delayElements(5 seconds)
-          val Flux2: Flux[Int] = Flux.just[Int](10, 30, 50, 70).delayElements(5 seconds).delaySubscription(2500 millisecond)
-          Flux.mergeOrderedPrefetch[Int](2, Ordering.Int.reverse.reverse, Flux1, Flux2)
-        }).thenAwait(30 seconds)
-          .expectNext(1, 10, 20, 30, 40, 50, 60, 70, 80)
-          .verifyComplete()
-      }
-      "with sequence of publisher and prefetch and Comparable should merge the value in orderly fashion" in {
-        StepVerifier.withVirtualTime(() => {
-          val flux1 = Flux.just[Int](1, 20, 40, 60, 80).delayElements(5 seconds)
-          val flux2 = Flux.just[Int](10, 30, 50, 70).delayElements(5 seconds).delaySubscription(2500 millisecond)
-          Flux.mergeOrderedPrefetch[Int](5, Ordering.Int.reverse, flux1, flux2)
-        }).thenAwait(30 seconds)
-          .expectNext(10, 30, 50, 70, 1, 20, 40, 60, 80)
-          .verifyComplete()
-      }
+//      "with sequence of publisher and prefetch should merge the value in orderly fashion" in {
+//        StepVerifier.withVirtualTime(() => {
+//          val Flux1: Flux[Int] = Flux.just[Int](1, 20, 40, 60, 80).delayElements(5 seconds)
+//          val Flux2: Flux[Int] = Flux.just[Int](10, 30, 50, 70).delayElements(5 seconds).delaySubscription(2500 millisecond)
+//          Flux.mergeOrderedPrefetch[Int](2, Ordering.Int.reverse.reverse, Flux1, Flux2)
+//        }).thenAwait(30 seconds)
+//          .expectNext(1, 10, 20, 30, 40, 50, 60, 70, 80)
+//          .verifyComplete()
+//      }
+//      "with sequence of publisher and prefetch and Comparable should merge the value in orderly fashion" in {
+//        StepVerifier.withVirtualTime(() => {
+//          val flux1 = Flux.just[Int](1, 20, 40, 60, 80).delayElements(5 seconds)
+//          val flux2 = Flux.just[Int](10, 30, 50, 70).delayElements(5 seconds).delaySubscription(2500 millisecond)
+//          Flux.mergeOrderedPrefetch[Int](5, Ordering.Int.reverse, flux1, flux2)
+//        }).thenAwait(30 seconds)
+//          .expectNext(10, 30, 50, 70, 1, 20, 40, 60, 80)
+//          .verifyComplete()
+//      }
     }
 
     ".mergeSequential*" - {
@@ -346,16 +342,16 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
           .expectNext(1, 2, 3, 4, 2, 3, 4)
           .verifyComplete()
       }
-      "with publisher of publisher, maxConcurrency and prefetch should merge the underlying publisher in sequence of publisher" in {
-        StepVerifier.create(Flux.mergeSequential[Int](Flux.just(Flux.just(1, 2, 3), Flux.just(2, 3, 4)), maxConcurrency = 8, prefetch = 2))
-          .expectNext(1, 2, 3, 2, 3, 4)
-          .verifyComplete()
-      }
-      "with publisher of publisher, delayError, maxConcurrency and prefetch should merge the underlying publisher in sequence of publisher" in {
-        StepVerifier.create(Flux.mergeSequentialDelayError[Int](Flux.just(Flux.just(1, 2, 3), Flux.just(2, 3, 4)), 8, 2))
-          .expectNext(1, 2, 3, 2, 3, 4)
-          .verifyComplete()
-      }
+//      "with publisher of publisher, maxConcurrency and prefetch should merge the underlying publisher in sequence of publisher" in {
+//        StepVerifier.create(Flux.mergeSequential[Int](Flux.just(Flux.just(1, 2, 3), Flux.just(2, 3, 4)), maxConcurrency = 8, prefetch = 2))
+//          .expectNext(1, 2, 3, 2, 3, 4)
+//          .verifyComplete()
+//      }
+//      "with publisher of publisher, delayError, maxConcurrency and prefetch should merge the underlying publisher in sequence of publisher" in {
+//        StepVerifier.create(Flux.mergeSequentialDelayError[Int](Flux.just(Flux.just(1, 2, 3), Flux.just(2, 3, 4)), 8, 2))
+//          .expectNext(1, 2, 3, 2, 3, 4)
+//          .verifyComplete()
+//      }
       "should compile properly" in {
         val iterators: Iterable[Flux[String]] = for (_ <- 0 to 4000) yield Flux.interval(5 seconds).map(_.toString)
         val publishers: Flux[Flux[String]] = Flux.just(iterators).flatMapIterable(identity)
@@ -367,32 +363,32 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
           .expectNext(1, 2, 3, 2, 3, 4)
           .verifyComplete()
       }
-      "with prefetch and varargs of publishers should merge the underlying publisher in sequence of publisher" in {
-        StepVerifier.create(Flux.mergeSequential[Int](Seq(Flux.just(1, 2, 3), Flux.just(2, 3, 4)), prefetch = 2, maxConcurrency = Queues.SMALL_BUFFER_SIZE))
-          .expectNext(1, 2, 3, 2, 3, 4)
-          .verifyComplete()
-      }
-      "with prefetch, delayError and varargs of publishers should merge the underlying publisher in sequence of publisher" in {
-        StepVerifier.create[Int](Flux.mergeSequentialDelayError[Int](Seq(Flux.just(1, 2, 3), Flux.just(2, 3, 4)), 2, Queues.SMALL_BUFFER_SIZE))
-          .expectNext(1, 2, 3, 2, 3, 4)
-          .verifyComplete()
-      }
+//      "with prefetch and varargs of publishers should merge the underlying publisher in sequence of publisher" in {
+//        StepVerifier.create(Flux.mergeSequential[Int](Seq(Flux.just(1, 2, 3), Flux.just(2, 3, 4)), prefetch = 2, maxConcurrency = Queues.SMALL_BUFFER_SIZE))
+//          .expectNext(1, 2, 3, 2, 3, 4)
+//          .verifyComplete()
+//      }
+//      "with prefetch, delayError and varargs of publishers should merge the underlying publisher in sequence of publisher" in {
+//        StepVerifier.create[Int](Flux.mergeSequentialDelayError[Int](Seq(Flux.just(1, 2, 3), Flux.just(2, 3, 4)), 2, Queues.SMALL_BUFFER_SIZE))
+//          .expectNext(1, 2, 3, 2, 3, 4)
+//          .verifyComplete()
+//      }
       "with iterable of publisher should merge the underlying publisher in sequence of the publisher" in {
         StepVerifier.create(Flux.mergeSequential[Int](Iterable(Flux.just(1, 2, 3), Flux.just(2, 3, 4))))
           .expectNext(1, 2, 3, 2, 3, 4)
           .verifyComplete()
       }
-      "with iterable of publisher, maxConcurrency and prefetch should merge the underlying publisher in sequence of the publisher" in {
-        StepVerifier.create(Flux.mergeSequential[Int](Iterable(Flux.just(1, 2, 3), Flux.just(2, 3, 4)), maxConcurrency = 8, prefetch = 2))
-          .expectNext(1, 2, 3, 2, 3, 4)
-          .verifyComplete()
-      }
-      "with iterable of publisher, delayError, maxConcurrency and prefetch should merge the underlying publisher in sequence of the publisher" in {
-        val flux = Flux.mergeSequentialDelayError[Int](Iterable(Flux.just(1, 2, 3), Flux.just(2, 3, 4)), 8, 2)
-        StepVerifier.create(flux)
-          .expectNext(1, 2, 3, 2, 3, 4)
-          .verifyComplete()
-      }
+//      "with iterable of publisher, maxConcurrency and prefetch should merge the underlying publisher in sequence of the publisher" in {
+//        StepVerifier.create(Flux.mergeSequential[Int](Iterable(Flux.just(1, 2, 3), Flux.just(2, 3, 4)), maxConcurrency = 8, prefetch = 2))
+//          .expectNext(1, 2, 3, 2, 3, 4)
+//          .verifyComplete()
+//      }
+//      "with iterable of publisher, delayError, maxConcurrency and prefetch should merge the underlying publisher in sequence of the publisher" in {
+//        val flux = Flux.mergeSequentialDelayError[Int](Iterable(Flux.just(1, 2, 3), Flux.just(2, 3, 4)), 8, 2)
+//        StepVerifier.create(flux)
+//          .expectNext(1, 2, 3, 2, 3, 4)
+//          .verifyComplete()
+//      }
     }
 
     ".never should never emit any signal" in {
@@ -411,37 +407,38 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
         .verifyComplete()
     }
 
-    ".raiseError" - {
-      "with throwable and whenRequest flag should" - {
-        "emit onError during onSubscribe if the flag is false" in {
-          val flag = new AtomicBoolean(false)
-          val flux = Flux.error(new RuntimeException("Error message"))
-            .doOnRequest(_ => flag.compareAndSet(false, true))
-          Try(flux.subscribe(new BaseSubscriber[Long] {
-            override def hookOnSubscribe(subscription: Subscription): Unit = {
-              ()
-            }
-
-            override def hookOnNext(value: Long): Unit = ()
-          })) shouldBe a[Failure[_]]
-          flag.get() shouldBe false
-        }
-        "emit onError during onRequest if the flag is true" in {
-          val flag = new AtomicBoolean(false)
-          val flux = Flux.error(new RuntimeException(), whenRequested = true)
-            .doOnRequest(_ => flag.compareAndSet(false, true))
-          Try(flux.subscribe(new BaseSubscriber[Long] {
-            override def hookOnSubscribe(subscription: Subscription): Unit = {
-              subscription.request(1)
-              ()
-            }
-
-            override def hookOnNext(value: Long): Unit = ()
-          })) shouldBe a[Failure[_]]
-          flag.get() shouldBe true
-        }
-      }
-    }
+    // todo look into this. remove request logic anyways?
+//    ".raiseError" - {
+//      "with throwable and whenRequest flag should" - {
+//        "emit onError during onSubscribe if the flag is false" in {
+//          val flag = new AtomicBoolean(false)
+//          val flux = Flux.error(new RuntimeException("Error message"))
+//            .doOnRequest(_ => flag.compareAndSet(false, true))
+//          Try(flux.subscribe(new BaseSubscriber[Long] {
+//            override def hookOnSubscribe(subscription: Subscription): Unit = {
+//              ()
+//            }
+//
+//            override def hookOnNext(value: Long): Unit = ()
+//          })) shouldBe a[Failure[_]]
+//          flag.get() shouldBe false
+//        }
+//        "emit onError during onRequest if the flag is true" in {
+//          val flag = new AtomicBoolean(false)
+//          val flux = Flux.error(new RuntimeException(), whenRequested = true)
+//            .doOnRequest(_ => flag.compareAndSet(false, true))
+//          Try(flux.subscribe(new BaseSubscriber[Long] {
+//            override def hookOnSubscribe(subscription: Subscription): Unit = {
+//              subscription.request(1)
+//              ()
+//            }
+//
+//            override def hookOnNext(value: Long): Unit = ()
+//          })) shouldBe a[Failure[_]]
+//          flag.get() shouldBe true
+//        }
+//      }
+//    }
 
     ".range should emit int within the range" in {
       StepVerifier.create(Flux.range(10, 5))
@@ -449,41 +446,41 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
         .verifyComplete()
     }
 
-    ".using" - {
-      "without eager flag should produce some data" in {
-        val tempFile = Files.createTempFile("fluxtest-", ".tmp")
-        tempFile.toFile.deleteOnExit()
-        new PrintWriter(tempFile.toFile) {
-          write(s"1${sys.props("line.separator")}2")
-          flush()
-          close()
-        }
-
-        StepVerifier.create(
-          Flux.using[String, File](() => tempFile.toFile, (file: File) => Flux.fromIterable[String](Source.fromFile(file).getLines().toIterable), (file: File) => {
-            file.delete()
-            ()
-          }))
-          .expectNext("1", "2")
-          .verifyComplete()
-      }
-      "with eager flag should produce some data" in {
-        val tempFile = Files.createTempFile("fluxtest-", ".tmp")
-        tempFile.toFile.deleteOnExit()
-        new PrintWriter(tempFile.toFile) {
-          write(s"1${sys.props("line.separator")}2")
-          flush()
-          close()
-        }
-        StepVerifier.create(
-          Flux.using[String, File](() => tempFile.toFile, (file: File) => Flux.fromIterable[String](Source.fromFile(file).getLines().toIterable), (file: File) => {
-            file.delete()
-            ()
-          }, eager = true))
-          .expectNext("1", "2")
-          .verifyComplete()
-      }
-    }
+//    ".using" - {
+//      "without eager flag should produce some data" in {
+//        val tempFile = Files.createTempFile("fluxtest-", ".tmp")
+//        tempFile.toFile.deleteOnExit()
+//        new PrintWriter(tempFile.toFile) {
+//          write(s"1${sys.props("line.separator")}2")
+//          flush()
+//          close()
+//        }
+//
+//        StepVerifier.create(
+//          Flux.using[String, File](() => tempFile.toFile, (file: File) => Flux.fromIterable[String](Source.fromFile(file).getLines().toIterable), (file: File) => {
+//            file.delete()
+//            ()
+//          }))
+//          .expectNext("1", "2")
+//          .verifyComplete()
+//      }
+//      "with eager flag should produce some data" in {
+//        val tempFile = Files.createTempFile("fluxtest-", ".tmp")
+//        tempFile.toFile.deleteOnExit()
+//        new PrintWriter(tempFile.toFile) {
+//          write(s"1${sys.props("line.separator")}2")
+//          flush()
+//          close()
+//        }
+//        StepVerifier.create(
+//          Flux.using[String, File](() => tempFile.toFile, (file: File) => Flux.fromIterable[String](Source.fromFile(file).getLines().toIterable), (file: File) => {
+//            file.delete()
+//            ()
+//          }, eager = true))
+//          .expectNext("1", "2")
+//          .verifyComplete()
+//      }
+//    }
 
     ".zip" - {
       "with source1, source2 and combinator should combine the data" in {
@@ -522,21 +519,21 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
           .expectNext("1-one", "2-two", "3-three")
           .verifyComplete()
       }
-      "with iterable, prefetch and combinator should emit flux of combined data" in {
-        StepVerifier.create(Flux.zip[String](Iterable(Flux.just(1, 2, 3), Flux.just("one", "two", "three")), 2, (array: Array[_]) => s"${array(0)}-${array(1)}"))
-          .expectNext("1-one", "2-two", "3-three")
-          .verifyComplete()
-      }
+//      "with iterable, prefetch and combinator should emit flux of combined data" in {
+//        StepVerifier.create(Flux.zip[String](Iterable(Flux.just(1, 2, 3), Flux.just("one", "two", "three")), 2, (array: Array[_]) => s"${array(0)}-${array(1)}"))
+//          .expectNext("1-one", "2-two", "3-three")
+//          .verifyComplete()
+//      }
       "with combinator and varargs publisher should emit flux of combined data" in {
         StepVerifier.create(Flux.zip(Seq(Flux.just(1, 2, 3), Flux.just(10, 20, 30)), (array: Array[AnyRef]) => s"${array(0)}-${array(1)}"))
           .expectNext("1-10", "2-20", "3-30")
           .verifyComplete()
       }
-      "with combinator, prefetch and varargs publisher should emit flux of combined data" in {
-        StepVerifier.create(Flux.zip(Seq(Flux.just(1, 2, 3), Flux.just(10, 20, 30)), 2, (array: Array[AnyRef]) => s"${array(0)}-${array(1)}"))
-          .expectNext("1-10", "2-20", "3-30")
-          .verifyComplete()
-      }
+//      "with combinator, prefetch and varargs publisher should emit flux of combined data" in {
+//        StepVerifier.create(Flux.zip(Seq(Flux.just(1, 2, 3), Flux.just(10, 20, 30)), 2, (array: Array[AnyRef]) => s"${array(0)}-${array(1)}"))
+//          .expectNext("1-10", "2-20", "3-30")
+//          .verifyComplete()
+//      }
     }
 
     ".all should check every single element satisfy the predicate" in {
@@ -557,27 +554,27 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
         .verifyComplete()
     }
 
-    ".blockFirst" - {
-      "should block and return the first element" in {
-        val element = Flux.just(1, 2, 3).blockFirst()
-        element shouldBe Option(1)
-      }
-      "with duration should wait up to maximum provided duration" in {
-        val element = Flux.just(1, 2, 3).blockFirst(Duration(10, "seconds"))
-        element shouldBe Option(1)
-      }
-    }
+//    ".blockFirst" - {
+//      "should block and return the first element" in {
+//        val element = Flux.just(1, 2, 3).blockFirst()
+//        element shouldBe Option(1)
+//      }
+//      "with duration should wait up to maximum provided duration" in {
+//        val element = Flux.just(1, 2, 3).blockFirst(Duration(10, "seconds"))
+//        element shouldBe Option(1)
+//      }
+//    }
 
-    ".blockLast" - {
-      "should block and return the last element" in {
-        val element = Flux.just(1, 2, 3).blockLast()
-        element shouldBe Option(3)
-      }
-      "with duration should wait up to the maximum provided duration to get the last element" in {
-        val element = Flux.just(1, 2, 3).blockLast(10 seconds)
-        element shouldBe Option(3)
-      }
-    }
+//    ".blockLast" - {
+//      "should block and return the last element" in {
+//        val element = Flux.just(1, 2, 3).blockLast()
+//        element shouldBe Option(3)
+//      }
+//      "with duration should wait up to the maximum provided duration to get the last element" in {
+//        val element = Flux.just(1, 2, 3).blockLast(10 seconds)
+//        element shouldBe Option(3)
+//      }
+//    }
 
     ".buffer" - {
       "should buffer all element into a Seq" in {
@@ -806,10 +803,10 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
 //          }
         }
 
-        ".cast should cast the underlying value to a different type" in {
-          val number = Flux.just(BigDecimal("1"), BigDecimal("2"), BigDecimal("3")).cast(classOf[ScalaNumber]).blockLast()
-          number.get shouldBe a[ScalaNumber]
-        }
+//        ".cast should cast the underlying value to a different type" in {
+//          val number = Flux.just(BigDecimal("1"), BigDecimal("2"), BigDecimal("3")).cast(classOf[ScalaNumber]).blockLast()
+//          number.get shouldBe a[ScalaNumber]
+//        }
 
         ".collect should collect the value into the supplied container" in {
           StepVerifier.create(Flux.just(1, 2, 3).collect[ListBuffer[Int]](() => ListBuffer.empty, (buffer, v) => buffer += v))
@@ -842,28 +839,28 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
           }
         }
 
-        ".collectMultimap" - {
-          "with keyExtractor should group the value based on the keyExtractor" in {
-            StepVerifier.create(Flux.just(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).collectMultimap(i => i % 3))
-              .expectNext(Map((0, Seq(3, 6, 9)), (1, Seq(1, 4, 7, 10)), (2, Seq(2, 5, 8))))
-              .verifyComplete()
-          }
-          "with keyExtractor and valueExtractor should collect the value, extract the key and value from it" in {
-            StepVerifier.create(Flux.just(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).collectMultimap(i => i % 3, i => i + 6))
-              .expectNext(Map((0, Seq(9, 12, 15)), (1, Seq(7, 10, 13, 16)), (2, Seq(8, 11, 14))))
-              .verifyComplete()
-          }
-          "with keyExtractor, valueExtractor and map supplier should collect the value, extract the key and value from it and put in the provided map" in {
-            //        val map = mutable.HashMap[Int, util.Collection[Int]]()
-            StepVerifier.create(Flux.just(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).collectMultimap(i => i % 3, i => i + 6))
-              .expectNextMatches((m: Map[Int, Traversable[Int]]) => {
-                //            m shouldBe map.mapValues(vs => vs.toArray().toSeq).toMap
-                m shouldBe Map((0, Seq(9, 12, 15)), (1, Seq(7, 10, 13, 16)), (2, Seq(8, 11, 14)))
-                true
-              })
-              .verifyComplete()
-          }
-        }
+//        ".collectMultimap" - {
+//          "with keyExtractor should group the value based on the keyExtractor" in {
+//            StepVerifier.create(Flux.just(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).collectMultimap(i => i % 3))
+//              .expectNext(Map((0, Seq(3, 6, 9)), (1, Seq(1, 4, 7, 10)), (2, Seq(2, 5, 8))))
+//              .verifyComplete()
+//          }
+//          "with keyExtractor and valueExtractor should collect the value, extract the key and value from it" in {
+//            StepVerifier.create(Flux.just(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).collectMultimap(i => i % 3, i => i + 6))
+//              .expectNext(Map((0, Seq(9, 12, 15)), (1, Seq(7, 10, 13, 16)), (2, Seq(8, 11, 14))))
+//              .verifyComplete()
+//          }
+//          "with keyExtractor, valueExtractor and map supplier should collect the value, extract the key and value from it and put in the provided map" in {
+//            //        val map = mutable.HashMap[Int, util.Collection[Int]]()
+//            StepVerifier.create(Flux.just(1, 2, 3, 4, 5, 6, 7, 8, 9, 10).collectMultimap(i => i % 3, i => i + 6))
+//              .expectNextMatches((m: Map[Int, Traversable[Int]]) => {
+//                //            m shouldBe map.mapValues(vs => vs.toArray().toSeq).toMap
+//                m shouldBe Map((0, Seq(9, 12, 15)), (1, Seq(7, 10, 13, 16)), (2, Seq(8, 11, 14)))
+//                true
+//              })
+//              .verifyComplete()
+//          }
+//        }
 
         ".collectSortedSeq" - {
           "should collect and sort the elements" in {
@@ -897,25 +894,25 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
               .expectNext(2, 3, 4, 6, 6, 9)
               .verifyComplete()
           }
-          "with mapper and prefetch should map the element sequentially" in {
-            StepVerifier.create(Flux.just(1, 2, 3).concatMap(i => Flux.just(i * 2, i * 3), 2))
-              .expectNext(2, 3, 4, 6, 6, 9)
-              .verifyComplete()
-          }
+//          "with mapper and prefetch should map the element sequentially" in {
+//            StepVerifier.create(Flux.just(1, 2, 3).concatMap(i => Flux.just(i * 2, i * 3), 2))
+//              .expectNext(2, 3, 4, 6, 6, 9)
+//              .verifyComplete()
+//          }
         }
 
-        ".concatMapDelayError" - {
-          "with mapper, delayUntilEnd and prefetch" in {
-            val flux = Flux.just(1, 2, 3).concatMapDelayError(i => {
-              if (i == 2) Flux.error[Int](new RuntimeException("runtime ex"))
-              else Flux.just(i * 2, i * 3)
-            }, delayUntilEnd = true, 2)
-            StepVerifier.create(flux)
-              .expectNext(2, 3, 6, 9)
-              .expectError(classOf[RuntimeException])
-              .verify()
-          }
-        }
+//        ".concatMapDelayError" - {
+//          "with mapper, delayUntilEnd and prefetch" in {
+//            val flux = Flux.just(1, 2, 3).concatMapDelayError(i => {
+//              if (i == 2) Flux.error[Int](new RuntimeException("runtime ex"))
+//              else Flux.just(i * 2, i * 3)
+//            }, delayUntilEnd = true, 2)
+//            StepVerifier.create(flux)
+//              .expectNext(2, 3, 6, 9)
+//              .expectError(classOf[RuntimeException])
+//              .verify()
+//          }
+//        }
 
         ".concatMapIterable" - {
           "with mapper should concat and map an iterable" in {
@@ -923,11 +920,11 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
               .expectNext(2, 3, 4, 6, 6, 9)
               .verifyComplete()
           }
-          "with mapper and prefetch should concat and map an iterable" in {
-            StepVerifier.create(Flux.just(1, 2, 3).concatMapIterable(i => Iterable(i * 2, i * 3), 2))
-              .expectNext(2, 3, 4, 6, 6, 9)
-              .verifyComplete()
-          }
+//          "with mapper and prefetch should concat and map an iterable" in {
+//            StepVerifier.create(Flux.just(1, 2, 3).concatMapIterable(i => Iterable(i * 2, i * 3), 2))
+//              .expectNext(2, 3, 4, 6, 6, 9)
+//              .verifyComplete()
+//          }
         }
 
         ".concatWith should concatenate with another publisher" in {
@@ -972,12 +969,12 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
               .expectNext((1100L, (100L, 1)), (100L, (100L, 2)), (100L, (100L, 3)))
               .verifyComplete()
           }
-          "with scheduler should use the scheduler" in {
-            StepVerifier.withVirtualTime[(Long, (Long, Int))](() => Flux.from(Flux.just[Int](1, 2, 3).delayElements(100 milliseconds).elapsed()).delaySequence(1 seconds, VirtualTimeScheduler.getOrSet()).elapsed())
-              .thenAwait(1300 milliseconds)
-              .expectNext((1100L, (100L, 1)), (100L, (100L, 2)), (100L, (100L, 3)))
-              .verifyComplete()
-          }
+//          "with scheduler should use the scheduler" in {
+//            StepVerifier.withVirtualTime[(Long, (Long, Int))](() => Flux.from(Flux.just[Int](1, 2, 3).delayElements(100 milliseconds).elapsed()).delaySequence(1 seconds, VirtualTimeScheduler.getOrSet()).elapsed())
+//              .thenAwait(1300 milliseconds)
+//              .expectNext((1100L, (100L, 1)), (100L, (100L, 2)), (100L, (100L, 3)))
+//              .verifyComplete()
+//          }
         }
 
         ".dematerialize should dematerialize the underlying flux" in {
@@ -1078,14 +1075,14 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
           flag shouldBe Symbol("get")
         }
 
-        ".doOnEach should perform an action for every signal" in {
-          val buffer = ListBuffer[String]()
-          val flux = Flux.just(1, 2, 3).doOnEach(s => buffer += s"${s.getType.toString}-${s.get()}")
-          StepVerifier.create(flux)
-            .expectNext(1, 2, 3)
-            .verifyComplete()
-          buffer shouldBe Seq("onNext-1", "onNext-2", "onNext-3", "onComplete-null")
-        }
+//        ".doOnEach should perform an action for every signal" in {
+//          val buffer = ListBuffer[String]()
+//          val flux = Flux.just(1, 2, 3).doOnEach(s => buffer += s"${s.getType.toString}-${s.get()}")
+//          StepVerifier.create(flux)
+//            .expectNext(1, 2, 3)
+//            .verifyComplete()
+//          buffer shouldBe Seq("onNext-1", "onNext-2", "onNext-3", "onComplete-null")
+//        }
 
         ".doOnError" - {
           "with callback function should call the callback function when the flux encounter error" in {
@@ -1179,32 +1176,32 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
               })
               .verifyComplete()
           }
-          "with Scheduler should provide the time elapsed using the provided scheduler when this mono emit value" in {
-            val virtualTimeScheduler = VirtualTimeScheduler.getOrSet()
-            StepVerifier.withVirtualTime(() => Flux.just(1, 2, 3)
-              .delaySubscription(1 second, virtualTimeScheduler)
-              .delayElements(1 second, virtualTimeScheduler)
-              .elapsed(virtualTimeScheduler), 3)
-//              .thenAwait(4 seconds)
-              .`then`(() => virtualTimeScheduler.advanceTimeBy(5 seconds))
-              //          .`then`(() => virtualTimeScheduler.advanceTimeBy(4 seconds))
-              .expectNextMatches(new Predicate[(Long, Int)] {
-                override def test(t: (Long, Int)): Boolean = t match {
-                  case (time, data) => time >= 1000 && data == 1
-                }
-              })
-              .expectNextMatches(new Predicate[(Long, Int)] {
-                override def test(t: (Long, Int)): Boolean = t match {
-                  case (time, data) => time >= 1000 && data == 2
-                }
-              })
-              .expectNextMatches(new Predicate[(Long, Int)] {
-                override def test(t: (Long, Int)): Boolean = t match {
-                  case (time, data) => time >= 1000 && data == 3
-                }
-              })
-              .verifyComplete()
-          }
+//          "with Scheduler should provide the time elapsed using the provided scheduler when this mono emit value" in {
+//            val virtualTimeScheduler = VirtualTimeScheduler.getOrSet()
+//            StepVerifier.withVirtualTime(() => Flux.just(1, 2, 3)
+//              .delaySubscription(1 second, virtualTimeScheduler)
+//              .delayElements(1 second, virtualTimeScheduler)
+//              .elapsed(virtualTimeScheduler), 3)
+////              .thenAwait(4 seconds)
+//              .`then`(() => virtualTimeScheduler.advanceTimeBy(5 seconds))
+//              //          .`then`(() => virtualTimeScheduler.advanceTimeBy(4 seconds))
+//              .expectNextMatches(new Predicate[(Long, Int)] {
+//                override def test(t: (Long, Int)): Boolean = t match {
+//                  case (time, data) => time >= 1000 && data == 1
+//                }
+//              })
+//              .expectNextMatches(new Predicate[(Long, Int)] {
+//                override def test(t: (Long, Int)): Boolean = t match {
+//                  case (time, data) => time >= 1000 && data == 2
+//                }
+//              })
+//              .expectNextMatches(new Predicate[(Long, Int)] {
+//                override def test(t: (Long, Int)): Boolean = t match {
+//                  case (time, data) => time >= 1000 && data == 3
+//                }
+//              })
+//              .verifyComplete()
+//          }
         }
 
         ".elementAt" - {
@@ -1277,11 +1274,11 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
               .expectNext(2, 3, 4, 6, 6, 9)
               .verifyComplete()
           }
-          "with prefetch should transform the items and prefetch" in {
-            StepVerifier.create(Flux.just(1, 2, 3).flatMapIterable(i => Iterable(i * 2, i * 3), 2))
-              .expectNext(2, 3, 4, 6, 6, 9)
-              .verifyComplete()
-          }
+//          "with prefetch should transform the items and prefetch" in {
+//            StepVerifier.create(Flux.just(1, 2, 3).flatMapIterable(i => Iterable(i * 2, i * 3), 2))
+//              .expectNext(2, 3, 4, 6, 6, 9)
+//              .verifyComplete()
+//          }
         }
 
         ".flatMapSequential" - {
@@ -1290,24 +1287,24 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
               .expectNext(2, 3, 4, 6, 6, 9)
               .verifyComplete()
           }
-          "with maxConcurrency, should do the same as before just with provided maxConcurrency" in {
-            StepVerifier.create(Flux.just(1, 2, 3).flatMapSequential(i => Flux.just(i * 2, i * 3), 2))
-              .expectNext(2, 3, 4, 6, 6, 9)
-              .verifyComplete()
-          }
-          "with maxConcurrency and prefetch, should do the same as before just with provided maxConcurrency and prefetch" in {
-            StepVerifier.create(Flux.just(1, 2, 3).flatMapSequential(i => Flux.just(i * 2, i * 3), 2, 2))
-              .expectNext(2, 3, 4, 6, 6, 9)
-              .verifyComplete()
-          }
-          "with delayError should respect whether error be delayed after current merge backlog" in {
-            StepVerifier.create(Flux.just(1, 2, 3).flatMapSequentialDelayError(i => {
-              if (i == 2) Flux.error[Int](new RuntimeException("just an error"))
-              else Flux.just(i * 2, i * 3)
-            }, 2, 2))
-              .expectNext(2, 3, 6, 9)
-              .verifyError(classOf[RuntimeException])
-          }
+//          "with maxConcurrency, should do the same as before just with provided maxConcurrency" in {
+//            StepVerifier.create(Flux.just(1, 2, 3).flatMapSequential(i => Flux.just(i * 2, i * 3), 2))
+//              .expectNext(2, 3, 4, 6, 6, 9)
+//              .verifyComplete()
+//          }
+//          "with maxConcurrency and prefetch, should do the same as before just with provided maxConcurrency and prefetch" in {
+//            StepVerifier.create(Flux.just(1, 2, 3).flatMapSequential(i => Flux.just(i * 2, i * 3), 2, 2))
+//              .expectNext(2, 3, 4, 6, 6, 9)
+//              .verifyComplete()
+//          }
+//          "with delayError should respect whether error be delayed after current merge backlog" in {
+//            StepVerifier.create(Flux.just(1, 2, 3).flatMapSequentialDelayError(i => {
+//              if (i == 2) Flux.error[Int](new RuntimeException("just an error"))
+//              else Flux.just(i * 2, i * 3)
+//            }, 2, 2))
+//              .expectNext(2, 3, 6, 9)
+//              .verifyError(classOf[RuntimeException])
+//          }
         }
 
         ".flatMap(Function,Int,Int)" - {
@@ -1323,26 +1320,26 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
               .expectNext(2, 3)
               .verifyComplete()
           }
-          "with limited maxConcurrency, should further delay an element that would have otherwise returned sooner" in {
-            StepVerifier.withVirtualTime(() =>
-              Flux.just(2, 1, 3)
-                .flatMap(i => Flux.just(i * 2, i * 3).delaySequence(5 - i seconds), 2))
-              .thenAwait(3 seconds)
-              .expectNext(4, 6)
-              .thenAwait(1 second)
-              .expectNext(2, 3)
-              .thenAwait(1 second)
-              .expectNext(6, 9)
-              .verifyComplete()
-          }
-          "with delayError should respect whether error be delayed after current merge backlog" in {
-            StepVerifier.create(Flux.just(1, 2, 3).flatMapDelayError(i => {
-              if (i == 2) Flux.error[Int](new RuntimeException("just an error"))
-              else Flux.just(i * 2, i * 3)
-            }, 2, 2))
-              .expectNext(2, 3, 6, 9)
-              .verifyError(classOf[RuntimeException])
-          }
+//          "with limited maxConcurrency, should further delay an element that would have otherwise returned sooner" in {
+//            StepVerifier.withVirtualTime(() =>
+//              Flux.just(2, 1, 3)
+//                .flatMap(i => Flux.just(i * 2, i * 3).delaySequence(5 - i seconds), 2))
+//              .thenAwait(3 seconds)
+//              .expectNext(4, 6)
+//              .thenAwait(1 second)
+//              .expectNext(2, 3)
+//              .thenAwait(1 second)
+//              .expectNext(6, 9)
+//              .verifyComplete()
+//          }
+//          "with delayError should respect whether error be delayed after current merge backlog" in {
+//            StepVerifier.create(Flux.just(1, 2, 3).flatMapDelayError(i => {
+//              if (i == 2) Flux.error[Int](new RuntimeException("just an error"))
+//              else Flux.just(i * 2, i * 3)
+//            }, 2, 2))
+//              .expectNext(2, 3, 6, 9)
+//              .verifyError(classOf[RuntimeException])
+//          }
         }
 
         ".flatten" - {
@@ -1385,29 +1382,29 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
             oddBuffer shouldBe Seq(1, 3, 5)
             evenBuffer shouldBe Seq(2, 4, 6)
           }
-          "with keyMapper and prefetch should group the flux by the key mapper and prefetch the elements from the source" in {
-            val oddBuffer = ListBuffer.empty[Int]
-            val evenBuffer = ListBuffer.empty[Int]
-            StepVerifier.create(Flux.just(1, 2, 3, 4, 5, 6).groupBy({
-              case even: Int if even % 2 == 0 => "even"
-              case _: Int => "odd"
-            }: Int => String, identity, 6))
-              .expectNextMatches(new Predicate[GroupedFlux[String, Int]] {
-                override def test(t: GroupedFlux[String, Int]): Boolean = {
-                  t.subscribe((x: Int) => oddBuffer append x)
-                  t.key() == "odd"
-                }
-              })
-              .expectNextMatches(new Predicate[GroupedFlux[String, Int]] {
-                override def test(t: GroupedFlux[String, Int]): Boolean = {
-                  t.subscribe((x: Int) => evenBuffer append x)
-                  t.key() == "even"
-                }
-              })
-              .verifyComplete()
-            oddBuffer shouldBe Seq(1, 3, 5)
-            evenBuffer shouldBe Seq(2, 4, 6)
-          }
+//          "with keyMapper and prefetch should group the flux by the key mapper and prefetch the elements from the source" in {
+//            val oddBuffer = ListBuffer.empty[Int]
+//            val evenBuffer = ListBuffer.empty[Int]
+//            StepVerifier.create(Flux.just(1, 2, 3, 4, 5, 6).groupBy({
+//              case even: Int if even % 2 == 0 => "even"
+//              case _: Int => "odd"
+//            }: Int => String, identity, 6))
+//              .expectNextMatches(new Predicate[GroupedFlux[String, Int]] {
+//                override def test(t: GroupedFlux[String, Int]): Boolean = {
+//                  t.subscribe((x: Int) => oddBuffer append x)
+//                  t.key() == "odd"
+//                }
+//              })
+//              .expectNextMatches(new Predicate[GroupedFlux[String, Int]] {
+//                override def test(t: GroupedFlux[String, Int]): Boolean = {
+//                  t.subscribe((x: Int) => evenBuffer append x)
+//                  t.key() == "even"
+//                }
+//              })
+//              .verifyComplete()
+//            oddBuffer shouldBe Seq(1, 3, 5)
+//            evenBuffer shouldBe Seq(2, 4, 6)
+//          }
           "with keyMapper and valueMapper should group the flux by the key mapper and convert the value by value mapper" in {
             val oddBuffer = ListBuffer.empty[String]
             val evenBuffer = ListBuffer.empty[String]
@@ -1431,29 +1428,29 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
             oddBuffer shouldBe Seq("1", "3", "5")
             evenBuffer shouldBe Seq("2", "4", "6")
           }
-          "with keyMapper, valueMapper and prefetch should do the above with prefetch" in {
-            val oddBuffer = ListBuffer.empty[String]
-            val evenBuffer = ListBuffer.empty[String]
-            StepVerifier.create(Flux.just(1, 2, 3, 4, 5, 6).groupBy[String, String]({
-              case even: Int if even % 2 == 0 => "even"
-              case _: Int => "odd"
-            }: Int => String, (i => i.toString): Int => String, 6))
-              .expectNextMatches(new Predicate[GroupedFlux[String, String]] {
-                override def test(t: GroupedFlux[String, String]): Boolean = {
-                  t.subscribe((x: String) => oddBuffer append x)
-                  t.key() == "odd"
-                }
-              })
-              .expectNextMatches(new Predicate[GroupedFlux[String, String]] {
-                override def test(t: GroupedFlux[String, String]): Boolean = {
-                  t.subscribe((x: String) => evenBuffer append x)
-                  t.key() == "even"
-                }
-              })
-              .verifyComplete()
-            oddBuffer shouldBe Seq("1", "3", "5")
-            evenBuffer shouldBe Seq("2", "4", "6")
-          }
+//          "with keyMapper, valueMapper and prefetch should do the above with prefetch" in {
+//            val oddBuffer = ListBuffer.empty[String]
+//            val evenBuffer = ListBuffer.empty[String]
+//            StepVerifier.create(Flux.just(1, 2, 3, 4, 5, 6).groupBy[String, String]({
+//              case even: Int if even % 2 == 0 => "even"
+//              case _: Int => "odd"
+//            }: Int => String, (i => i.toString): Int => String, 6))
+//              .expectNextMatches(new Predicate[GroupedFlux[String, String]] {
+//                override def test(t: GroupedFlux[String, String]): Boolean = {
+//                  t.subscribe((x: String) => oddBuffer append x)
+//                  t.key() == "odd"
+//                }
+//              })
+//              .expectNextMatches(new Predicate[GroupedFlux[String, String]] {
+//                override def test(t: GroupedFlux[String, String]): Boolean = {
+//                  t.subscribe((x: String) => evenBuffer append x)
+//                  t.key() == "even"
+//                }
+//              })
+//              .verifyComplete()
+//            oddBuffer shouldBe Seq("1", "3", "5")
+//            evenBuffer shouldBe Seq("2", "4", "6")
+//          }
         }
 
 
@@ -1766,42 +1763,42 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
           }
         }
 
-        ".retry" - {
-          "with numRetries will retry a number of times according to provided parameter" in {
-            StepVerifier.create(Flux.just(1, 2, 3).concatWith(Mono.error(new RuntimeException("ex"))).retry(3))
-              .expectNext(1, 2, 3)
-              .expectNext(1, 2, 3)
-              .expectNext(1, 2, 3)
-              .expectNext(1, 2, 3)
-              .expectError(classOf[RuntimeException])
-              .verify()
-          }
-          "with predicate will retry until the predicate returns false" in {
-            val counter = new AtomicInteger(0)
-            StepVerifier.create(Flux.just(1, 2, 3).concatWith(Mono.error(new RuntimeException("ex"))).retry(retryMatcher = (_: Throwable) =>
-              if (counter.getAndIncrement() > 0) false
-              else true
-            ))
-              .expectNext(1, 2, 3)
-              .expectNext(1, 2, 3)
-              .expectError(classOf[RuntimeException])
-              .verify()
-          }
-          "with numRetries and predicate should retry as many as provided numRetries and predicate returns true" in {
-            val counter = new AtomicInteger(0)
-            val flux = Flux.just(1, 2, 3).concatWith(Mono.error(new RuntimeException("ex"))).retry(3, { _ =>
-              if (counter.getAndIncrement() > 5) false
-              else true
-            })
-            StepVerifier.create(flux)
-              .expectNext(1, 2, 3)
-              .expectNext(1, 2, 3)
-              .expectNext(1, 2, 3)
-              .expectNext(1, 2, 3)
-              .expectError(classOf[RuntimeException])
-              .verify()
-          }
-        }
+//        ".retry" - {
+//          "with numRetries will retry a number of times according to provided parameter" in {
+//            StepVerifier.create(Flux.just(1, 2, 3).concatWith(Mono.error(new RuntimeException("ex"))).retry(3))
+//              .expectNext(1, 2, 3)
+//              .expectNext(1, 2, 3)
+//              .expectNext(1, 2, 3)
+//              .expectNext(1, 2, 3)
+//              .expectError(classOf[RuntimeException])
+//              .verify()
+//          }
+//          "with predicate will retry until the predicate returns false" in {
+//            val counter = new AtomicInteger(0)
+//            StepVerifier.create(Flux.just(1, 2, 3).concatWith(Mono.error(new RuntimeException("ex"))).retry(retryMatcher = (_: Throwable) =>
+//              if (counter.getAndIncrement() > 0) false
+//              else true
+//            ))
+//              .expectNext(1, 2, 3)
+//              .expectNext(1, 2, 3)
+//              .expectError(classOf[RuntimeException])
+//              .verify()
+//          }
+//          "with numRetries and predicate should retry as many as provided numRetries and predicate returns true" in {
+//            val counter = new AtomicInteger(0)
+//            val flux = Flux.just(1, 2, 3).concatWith(Mono.error(new RuntimeException("ex"))).retry(3, { _ =>
+//              if (counter.getAndIncrement() > 5) false
+//              else true
+//            })
+//            StepVerifier.create(flux)
+//              .expectNext(1, 2, 3)
+//              .expectNext(1, 2, 3)
+//              .expectNext(1, 2, 3)
+//              .expectNext(1, 2, 3)
+//              .expectError(classOf[RuntimeException])
+//              .verify()
+//          }
+//        }
 
         // todo reenable w/ new retryWhen
 //        ".retryWhen should retry the companion publisher produces onNext signal" in {
@@ -1886,12 +1883,12 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
               .expectNext(2, 3, 4, 5)
               .verifyComplete()
           }
-          "with timer should skip all elements within the millis duration with the provided timer" in {
-            StepVerifier.withVirtualTime(() => Flux.just(1, 2, 3, 4, 5).delayElements(1 second).skip(2 seconds, Schedulers.single()))
-              .thenAwait(6 seconds)
-              .expectNext(2, 3, 4, 5)
-              .verifyComplete()
-          }
+//          "with timer should skip all elements within the millis duration with the provided timer" in {
+//            StepVerifier.withVirtualTime(() => Flux.just(1, 2, 3, 4, 5).delayElements(1 second).skip(2 seconds, Schedulers.single()))
+//              .thenAwait(6 seconds)
+//              .expectNext(2, 3, 4, 5)
+//              .verifyComplete()
+//          }
         }
 
         ".skipLast should skip the last n elements" in {
@@ -1963,11 +1960,11 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
               .expectNext(10, 20, 20, 40, 30, 60)
               .verifyComplete()
           }
-          "with function and prefetch should switch to the new publisher" in {
-            StepVerifier.create(Flux.just(1, 2, 3).switchMap(i => Flux.just(i * 10, i * 20), 2))
-              .expectNext(10, 20, 20, 40, 30, 60)
-              .verifyComplete()
-          }
+//          "with function and prefetch should switch to the new publisher" in {
+//            StepVerifier.create(Flux.just(1, 2, 3).switchMap(i => Flux.just(i * 10, i * 20), 2))
+//              .expectNext(10, 20, 20, 40, 30, 60)
+//              .verifyComplete()
+//          }
         }
 
         //        ".tag should tag the Flux and accessible from Scannable" in {
@@ -1993,16 +1990,16 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
               .expectNext(1, 2, 3)
               .verifyComplete()
           }
-          "with timespan and timed scheduler should only emit values during the provided timespan with the provided TimedScheduler" in {
-            val vts = VirtualTimeScheduler.getOrSet()
-            StepVerifier.create(Flux.just(1, 2, 3, 4, 5)
-              .delayElements(1 second, vts)
-              .take(3500 milliseconds, vts), 256)
-              .`then`(() => vts.advanceTimeBy(5 seconds))
-              //          .`then`(() => vts.advanceTimeBy(5 seconds))
-              .expectNext(1, 2, 3)
-              .verifyComplete()
-          }
+//          "with timespan and timed scheduler should only emit values during the provided timespan with the provided TimedScheduler" in {
+//            val vts = VirtualTimeScheduler.getOrSet()
+//            StepVerifier.create(Flux.just(1, 2, 3, 4, 5)
+//              .delayElements(1 second, vts)
+//              .take(3500 milliseconds, vts), 256)
+//              .`then`(() => vts.advanceTimeBy(5 seconds))
+//              //          .`then`(() => vts.advanceTimeBy(5 seconds))
+//              .expectNext(1, 2, 3)
+//              .verifyComplete()
+//          }
         }
 
         ".takeLast should take the last n values" in {
@@ -2077,26 +2074,26 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
 //          }
         }
 
-        ".toIterable" - {
-          "should transform this flux into iterable" in {
-            Flux.just(1, 2, 3).toIterable().toList shouldBe Iterable(1, 2, 3)
-          }
-          "with batchSize should transform this flux into iterable" in {
-            Flux.just(1, 2, 3).toIterable(1).toList shouldBe Iterable(1, 2, 3)
-          }
-          "with batchSize and queue supplier should transform this flux into interable" in {
-            Flux.just(1, 2, 3).toIterable(1, () => Queues.get[Int](1).get()).toList shouldBe Iterable(1, 2, 3)
-          }
-        }
+//        ".toIterable" - {
+//          "should transform this flux into iterable" in {
+//            Flux.just(1, 2, 3).toIterable().toList shouldBe Iterable(1, 2, 3)
+//          }
+//          "with batchSize should transform this flux into iterable" in {
+//            Flux.just(1, 2, 3).toIterable(1).toList shouldBe Iterable(1, 2, 3)
+//          }
+//          "with batchSize and queue supplier should transform this flux into interable" in {
+//            Flux.just(1, 2, 3).toIterable(1, () => Queues.get[Int](1).get()).toList shouldBe Iterable(1, 2, 3)
+//          }
+//        }
 
-        ".toStream" - {
-          "should transform this flux into stream" in {
-            Flux.just(1, 2, 3).toStream() shouldBe Stream(1, 2, 3)
-          }
-          "with batchSize should transform this flux into stream" in {
-            Flux.just(1, 2, 3).toStream(2) shouldBe Stream(1, 2, 3)
-          }
-        }
+//        ".toStream" - {
+//          "should transform this flux into stream" in {
+//            Flux.just(1, 2, 3).toStream() shouldBe Stream(1, 2, 3)
+//          }
+//          "with batchSize should transform this flux into stream" in {
+//            Flux.just(1, 2, 3).toStream(2) shouldBe Stream(1, 2, 3)
+//          }
+//        }
 
         ".transform should defer transformation of this flux to another publisher" in {
           StepVerifier.create(Flux.just(1, 2, 3).transform(Mono.from))
@@ -2122,16 +2119,16 @@ class FluxTest extends AnyFreeSpec with Matchers with TableDrivenPropertyChecks 
               .expectNext(11, 22, 33)
               .verifyComplete()
           }
-          "with combinator and prefetch should zip and apply the combinator" in {
-            StepVerifier.create(Flux.just(1, 2, 3).zipWith[Int, Int](Flux.just(10, 20, 30), 1, (i1: Int, i2: Int) => i1 + i2))
-              .expectNext(11, 22, 33)
-              .verifyComplete()
-          }
-          "with prefetch should zip both publishers" in {
-            StepVerifier.create(Flux.just[Int](1, 2, 3).zipWith[Int](Flux.just[Int](10, 20, 30), 1))
-              .expectNext((1, 10), (2, 20), (3, 30))
-              .verifyComplete()
-          }
+//          "with combinator and prefetch should zip and apply the combinator" in {
+//            StepVerifier.create(Flux.just(1, 2, 3).zipWith[Int, Int](Flux.just(10, 20, 30), 1, (i1: Int, i2: Int) => i1 + i2))
+//              .expectNext(11, 22, 33)
+//              .verifyComplete()
+//          }
+//          "with prefetch should zip both publishers" in {
+//            StepVerifier.create(Flux.just[Int](1, 2, 3).zipWith[Int](Flux.just[Int](10, 20, 30), 1))
+//              .expectNext((1, 10), (2, 20), (3, 30))
+//              .verifyComplete()
+//          }
         }
 
         ".zipWithIterable" - {

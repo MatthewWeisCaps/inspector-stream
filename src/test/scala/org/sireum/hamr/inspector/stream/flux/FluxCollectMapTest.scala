@@ -33,8 +33,8 @@ import scala.collection.mutable
 class FluxCollectMapTest extends AnyFunSuite {
 
   /**
-    * IMPORTANT: collectMap returns a map allowing one value per key. See collectMultiMap for 1 key to N value mappings.
-    */
+   * IMPORTANT: collectMap returns a map allowing one value per key. See collectMultiMap for 1 key to N value mappings.
+   */
 
   // creates a map of color -> Student(...)
   test("flux_collectMap") {
@@ -44,10 +44,10 @@ class FluxCollectMapTest extends AnyFunSuite {
     val students = Flux.just(
       Student("alice", "red"),
       Student("bob", "blue"),
-      Student("casey", "green"),
+      Student("casey", "green")
     )
 
-    val map: Map[String, Student] = students.collectMap(_.favoriteColor).block()
+    val map: Map[String, Student] = reactor.core.publisher.Mono.from(students.collectMap(_.favoriteColor)).block()
 
     // ensure all keys in map with nothing extra
     assert(map.contains("red"))
@@ -75,10 +75,10 @@ class FluxCollectMapTest extends AnyFunSuite {
     val students = Flux.just(
       Student("alice", "red"),
       Student("bob", "blue"),
-      Student("casey", "green"),
+      Student("casey", "green")
     )
 
-    val map: Map[String, String] = students.collectMap(_.favoriteColor, _.name).block()
+    val map: Map[String, String] = reactor.core.publisher.Mono.from(students.collectMap(_.favoriteColor, _.name)).block()
 
     // ensure all keys in map with nothing extra
     assert(map.contains("red"))
@@ -106,12 +106,12 @@ class FluxCollectMapTest extends AnyFunSuite {
     val students = Flux.just(
       Student("alice", "red"),
       Student("bob", "blue"),
-      Student("casey", "green"),
+      Student("casey", "green")
     )
 
     // call collectMap using a map that already contains an entry
     val supplier = () => mutable.Map(("purple", "zack"))
-    val map: Map[String, String] = students.collectMap(_.favoriteColor, _.name, supplier).block()
+    val map: Map[String, String] = reactor.core.publisher.Mono.from(students.collectMap(_.favoriteColor, _.name, supplier)).block()
 
     // ensure all keys in map with nothing extra
     assert(map.contains("red"))

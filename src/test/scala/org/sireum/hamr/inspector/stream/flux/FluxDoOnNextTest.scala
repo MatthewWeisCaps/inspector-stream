@@ -35,7 +35,7 @@ class FluxDoOnNextTest extends AnyFunSuite {
 
     Flux.just("apple")
       .doOnNext(s => sideEffect = s)
-      .subscribe(_ => Unit, it => throw it)
+      .subscribe(_ => (), it => throw it)
 
     assert(sideEffect == "apple")
   }

@@ -34,7 +34,7 @@ import java.{lang, util}
 import org.junit.jupiter.api.Assertions
 import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import org.sireum.hamr.inspector.stream.JavaInterop._
-import reactor.core.publisher.{BufferOverflowStrategy, Signal, SignalType, SynchronousSink, Flux => JFlux, FluxSink => JFluxSink, Mono => JMono}
+import reactor.core.publisher.{BufferOverflowStrategy, Signal, SignalType, SynchronousSink, Flux => JFlux, FluxSink => JFluxSink}
 import reactor.core.scheduler.Scheduler
 import reactor.core.{Disposable, Scannable => JScannable}
 import reactor.util.Logger
@@ -53,7 +53,7 @@ object Flux {
   ///
 
   def combineLatest[T, V](combinator: Array[AnyRef] => V, sources: Publisher[T]*): Flux[V] = wrapFlux[V](JFlux.combineLatest(asJavaFn1(combinator), sources:_*))
-  def combineLatest[T, V](combinator: Array[AnyRef] => V, prefetch: Int, sources: Publisher[T]*): Flux[V] = wrapFlux[V](JFlux.combineLatest(asJavaFn1(combinator), prefetch, sources:_*))
+//  def combineLatest[T, V](combinator: Array[AnyRef] => V, prefetch: Int, sources: Publisher[T]*): Flux[V] = wrapFlux[V](JFlux.combineLatest(asJavaFn1(combinator), prefetch, sources:_*))
   def combineLatest[T1, T2, V](source1: Publisher[T1], source2: Publisher[T2], combinator: (T1, T2) => _ <: V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, asJavaFn2(combinator)))
   def combineLatest[T1, T2, T3, V](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], combinator: (T1, T2, T3) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, asJavaFn3(combinator)))
   def combineLatest[T1, T2, T3, T4, V](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], source4: Publisher[T4], combinator: (T1, T2, T3, T4) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, source4, asJavaFn4(combinator)))
@@ -61,16 +61,16 @@ object Flux {
   def combineLatest[T1, T2, T3, T4, T5, T6, V](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], source4: Publisher[T4], source5: Publisher[T5], source6: Publisher[T6], combinator: (T1, T2, T3, T4, T5, T6) => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(source1, source2, source3, source4, source5, source6, asJavaFn6(combinator)))
 
   def combineLatest[T, V](sources: Iterable[_ <: Publisher[T]], combinator: Array[AnyRef] => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(asJavaIterable(sources), asJavaFn1(combinator)))
-  def combineLatest[T, V](sources: Iterable[_ <: Publisher[T]], prefetch: Int, combinator: Array[AnyRef] => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(asJavaIterable(sources), prefetch, asJavaFn1(combinator)))
+//  def combineLatest[T, V](sources: Iterable[_ <: Publisher[T]], prefetch: Int, combinator: Array[AnyRef] => V): Flux[V] = wrapFlux[V](JFlux.combineLatest(asJavaIterable(sources), prefetch, asJavaFn1(combinator)))
 
   def concat[T](sources: Iterable[_ <: Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.concat(asJavaIterable(sources)))
   def concatWithValues[T](sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.concat(sources:_*))
   def concat[T](sources: Publisher[_ <: Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.concat(sources))
-  def concat[T](sources: Publisher[_ <: Publisher[T]], prefetch: Int): Flux[T] = wrapFlux[T](JFlux.concat(sources, prefetch))
+//  def concat[T](sources: Publisher[_ <: Publisher[T]], prefetch: Int): Flux[T] = wrapFlux[T](JFlux.concat(sources, prefetch))
   def concat[T](sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.concat(sources:_*))
 
   def concatDelayError[T](sources: Publisher[_ <: Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.concatDelayError(sources))
-  def concatDelayError[T](sources: Publisher[_ <: Publisher[T]], prefetch: Int): Flux[T] = wrapFlux[T](JFlux.concatDelayError(sources, prefetch))
+//  def concatDelayError[T](sources: Publisher[_ <: Publisher[T]], prefetch: Int): Flux[T] = wrapFlux[T](JFlux.concatDelayError(sources, prefetch))
   def concatDelayError[T](sources: Publisher[_ <: Publisher[T]], delayUntilEnd: Boolean, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.concatDelayError(sources, delayUntilEnd, prefetch))
   def concatDelayError[T](sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.concatDelayError(sources:_*))
 
@@ -89,17 +89,17 @@ object Flux {
   def error[T](errorSupplier: () => Throwable): Flux[T] = wrapFlux[T](JFlux.error(asJavaSupplier(errorSupplier)))
   def error[T](error: Throwable, whenRequested: Boolean): Flux[T] = wrapFlux[T](JFlux.error(error, whenRequested))
 
-  def first[T](source: Publisher[T], sources: Publisher[T]*): Flux[T] = first((source +: sources) (Seq.canBuildFrom))
+  def first[T](source: Publisher[T], sources: Publisher[T]*): Flux[T] = first(source +: sources)
   def first[T](sources: Iterable[_ <: Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.first(asJavaIterable(sources)))
 
   def from[T](source: Publisher[T]): Flux[T] = wrapFlux[T](JFlux.from(source))
-  def fromArray[T](source: Array[T with Object]): Flux[T] = wrapFlux[T](JFlux.fromArray(source))
+//  def fromArray[T](source: Array[T with Object]): Flux[T] = wrapFlux[T](JFlux.fromArray(source))
   def fromIterable[T](source: Iterable[T]): Flux[T] = wrapFlux[T](JFlux.fromIterable(asJavaIterable(source)))
 
   // scala stream can't directly map to java stream, so ignore this (since fromIterable will work with this)
 //  def fromStream[T](stream: Stream[T]): Flux[T] = wrap(JFlux.fromStream(stream))
 //  def fromStream[T](stream: Stream[T]): Flux[T] = wrapFlux[T](JFlux.fromIterable(asJavaIterable(stream)))
-  def fromStream[T](stream: Stream[T]): Flux[T] = wrapFlux[T](JFlux.fromStream(toJavaStream(stream)))
+//  def fromStream[T](stream: Stream[T]): Flux[T] = wrapFlux[T](JFlux.fromStream(toJavaStream(stream)))
 
 //  // todo
 //  def fromStream[T](streamSupplier: () => Stream[T]): Flux[T] = {
@@ -141,11 +141,11 @@ object Flux {
   def just[T](data: T*): Flux[T] = wrapFlux[T](JFlux.just(data:_*))
 
   def merge[T](source: Publisher[Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.merge(source))
-  def merge[T](source: Publisher[Publisher[T]], concurrency: Int): Flux[T] = wrapFlux[T](JFlux.merge(source, concurrency))
-  def merge[T](source: Publisher[Publisher[T]], concurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.merge(source, concurrency, prefetch))
+//  def merge[T](source: Publisher[Publisher[T]], concurrency: Int): Flux[T] = wrapFlux[T](JFlux.merge(source, concurrency))
+//  def merge[T](source: Publisher[Publisher[T]], concurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.merge(source, concurrency, prefetch))
   def merge[T](sources: Iterable[Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.merge(asJavaIterable(sources)))
   def merge[T](sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.merge(sources:_*))
-  def merge[T](prefetch: Int, sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.merge(sources:_*))
+//  def merge[T](prefetch: Int, sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.merge(sources:_*))
 
   def mergeDelayError[T](prefetch: Int, sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeDelayError(prefetch, sources:_*))
 
@@ -154,32 +154,32 @@ object Flux {
 //  def mergeOrdered[T](ordering: Ordering[T], sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(ordering, sources:_*))
   def mergeOrdered[T](ordering: Ordering[T], sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(ordering, sources:_*))
 //  def mergeOrderedPrefetch[T](prefetch: Int, ordering: Ordering[T], sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(prefetch, ordering, sources:_*))
-  def mergeOrderedPrefetch[T](prefetch: Int, ordering: Ordering[T], sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(prefetch, ordering, sources:_*))
+//  def mergeOrderedPrefetch[T](prefetch: Int, ordering: Ordering[T], sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeOrdered(prefetch, ordering, sources:_*))
 
   def mergeSequential[T](sources: Publisher[_ <: Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.mergeSequential(sources))
-  def mergeSequential[T](sources: Publisher[_ <: Publisher[T]], maxConcurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.mergeSequential(sources, maxConcurrency, prefetch))
-  def mergeSequentialDelayError[T](sources: Publisher[_ <: Publisher[T]], maxConcurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.mergeSequentialDelayError(sources, maxConcurrency, prefetch))
+//  def mergeSequential[T](sources: Publisher[_ <: Publisher[T]], maxConcurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.mergeSequential(sources, maxConcurrency, prefetch))
+//  def mergeSequentialDelayError[T](sources: Publisher[_ <: Publisher[T]], maxConcurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.mergeSequentialDelayError(sources, maxConcurrency, prefetch))
   // todo
   def mergeSequentialVarargs[T](sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeSequential(sources:_*))
-  def mergeSequential[T](prefetch: Int, sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeSequential(prefetch, sources:_*))
-  def mergeSequentialDelayError[T](prefetch: Int, sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeSequentialDelayError(prefetch, sources:_*))
+//  def mergeSequential[T](prefetch: Int, sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeSequential(prefetch, sources:_*))
+//  def mergeSequentialDelayError[T](prefetch: Int, sources: Publisher[T]*): Flux[T] = wrapFlux[T](JFlux.mergeSequentialDelayError(prefetch, sources:_*))
   def mergeSequential[T](sources: Iterable[_ <: Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.mergeSequential(asJavaIterable(sources)))
-  def mergeSequential[T](sources: Iterable[_ <: Publisher[T]], maxConcurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.mergeSequential(asJavaIterable(sources), maxConcurrency, prefetch))
-  def mergeSequentialDelayError[T](sources: Iterable[_ <: Publisher[T]], maxConcurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.mergeSequentialDelayError(asJavaIterable(sources), maxConcurrency, prefetch))
+//  def mergeSequential[T](sources: Iterable[_ <: Publisher[T]], maxConcurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.mergeSequential(asJavaIterable(sources), maxConcurrency, prefetch))
+//  def mergeSequentialDelayError[T](sources: Iterable[_ <: Publisher[T]], maxConcurrency: Int, prefetch: Int): Flux[T] = wrapFlux[T](JFlux.mergeSequentialDelayError(asJavaIterable(sources), maxConcurrency, prefetch))
 
   def never[T](): Flux[T] = wrapFlux[T](JFlux.never())
 
   def range(start: Int, count: Int): Flux[Int] = wrapFlux[Int](JFlux.range(start, count).map(Integer2int(_)))
 
   def switchOnNext[T](mergedPublishers: Publisher[_ <: Publisher[T]]): Flux[T] = wrapFlux[T](JFlux.switchOnNext(mergedPublishers))
-  def switchOnNext[T](mergedPublishers: Publisher[_ <: Publisher[T]], prefetch: Int): Flux[T] = wrapFlux[T](JFlux.switchOnNext(mergedPublishers, prefetch))
+//  def switchOnNext[T](mergedPublishers: Publisher[_ <: Publisher[T]], prefetch: Int): Flux[T] = wrapFlux[T](JFlux.switchOnNext(mergedPublishers, prefetch))
 
   def using[T, D](resourceSupplier: Callable[D], sourceSupplier: D => Publisher[T], resourceCleanup: D => Unit): Flux[T] = wrapFlux[T](JFlux.using(resourceSupplier, asJavaFn1(sourceSupplier), asJavaConsumer(resourceCleanup)))
   def using[T, D](resourceSupplier: Callable[D], sourceSupplier: D => Publisher[T], resourceCleanup: D => Unit, eager: Boolean): Flux[T] = wrapFlux[T](JFlux.using(resourceSupplier, asJavaFn1(sourceSupplier), asJavaConsumer(resourceCleanup), eager))
 
-  def usingWhen[T, D](resourceSupplier: Publisher[D], resourceClosure: D => Publisher[T], asyncComplete: D => Publisher[_], asyncError: D => Publisher[_]): Flux[T] = wrapFlux[T](JFlux.usingWhen(resourceSupplier, asJavaFn1(resourceClosure), asJavaFn1(asyncComplete), asJavaFn1(asyncError)))
-  def usingWhen[T, D](resourceSupplier: Publisher[D], resourceClosure: D => Publisher[T], asyncComplete: D => Publisher[_], asyncError: D => Publisher[_], asyncCancel: D => Publisher[_]): Flux[T] = wrapFlux[T](JFlux.usingWhen(resourceSupplier, asJavaFn1(resourceClosure), asJavaFn1(asyncComplete), asJavaFn1(asyncError), asJavaFn1(asyncCancel)))
-  def usingWhen[T, D](resourceSupplier: Publisher[D], resourceClosure: D => Publisher[T], asyncCleanup: D => Publisher[_]): Flux[T] = wrapFlux[T](JFlux.usingWhen(resourceSupplier, asJavaFn1(resourceClosure), asJavaFn1(asyncCleanup)))
+//  def usingWhen[T, D](resourceSupplier: Publisher[D], resourceClosure: D => Publisher[T], asyncComplete: D => Publisher[_], asyncError: D => Publisher[_]): Flux[T] = wrapFlux[T](JFlux.usingWhen(resourceSupplier, asJavaFn1(resourceClosure), asJavaFn1(asyncComplete), asJavaFn1(asyncError)))
+//  def usingWhen[T, D](resourceSupplier: Publisher[D], resourceClosure: D => Publisher[T], asyncComplete: D => Publisher[_], asyncError: D => Publisher[_], asyncCancel: D => Publisher[_]): Flux[T] = wrapFlux[T](JFlux.usingWhen(resourceSupplier, asJavaFn1(resourceClosure), asJavaFn1(asyncComplete), asJavaFn1(asyncError), asJavaFn1(asyncCancel)))
+//  def usingWhen[T, D](resourceSupplier: Publisher[D], resourceClosure: D => Publisher[T], asyncCleanup: D => Publisher[_]): Flux[T] = wrapFlux[T](JFlux.usingWhen(resourceSupplier, asJavaFn1(resourceClosure), asJavaFn1(asyncCleanup)))
 
   def zip[T1, T2, O](source1: Publisher[T1], source2: Publisher[T2], combinator: (T1, T2) => O): Flux[O] = wrapFlux[O](JFlux.zip(source1, source2, asJavaFn2(combinator)))
 
@@ -192,10 +192,10 @@ object Flux {
   def zip[T1, T2, T3, T4, T5, T6, T7, T8](source1: Publisher[T1], source2: Publisher[T2], source3: Publisher[T3], source4: Publisher[T4], source5: Publisher[T5], source6: Publisher[T6], source7: Publisher[T7], source8: Publisher[T8]): Flux[(T1, T2, T3, T4, T5, T6, T7, T8)] = wrapFlux(JFlux.zip(source1, source2, source3, source4, source5, source6, source7, source8).map(toScalaTuple8(_)))
 
   def zip[O](sources: Iterable[Publisher[_]], combinator: (_ >: Array[AnyRef]) => O): Flux[O] = wrapFlux[O](JFlux.zip(asJavaIterable(sources), asJavaFn1(combinator)))
-  def zip[O](sources: Iterable[Publisher[_]], prefetch: Int, combinator: (_ >: Array[AnyRef]) => O): Flux[O] = wrapFlux[O](JFlux.zip(asJavaIterable(sources), prefetch, asJavaFn1(combinator)))
+//  def zip[O](sources: Iterable[Publisher[_]], prefetch: Int, combinator: (_ >: Array[AnyRef]) => O): Flux[O] = wrapFlux[O](JFlux.zip(asJavaIterable(sources), prefetch, asJavaFn1(combinator)))
 
   def zip[I, O](combinator: (_ >: Array[AnyRef]) => O, sources: Publisher[I]*): Flux[O] = wrapFlux[O](JFlux.zip(asJavaFn1(combinator), sources:_*))
-  def zip[I, O](combinator: (_ >: Array[AnyRef]) => O, prefetch: Int, sources: Publisher[I]*): Flux[O] = wrapFlux[O](JFlux.zip(asJavaFn1(combinator), prefetch, sources:_*))
+//  def zip[I, O](combinator: (_ >: Array[AnyRef]) => O, prefetch: Int, sources: Publisher[I]*): Flux[O] = wrapFlux[O](JFlux.zip(asJavaFn1(combinator), prefetch, sources:_*))
 
   def zip[V](sources: Publisher[_ <: Publisher[_]], combinator: (Any, Any) => V): Flux[V] = wrapFlux[V](JFlux.zip(sources, asJavaFn1((tuple: JTuple2[Any, Any]) => combinator(tuple.getT1, tuple.getT2))))
   def zip[V](sources: Publisher[_ <: Publisher[_]], combinator: (Any, Any, Any) => V): Flux[V] = wrapFlux[V](JFlux.zip(sources, asJavaFn1((tuple: JTuple3[Any, Any, Any]) => combinator(tuple.getT1, tuple.getT2, tuple.getT3))))
@@ -259,19 +259,19 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def as[P](transformer: Flux[T] => P): P = delegate.as((jf: JFlux[T]) => transformer.apply(wrapFlux(jf)))
 
-  def blockFirst(): Option[T] = Option(delegate.blockFirst())
-
-  def blockFirst(timeout: Duration): Option[T] = timeout match {
-    case _: Infinite => Option(delegate.blockFirst())
-    case finiteDuration: FiniteDuration => Option(delegate.blockFirst(asJavaDuration(finiteDuration)))
-  }
-
-  def blockLast(): Option[T] = Option(delegate.blockLast())
-
-  def blockLast(timeout: Duration): Option[T] = timeout match {
-    case _: Infinite => Option(delegate.blockLast())
-    case finiteDuration: FiniteDuration => Option(delegate.blockLast(asJavaDuration(finiteDuration)))
-  }
+//  def blockFirst(): Option[T] = Option(delegate.blockFirst())
+//
+//  def blockFirst(timeout: Duration): Option[T] = timeout match {
+//    case _: Infinite => Option(delegate.blockFirst())
+//    case finiteDuration: FiniteDuration => Option(delegate.blockFirst(asJavaDuration(finiteDuration)))
+//  }
+//
+//  def blockLast(): Option[T] = Option(delegate.blockLast())
+//
+//  def blockLast(timeout: Duration): Option[T] = timeout match {
+//    case _: Infinite => Option(delegate.blockLast())
+//    case finiteDuration: FiniteDuration => Option(delegate.blockLast(asJavaDuration(finiteDuration)))
+//  }
 
   // todo benchmark toSeq!
 
@@ -282,8 +282,8 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def buffer(bufferingTimespan: FiniteDuration): Flux[Seq[T]] = wrapFlux(delegate.buffer(asJavaDuration(bufferingTimespan))).map(toScalaSeq)
   def buffer(bufferingTimespan: FiniteDuration, openBufferEvery: FiniteDuration): Flux[Seq[T]] = wrapFlux(delegate.buffer(asJavaDuration(bufferingTimespan), asJavaDuration(openBufferEvery))).map(toScalaSeq)
-  def buffer(bufferingTimespan: FiniteDuration, timer: Scheduler): Flux[Seq[T]] = wrapFlux(delegate.buffer(asJavaDuration(bufferingTimespan), timer)).map(toScalaSeq)
-  def buffer(bufferingTimespan: FiniteDuration, openBufferEvery: FiniteDuration, timer: Scheduler): Flux[Seq[T]] = wrapFlux(delegate.buffer(asJavaDuration(bufferingTimespan), asJavaDuration(openBufferEvery), timer)).map(toScalaSeq)
+//  def buffer(bufferingTimespan: FiniteDuration, timer: Scheduler): Flux[Seq[T]] = wrapFlux(delegate.buffer(asJavaDuration(bufferingTimespan), timer)).map(toScalaSeq)
+//  def buffer(bufferingTimespan: FiniteDuration, openBufferEvery: FiniteDuration, timer: Scheduler): Flux[Seq[T]] = wrapFlux(delegate.buffer(asJavaDuration(bufferingTimespan), asJavaDuration(openBufferEvery), timer)).map(toScalaSeq)
 
 //  def buffer[C >: mutable.Buffer[T]](maxSize: Int, bufferSupplier: () => C): Flux[Seq[T]] = {
 //
@@ -298,7 +298,7 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def bufferTimeout(maxSize: Int, maxTime: FiniteDuration): Flux[Seq[T]] = wrapFlux(delegate.bufferTimeout(maxSize, asJavaDuration(maxTime))).map(toScalaSeq)
   // todo missing custom collection wrapper here (see JavaInterop's toIterable(collection: Collection) method)
-  def bufferTimeout(maxSize: Int, maxTime: FiniteDuration, timer: Scheduler): Flux[Seq[T]] = wrapFlux(delegate.bufferTimeout(maxSize, asJavaDuration(maxTime), timer)).map(toScalaSeq)
+//  def bufferTimeout(maxSize: Int, maxTime: FiniteDuration, timer: Scheduler): Flux[Seq[T]] = wrapFlux(delegate.bufferTimeout(maxSize, asJavaDuration(maxTime), timer)).map(toScalaSeq)
   // todo missing custom collection wrapper here
 
   def bufferUntil(predicate: T => Boolean): Flux[Seq[T]] = wrapFlux(delegate.bufferUntil(asJavaPredicate(predicate))).map(toScalaSeq)
@@ -315,22 +315,22 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
     case _: Infinite => cache()
     case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(asJavaDuration(finiteDuration)))
   }
-  def cache(ttl: Duration, timer: Scheduler): Flux[T] = ttl match {
-    case _: Infinite => cache()
-    case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(asJavaDuration(finiteDuration), timer))
-  }
+//  def cache(ttl: Duration, timer: Scheduler): Flux[T] = ttl match {
+//    case _: Infinite => cache()
+//    case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(asJavaDuration(finiteDuration), timer))
+//  }
   def cache(history: Int, ttl: Duration): Flux[T] = ttl match {
     case _: Infinite => cache(history)
     case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(history, asJavaDuration(finiteDuration)))
   }
-  def cache(history: Int, ttl: Duration, timer: Scheduler): Flux[T] = ttl match {
-    case _: Infinite => cache(history)
-    case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(history, asJavaDuration(finiteDuration), timer))
-  }
+//  def cache(history: Int, ttl: Duration, timer: Scheduler): Flux[T] = ttl match {
+//    case _: Infinite => cache(history)
+//    case finiteDuration: FiniteDuration => wrapFlux(delegate.cache(history, asJavaDuration(finiteDuration), timer))
+//  }
 
   def cast[E](clazz: Class[E]): Flux[E] = wrapFlux[E](delegate.cast(clazz))
 
-  def cancelOn(scheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.cancelOn(scheduler))
+//  def cancelOn(scheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.cancelOn(scheduler))
 
   def checkpoint(): Flux[T] = wrapFlux[T](delegate.checkpoint())
   def checkpoint(description: String): Flux[T] = wrapFlux[T](delegate.checkpoint(description))
@@ -361,17 +361,19 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
     mono.map(toScalaMap)
   }
 
-  def collectMultimap[K](keyExtractor: T => K): Mono[Map[K, Seq[T]]] = {
-    // this explicit type def is required
-    val mono: Mono[util.Map[K, util.Collection[T]]] = wrapMono(delegate.collectMultimap(asJavaFn1(keyExtractor)))
-    mono.map(toScalaMap).map(map => map.mapValues(toScalaSeq))
-  }
-
-  def collectMultimap[K, V](keyExtractor: T => K, valueExtractor: T => V): Mono[Map[K, Seq[V]]] = {
-    // this explicit type def is required
-    val mono: Mono[util.Map[K, util.Collection[V]]] = wrapMono(delegate.collectMultimap(asJavaFn1(keyExtractor), asJavaFn1(valueExtractor)))
-    mono.map(toScalaMap).map(map => map.mapValues(toScalaSeq))
-  }
+//  def collectMultimap[K](keyExtractor: T => K): Mono[Map[K, Seq[T]]] = {
+//    // this explicit type def is required
+//    val mono: Mono[util.Map[K, util.Collection[T]]] = wrapMono(delegate.collectMultimap(asJavaFn1(keyExtractor)))
+////    mono.map(m => toScalaMap(m)).map(map => map.mapValues(toScalaSeq))
+//    mono.map(m => toScalaMap(m).map((k: K, v: util.Collection[T]) => (k, toScalaSeq(v))))
+//  }
+//
+//  def collectMultimap[K, V](keyExtractor: T => K, valueExtractor: T => V): Mono[Map[K, Seq[V]]] = {
+//    // this explicit type def is required
+//    val mono: Mono[util.Map[K, util.Collection[V]]] = wrapMono(delegate.collectMultimap(asJavaFn1(keyExtractor), asJavaFn1(valueExtractor)))
+////    mono.map(toScalaMap).map(map => map.mapValues(toScalaSeq)
+//    mono.map(m => toScalaMap(m).map((k: K, v: util.Collection[T]) => (k, toScalaSeq(v))))
+//  }
 
   // todo find out if this can be implemented without copying the map, since the intent is to have the map be mutable
   //   so the mapSupplier's map's implementation can be used
@@ -395,20 +397,20 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 //  def compose[V](transformer: Flux[T] => Publisher[V]): Flux[V] = wrapFlux[V](delegate.compose(transformer))
 
   def concatMap[V](mapper: T => Publisher[V]): Flux[V] = wrapFlux[V](delegate.concatMap(asJavaFn1(mapper)))
-  def concatMap[V](mapper: T => Publisher[V], prefetch: Int): Flux[V] = wrapFlux[V](delegate.concatMap(asJavaFn1(mapper), prefetch))
+//  def concatMap[V](mapper: T => Publisher[V], prefetch: Int): Flux[V] = wrapFlux[V](delegate.concatMap(asJavaFn1(mapper), prefetch))
 
   def concatMapDelayError[V](mapper: T => Publisher[V]): Flux[V] = wrapFlux[V](delegate.concatMapDelayError(asJavaFn1(mapper)))
-  def concatMapDelayError[V](mapper: T => Publisher[V], prefetch: Int): Flux[V] = wrapFlux[V](delegate.concatMapDelayError(asJavaFn1(mapper), prefetch))
-  def concatMapDelayError[V](mapper: T => Publisher[V], delayUntilEnd: Boolean, prefetch: Int): Flux[V] = wrapFlux[V](delegate.concatMapDelayError(asJavaFn1(mapper), delayUntilEnd, prefetch))
+//  def concatMapDelayError[V](mapper: T => Publisher[V], prefetch: Int): Flux[V] = wrapFlux[V](delegate.concatMapDelayError(asJavaFn1(mapper), prefetch))
+//  def concatMapDelayError[V](mapper: T => Publisher[V], delayUntilEnd: Boolean, prefetch: Int): Flux[V] = wrapFlux[V](delegate.concatMapDelayError(asJavaFn1(mapper), delayUntilEnd, prefetch))
 
   def concatMapIterable[R](mapper: T => Iterable[R]): Flux[R] = {
     val m: util.function.Function[_ >: T, _ <: lang.Iterable[R]] = (t: T) => asJavaIterable(mapper(t))
     wrapFlux(delegate.concatMapIterable(m))
   }
-  def concatMapIterable[R](mapper: T => Iterable[R], prefetch: Int): Flux[R] = {
-    val m: util.function.Function[_ >: T, _ <: lang.Iterable[R]] = (t: T) => asJavaIterable(mapper(t))
-    wrapFlux(delegate.concatMapIterable(m, prefetch))
-  }
+//  def concatMapIterable[R](mapper: T => Iterable[R], prefetch: Int): Flux[R] = {
+//    val m: util.function.Function[_ >: T, _ <: lang.Iterable[R]] = (t: T) => asJavaIterable(mapper(t))
+//    wrapFlux(delegate.concatMapIterable(m, prefetch))
+//  }
 
   def concatWith(other: Publisher[T]): Flux[T] = wrapFlux[T](delegate.concatWith(other))
 
@@ -417,15 +419,15 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def defaultIfEmpty(defaultV: T): Flux[T] = wrapFlux[T](delegate.defaultIfEmpty(defaultV))
 
   def delayElements(delay: FiniteDuration): Flux[T] = wrapFlux[T](delegate.delayElements(asJavaDuration(delay)))
-  def delayElements(delay: FiniteDuration, timer: Scheduler): Flux[T] = wrapFlux[T](delegate.delayElements(asJavaDuration(delay), timer))
+//  def delayElements(delay: FiniteDuration, timer: Scheduler): Flux[T] = wrapFlux[T](delegate.delayElements(asJavaDuration(delay), timer))
 
   def delaySequence(delay: FiniteDuration): Flux[T] = wrapFlux[T](delegate.delaySequence(asJavaDuration(delay)))
-  def delaySequence(delay: FiniteDuration, timer: Scheduler): Flux[T] = wrapFlux[T](delegate.delaySequence(asJavaDuration(delay), timer))
+//  def delaySequence(delay: FiniteDuration, timer: Scheduler): Flux[T] = wrapFlux[T](delegate.delaySequence(asJavaDuration(delay), timer))
 
   def delayUntil(triggerProvider: T => Publisher[_]): Flux[T] = wrapFlux[T](delegate.delayUntil(asJavaFn1(triggerProvider)))
 
   def delaySubscription(delay: FiniteDuration): Flux[T] = wrapFlux[T](delegate.delaySubscription(asJavaDuration(delay)))
-  def delaySubscription(delay: FiniteDuration, timer: Scheduler): Flux[T] = wrapFlux[T](delegate.delaySubscription(asJavaDuration(delay), timer))
+//  def delaySubscription(delay: FiniteDuration, timer: Scheduler): Flux[T] = wrapFlux[T](delegate.delaySubscription(asJavaDuration(delay), timer))
   def delaySubscription[U](subscriptionDelay: Publisher[U]): Flux[T] = wrapFlux[T](delegate.delaySubscription(subscriptionDelay))
 
   def dematerialize[X](): Flux[X] = wrapFlux[X](delegate.dematerialize())
@@ -456,7 +458,7 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def doFinally(onFinally: SignalType => Unit): Flux[T] = wrapFlux[T](delegate.doFinally(asJavaConsumer(onFinally)))
 
   def elapsed(): Flux[(Long, T)] = wrapFlux[JTuple2[java.lang.Long, T]](delegate.elapsed()).map(tuple => (Long2long(toScalaTuple2(tuple)._1), toScalaTuple2(tuple)._2))
-  def elapsed(scheduler: Scheduler): Flux[(Long, T)] = wrapFlux[JTuple2[java.lang.Long, T]](delegate.elapsed()).map(tuple => toScalaTuple2(tuple.mapT1(t1 => Long2long(t1))))
+//  def elapsed(scheduler: Scheduler): Flux[(Long, T)] = wrapFlux[JTuple2[java.lang.Long, T]](delegate.elapsed()).map(tuple => toScalaTuple2(tuple.mapT1(t1 => Long2long(t1))))
 
   def elementAt(index: Int): Mono[T] = wrapMono[T](delegate.elementAt(index))
   def elementAt(index: Int, defaultValue: T): Mono[T] = wrapMono[T](delegate.elementAt(index, defaultValue))
@@ -473,25 +475,25 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def filterWhen(asyncPredicate: T => Publisher[Boolean], bufferSize: Int): Flux[T] = wrapFlux[T](delegate.filterWhen((t: T) => Flux.from(asyncPredicate(t)).map(boolean2Boolean), bufferSize))
 
   def flatMap[R](mapper: T => Publisher[R]): Flux[R] = wrapFlux[R](delegate.flatMap(asJavaFn1(mapper)))
-  def flatMap[V](mapper: T => Publisher[V], concurrency: Int): Flux[V] = wrapFlux[V](delegate.flatMap(asJavaFn1(mapper), concurrency))
-  def flatMap[V](mapper: T => Publisher[V], concurrency: Int, prefetch: Int): Flux[V] = wrapFlux[V](delegate.flatMap(asJavaFn1(mapper), concurrency, prefetch))
+//  def flatMap[V](mapper: T => Publisher[V], concurrency: Int): Flux[V] = wrapFlux[V](delegate.flatMap(asJavaFn1(mapper), concurrency))
+//  def flatMap[V](mapper: T => Publisher[V], concurrency: Int, prefetch: Int): Flux[V] = wrapFlux[V](delegate.flatMap(asJavaFn1(mapper), concurrency, prefetch))
   def flatMap[R](mapperOnNext: T => Publisher[R], mapperOnError: Throwable => Publisher[R], mapperOnComplete: () => Publisher[R]): Flux[R] = wrapFlux[R](delegate.flatMap(asJavaFn1(mapperOnNext), asJavaFn1(mapperOnError), asJavaSupplier(mapperOnComplete)))
-  def flatMapDelayError[V](mapper: T => Publisher[V], concurrency: Int, prefetch: Int): Flux[V] = wrapFlux[V](delegate.flatMapDelayError(asJavaFn1(mapper), concurrency, prefetch))
+//  def flatMapDelayError[V](mapper: T => Publisher[V], concurrency: Int, prefetch: Int): Flux[V] = wrapFlux[V](delegate.flatMapDelayError(asJavaFn1(mapper), concurrency, prefetch))
 
   def flatMapIterable[R](mapper: T => Iterable[R]): Flux[R] = wrapFlux[R](delegate.flatMapIterable((t: T) => asJavaIterable(mapper(t))))
-  def flatMapIterable[R](mapper: T => Iterable[R], prefetch: Int): Flux[R] = wrapFlux[R](delegate.flatMapIterable((t: T) => asJavaIterable(mapper(t)), prefetch))
+//  def flatMapIterable[R](mapper: T => Iterable[R], prefetch: Int): Flux[R] = wrapFlux[R](delegate.flatMapIterable((t: T) => asJavaIterable(mapper(t)), prefetch))
 
   def flatMapSequential[R](mapper: T => Publisher[R]): Flux[R] = wrapFlux[R](delegate.flatMapSequential(asJavaFn1(mapper)))
-  def flatMapSequential[R](mapper: T => Publisher[R], maxConcurrency: Int): Flux[R] = wrapFlux[R](delegate.flatMapSequential(asJavaFn1(mapper), maxConcurrency))
-  def flatMapSequential[R](mapper: T => Publisher[R], maxConcurrency: Int, prefetch: Int): Flux[R] = wrapFlux[R](delegate.flatMapSequential(asJavaFn1(mapper), maxConcurrency, prefetch))
-  def flatMapSequentialDelayError[R](mapper: T => Publisher[R], maxConcurrency: Int, prefetch: Int): Flux[R] = wrapFlux[R](delegate.flatMapSequentialDelayError(asJavaFn1(mapper), maxConcurrency, prefetch))
+//  def flatMapSequential[R](mapper: T => Publisher[R], maxConcurrency: Int): Flux[R] = wrapFlux[R](delegate.flatMapSequential(asJavaFn1(mapper), maxConcurrency))
+//  def flatMapSequential[R](mapper: T => Publisher[R], maxConcurrency: Int, prefetch: Int): Flux[R] = wrapFlux[R](delegate.flatMapSequential(asJavaFn1(mapper), maxConcurrency, prefetch))
+//  def flatMapSequentialDelayError[R](mapper: T => Publisher[R], maxConcurrency: Int, prefetch: Int): Flux[R] = wrapFlux[R](delegate.flatMapSequentialDelayError(asJavaFn1(mapper), maxConcurrency, prefetch))
 
   def getPrefetch: Int = delegate.getPrefetch
 
   def groupBy[K](keyMapper: T => K): Flux[GroupedFlux[K, T]] = wrapFlux[GroupedFlux[K, T]](delegate.groupBy[K](asJavaFn1(keyMapper)).map(wrapGroupedFlux[K, T](_)))
-  def groupBy[K](keyMapper: T => K, prefetch: Int): Flux[GroupedFlux[K, T]] = wrapFlux[GroupedFlux[K, T]](delegate.groupBy[K](asJavaFn1(keyMapper), prefetch).map(wrapGroupedFlux[K, T](_)))
+//  def groupBy[K](keyMapper: T => K, prefetch: Int): Flux[GroupedFlux[K, T]] = wrapFlux[GroupedFlux[K, T]](delegate.groupBy[K](asJavaFn1(keyMapper), prefetch).map(wrapGroupedFlux[K, T](_)))
   def groupBy[K, V](keyMapper: T => K, valueMapper: T => V): Flux[GroupedFlux[K, V]] = wrapFlux[GroupedFlux[K, V]](delegate.groupBy[K, V](asJavaFn1(keyMapper), asJavaFn1(valueMapper)).map(wrapGroupedFlux[K, V](_)))
-  def groupBy[K, V](keyMapper: T => K, valueMapper: T => V, prefetch: Int): Flux[GroupedFlux[K, V]] = wrapFlux[GroupedFlux[K, V]](delegate.groupBy[K, V](asJavaFn1(keyMapper), asJavaFn1(valueMapper), prefetch).map(wrapGroupedFlux[K, V](_)))
+//  def groupBy[K, V](keyMapper: T => K, valueMapper: T => V, prefetch: Int): Flux[GroupedFlux[K, V]] = wrapFlux[GroupedFlux[K, V]](delegate.groupBy[K, V](asJavaFn1(keyMapper), asJavaFn1(valueMapper), prefetch).map(wrapGroupedFlux[K, V](_)))
 
   def groupJoin[TRight, TLeftEnd, TRightEnd, R](other: Publisher[TRight], leftEnd: T => Publisher[TLeftEnd], rightEnd: TRight => Publisher[TRightEnd], resultSelector: (T, Flux[TRight]) => R): Flux[R] = wrapFlux[R](delegate.groupJoin(other, asJavaFn1(leftEnd), asJavaFn1(rightEnd), (t: T, f: JFlux[TRight]) => resultSelector(t, wrapFlux(f))))
   // commented out code is equivalent to the above function
@@ -518,9 +520,9 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def last(): Mono[T] = wrapMono[T](delegate.last())
   def last(defaultValue: T): Mono[T] = wrapMono[T](delegate.last(defaultValue))
 
-  def limitRate(prefetchRate: Int): Flux[T] = wrapFlux[T](delegate.limitRate(prefetchRate))
-  def limitRate(highTide: Int, lowTide: Int): Flux[T] = wrapFlux[T](delegate.limitRate(highTide, lowTide))
-  def limitRequest(requestCap: Long): Flux[T] = wrapFlux[T](delegate.limitRequest(requestCap))
+//  def limitRate(prefetchRate: Int): Flux[T] = wrapFlux[T](delegate.limitRate(prefetchRate))
+//  def limitRate(highTide: Int, lowTide: Int): Flux[T] = wrapFlux[T](delegate.limitRate(highTide, lowTide))
+//  def limitRequest(requestCap: Long): Flux[T] = wrapFlux[T](delegate.limitRequest(requestCap))
 
   def log(): Flux[T] = wrapFlux[T](delegate.log())
   def log(category: String): Flux[T] = wrapFlux[T](delegate.log(category))
@@ -556,7 +558,7 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def onBackpressureBuffer(maxSize: Int, bufferOverflowStrategy: BufferOverflowStrategy): Flux[T] = wrapFlux[T](delegate.onBackpressureBuffer(maxSize, bufferOverflowStrategy))
   def onBackpressureBuffer(maxSize: Int, onOverflow: T => Unit, bufferOverflowStrategy: BufferOverflowStrategy): Flux[T] = wrapFlux[T](delegate.onBackpressureBuffer(maxSize, asJavaConsumer(onOverflow), bufferOverflowStrategy))
   def onBackpressureBuffer(ttl: FiniteDuration, maxSize: Int, onBufferEviction: T => Unit): Flux[T] = wrapFlux[T](delegate.onBackpressureBuffer(asJavaDuration(ttl), maxSize, asJavaConsumer(onBufferEviction)))
-  def onBackpressureBuffer(ttl: FiniteDuration, maxSize: Int, onBufferEviction: T => Unit, scheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.onBackpressureBuffer(asJavaDuration(ttl), maxSize, asJavaConsumer(onBufferEviction), scheduler))
+//  def onBackpressureBuffer(ttl: FiniteDuration, maxSize: Int, onBufferEviction: T => Unit, scheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.onBackpressureBuffer(asJavaDuration(ttl), maxSize, asJavaConsumer(onBufferEviction), scheduler))
 
   def onBackpressureDrop(): Flux[T] = wrapFlux[T](delegate.onBackpressureDrop())
   def onBackpressureDrop(onDropped: T => Unit): Flux[T] = wrapFlux[T](delegate.onBackpressureDrop(asJavaConsumer(onDropped)))
@@ -573,7 +575,7 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def onErrorMap(mapper: Throwable => Throwable): Flux[T] = wrapFlux[T](delegate.onErrorMap(asJavaFn1(mapper)))
   def onErrorMap[E <: Throwable](classType: Class[E], mapper: E => Throwable): Flux[T] = wrapFlux[T](delegate.onErrorMap(classType, asJavaFn1(mapper)))
-  def onErrorMap(predicate: Throwable => Boolean, mapper: Throwable => Throwable): Flux[T] = wrapFlux[T](delegate.onErrorMap(asJavaFn1(mapper)))
+  def onErrorMap(predicate: Throwable => Boolean, mapper: Throwable => Throwable): Flux[T] = wrapFlux[T](delegate.onErrorMap(asJavaPredicate(predicate), asJavaFn1(mapper)))
 
   def onErrorResume(fallback: Throwable => Publisher[T]): Flux[T] = wrapFlux[T](delegate.onErrorResume(asJavaFn1(fallback)))
   def onErrorResume[E <: Throwable](classType: Class[E], fallback: E => Publisher[T]): Flux[T] = wrapFlux[T](delegate.onErrorResume(classType, asJavaFn1(fallback)))
@@ -583,25 +585,25 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def onErrorReturn[E <: Throwable](classType: Class[E], fallbackValue: T): Flux[T] = wrapFlux[T](delegate.onErrorReturn(classType, fallbackValue))
   def onErrorReturn(predicate: Throwable => Boolean, fallbackValue: T): Flux[T] = wrapFlux[T](delegate.onErrorReturn(asJavaPredicate(predicate), fallbackValue))
 
-  def onTerminateDetach(): Flux[T] = wrapFlux[T](delegate.onTerminateDetach())
+//  def onTerminateDetach(): Flux[T] = wrapFlux[T](delegate.onTerminateDetach())
 
   def or(other: Publisher[T]): Flux[T] = wrapFlux[T](delegate.or(other))
 
   // todo: uncomment these methods after creating a scala ParallelFlux wrapper
-  def parallel(): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel())
-  def parallel(parallelism: Int): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel(parallelism))
-  def parallel(parallelism: Int, prefetch: Int): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel(parallelism, prefetch))
+//  def parallel(): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel())
+//  def parallel(parallelism: Int): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel(parallelism))
+//  def parallel(parallelism: Int, prefetch: Int): ParallelFlux[T] = wrapParallelFlux[T](delegate.parallel(parallelism, prefetch))
 
   def publish(): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.publish())
   def publish(prefetch: Int): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.publish(prefetch))
   def publish[R](transform: Flux[T] => Publisher[R]): Flux[R] = wrapFlux[R](delegate.publish[R](asJavaFn1((jflux: JFlux[T]) => transform(wrapFlux(jflux)))))
-  def publish[R](transform: Flux[T] => Publisher[R], prefetch: Int): Flux[R] = wrapFlux[R](delegate.publish[R](asJavaFn1((jflux: JFlux[T]) => transform(wrapFlux(jflux))), prefetch))
+//  def publish[R](transform: Flux[T] => Publisher[R], prefetch: Int): Flux[R] = wrapFlux[R](delegate.publish[R](asJavaFn1((jflux: JFlux[T]) => transform(wrapFlux(jflux))), prefetch))
 
   def publishNext(): Mono[T] = wrapMono[T](delegate.publishNext())
 
-  def publishOn(scheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.publishOn(scheduler))
-  def publishOn(scheduler: Scheduler, prefetch: Int): Flux[T] = wrapFlux[T](delegate.publishOn(scheduler, prefetch))
-  def publishOn(scheduler: Scheduler, delayError: Boolean, prefetch: Int): Flux[T] = wrapFlux[T](delegate.publishOn(scheduler, delayError, prefetch))
+//  def publishOn(scheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.publishOn(scheduler))
+//  def publishOn(scheduler: Scheduler, prefetch: Int): Flux[T] = wrapFlux[T](delegate.publishOn(scheduler, prefetch))
+//  def publishOn(scheduler: Scheduler, delayError: Boolean, prefetch: Int): Flux[T] = wrapFlux[T](delegate.publishOn(scheduler, delayError, prefetch))
 
   def reduce(aggregator: (T, T) => T): Mono[T] = wrapMono[T](delegate.reduce(asJavaFn2(aggregator)))
   def reduce[A](initial: A, accumulator: (A, T) => A): Mono[A] = wrapMono[A](delegate.reduce[A](initial, asJavaFn2(accumulator)))
@@ -617,20 +619,20 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def replay(history: Int): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(history))
   def replay(ttl: FiniteDuration): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(asJavaDuration(ttl)))
   def replay(history: Int, ttl: FiniteDuration): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(history, asJavaDuration(ttl)))
-  def replay(ttl: FiniteDuration, timer: Scheduler): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(asJavaDuration(ttl), timer))
-  def replay(history: Int, ttl: FiniteDuration, timer: Scheduler): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(history, asJavaDuration(ttl), timer))
+//  def replay(ttl: FiniteDuration, timer: Scheduler): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(asJavaDuration(ttl), timer))
+//  def replay(history: Int, ttl: FiniteDuration, timer: Scheduler): ConnectableFlux[T] = wrapConnectableFlux[T](delegate.replay(history, asJavaDuration(ttl), timer))
 
-  def retry(): Flux[T] = wrapFlux[T](delegate.retry())
-  def retry(numRetries: Long): Flux[T] = wrapFlux[T](delegate.retry(numRetries))
-  def retry(retryMatcher: Throwable => Boolean): Flux[T] = wrapFlux[T](delegate.retry(asJavaPredicate(retryMatcher)))
-  def retry(numRetries: Long, retryMatcher: Throwable => Boolean): Flux[T] = wrapFlux[T](delegate.retry(numRetries, asJavaPredicate(retryMatcher)))
-//  def retryWhen(whenFactory: Flux[Throwable] => Publisher[_]): Flux[T] = wrapFlux[T](delegate.retryWhen((flux: JFlux[Throwable]) => whenFactory(wrapFlux(flux))))
-
-  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration): Flux[T] = wrapFlux[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff)))
-  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration): Flux[T] = wrapFlux[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff)))
-  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration, backoffScheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff), backoffScheduler))
-  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration, jitterFactor: Double): Flux[T] = wrapFlux[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff), jitterFactor))
-  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration, jitterFactor: Double, backoffScheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff), jitterFactor, backoffScheduler))
+//  def retry(): Flux[T] = wrapFlux[T](delegate.retry())
+//  def retry(numRetries: Long): Flux[T] = wrapFlux[T](delegate.retry(numRetries))
+//  def retry(retryMatcher: Throwable => Boolean): Flux[T] = wrapFlux[T](delegate.retry(asJavaPredicate(retryMatcher)))
+//  def retry(numRetries: Long, retryMatcher: Throwable => Boolean): Flux[T] = wrapFlux[T](delegate.retry(numRetries, asJavaPredicate(retryMatcher)))
+////  def retryWhen(whenFactory: Flux[Throwable] => Publisher[_]): Flux[T] = wrapFlux[T](delegate.retryWhen((flux: JFlux[Throwable]) => whenFactory(wrapFlux(flux))))
+//
+////  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration): Flux[T] = wrapFlux[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff)))
+////  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration): Flux[T] = wrapFlux[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff)))
+////  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration, backoffScheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff), backoffScheduler))
+////  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration, jitterFactor: Double): Flux[T] = wrapFlux[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff), jitterFactor))
+////  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration, jitterFactor: Double, backoffScheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff), jitterFactor, backoffScheduler))
 
   def sample(timespan: FiniteDuration): Flux[T] = wrapFlux[T](delegate.sample(asJavaDuration(timespan)))
   def sample[U](sampler: Publisher[U]): Flux[T] = wrapFlux[T](delegate.sample(sampler))
@@ -639,7 +641,7 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def sampleFirst[U](samplerFactory: T => Publisher[U]): Flux[T] = wrapFlux[T](delegate.sampleFirst(asJavaFn1(samplerFactory)))
 
   def sampleTimeout[U](throttlerFactory: T => Publisher[U]): Flux[T] = wrapFlux[T](delegate.sampleTimeout(asJavaFn1(throttlerFactory)))
-  def sampleTimeout[U](throttlerFactory: T => Publisher[U], maxConcurrency: Int): Flux[T] = wrapFlux[T](delegate.sampleTimeout(asJavaFn1(throttlerFactory), maxConcurrency))
+//  def sampleTimeout[U](throttlerFactory: T => Publisher[U], maxConcurrency: Int): Flux[T] = wrapFlux[T](delegate.sampleTimeout(asJavaFn1(throttlerFactory), maxConcurrency))
 
   def scan(accumulator: (T, T) => T): Flux[T] = wrapFlux[T](delegate.scan(asJavaFn2(accumulator)))
   def scan[A](initial: A, accumulator: (A, T) => A): Flux[A] = wrapFlux[A](delegate.scan(initial, asJavaFn2(accumulator)))
@@ -653,7 +655,7 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def skip(skipped: Long): Flux[T] = wrapFlux[T](delegate.skip(skipped))
   def skip(timespan: FiniteDuration): Flux[T] = wrapFlux[T](delegate.skip(asJavaDuration(timespan)))
-  def skip(timespan: FiniteDuration, timer: Scheduler): Flux[T] = wrapFlux[T](delegate.skip(asJavaDuration(timespan), timer))
+//  def skip(timespan: FiniteDuration, timer: Scheduler): Flux[T] = wrapFlux[T](delegate.skip(asJavaDuration(timespan), timer))
   def skipLast(n: Int): Flux[T] = wrapFlux[T](delegate.skipLast(n))
   def skipUntil(untilPredicate: T => Boolean): Flux[T] = wrapFlux[T](delegate.skipUntil(asJavaPredicate(untilPredicate)))
   def skipUntilOther(other: Publisher[_]): Flux[T] = wrapFlux[T](delegate.skipUntilOther(other))
@@ -683,13 +685,13 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   ///
   ///
 
-  def subscriberContext(mergeContext: Context): Flux[T] = wrapFlux[T](delegate.subscriberContext(mergeContext))
-  def subscriberContext(doOnContext: Context => Context): Flux[T] = wrapFlux[T](delegate.subscriberContext(asJavaFn1(doOnContext)))
+//  def subscriberContext(mergeContext: Context): Flux[T] = wrapFlux[T](delegate.subscriberContext(mergeContext))
+//  def subscriberContext(doOnContext: Context => Context): Flux[T] = wrapFlux[T](delegate.subscriberContext(asJavaFn1(doOnContext)))
 
-  def subscribeOn(scheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.subscribeOn(scheduler))
-  def subscribeOn(scheduler: Scheduler, requestOnSeparateThread: Boolean): Flux[T] = wrapFlux[T](delegate.subscribeOn(scheduler, requestOnSeparateThread))
+//  def subscribeOn(scheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.subscribeOn(scheduler))
+//  def subscribeOn(scheduler: Scheduler, requestOnSeparateThread: Boolean): Flux[T] = wrapFlux[T](delegate.subscribeOn(scheduler, requestOnSeparateThread))
 
-  def subscribeWith[E <: Subscriber[T]](subscriber: E): E = delegate.subscribeWith(subscriber)
+//  def subscribeWith[E <: Subscriber[T]](subscriber: E): E = delegate.subscribeWith(subscriber)
 
   def switchOnFirst[V](transformer: (Signal[T], Flux[T]) => Publisher[V]): Flux[V] = {
     val f: BiFunction[Signal[T], JFlux[T], Publisher[V]] = asJavaFn2[Signal[T], JFlux[T], Publisher[V]]((s: Signal[T], flux: JFlux[T]) => transformer(s, wrapFlux[T](flux)))
@@ -699,13 +701,13 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def switchIfEmpty(alternate: Publisher[T]): Flux[T] = wrapFlux[T](delegate.switchIfEmpty(alternate))
 
   def switchMap[V](fn: (_ >: T) => Publisher[_ <: V]): Flux[V] = wrapFlux[V](delegate.switchMap[V](asJavaFn1(fn)))
-  def switchMap[V](fn: (_ >: T) => Publisher[_ <: V], prefetch: Int): Flux[V] = wrapFlux[V](delegate.switchMap[V](asJavaFn1(fn), prefetch))
+//  def switchMap[V](fn: (_ >: T) => Publisher[_ <: V], prefetch: Int): Flux[V] = wrapFlux[V](delegate.switchMap[V](asJavaFn1(fn), prefetch))
 
-  def tag(key: String, value: String): Flux[T] = wrapFlux[T](delegate.tag(key, value))
+//  def tag(key: String, value: String): Flux[T] = wrapFlux[T](delegate.tag(key, value))
 
   def take(n: Long): Flux[T] = wrapFlux[T](delegate.take(n))
   def take(timespan: FiniteDuration): Flux[T] = wrapFlux[T](delegate.take(asJavaDuration(timespan)))
-  def take(timespan: FiniteDuration, scheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.take(asJavaDuration(timespan), scheduler))
+//  def take(timespan: FiniteDuration, scheduler: Scheduler): Flux[T] = wrapFlux[T](delegate.take(asJavaDuration(timespan), scheduler))
 
   def takeLast(n: Int): Flux[T] = wrapFlux[T](delegate.takeLast(n))
 
@@ -714,34 +716,34 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def takeWhile(continuePredicate: T => Boolean): Flux[T] = wrapFlux[T](delegate.takeWhile(asJavaPredicate(continuePredicate)))
 
-  def then(): Mono[Unit] = wrapMono[Void](delegate.`then`()).map(_ => ())
-  def then[V](other: Mono[V]): Mono[V] = wrapMono[V](delegate.`then`(other.delegate.asInstanceOf[JMono[V]]))
+//  def then(): Mono[Unit] = wrapMono[Void](delegate.`then`()).map(_ => ())
+//  def then[V](other: Mono[V]): Mono[V] = wrapMono[V](delegate.`then`(other.delegate.asInstanceOf[JMono[V]]))
 
-  def thenEmpty(other: Publisher[Unit]): Mono[Unit] = wrapMono[Unit](delegate.thenEmpty(Flux.from(other).map[Void](_ => null: Void)).map(_ => Unit))
+  def thenEmpty(other: Publisher[Unit]): Mono[Unit] = wrapMono[Unit](delegate.thenEmpty(Flux.from(other).map[Void](_ => null: Void)).map(_ => ()))
 
   def thenMany[V](other: Publisher[V]): Flux[V] = wrapFlux[V](delegate.thenMany(other))
 
   def timeout(timeout: FiniteDuration): Flux[T] = wrapFlux[T](delegate.timeout(asJavaDuration(timeout)))
   def timeout(timeout: FiniteDuration, fallback: Publisher[T]): Flux[T] = wrapFlux[T](delegate.timeout(asJavaDuration(timeout), fallback))
-  def timeout(timeout: FiniteDuration, timer: Scheduler): Flux[T] = wrapFlux[T](delegate.timeout(asJavaDuration(timeout), timer))
-  def timeout(timeout: FiniteDuration, fallback: Publisher[T], timer: Scheduler): Flux[T] = wrapFlux[T](delegate.timeout(asJavaDuration(timeout), fallback, timer))
+//  def timeout(timeout: FiniteDuration, timer: Scheduler): Flux[T] = wrapFlux[T](delegate.timeout(asJavaDuration(timeout), timer))
+//  def timeout(timeout: FiniteDuration, fallback: Publisher[T], timer: Scheduler): Flux[T] = wrapFlux[T](delegate.timeout(asJavaDuration(timeout), fallback, timer))
   def timeout[U](firstTimeout: Publisher[U]): Flux[T] = wrapFlux[T](delegate.timeout[U](firstTimeout))
   def timeout[U, V](firstTimeout: Publisher[U], nextTimeoutFactory: T => Publisher[V]): Flux[T] = wrapFlux[T](delegate.timeout[U, V](firstTimeout, asJavaFn1(nextTimeoutFactory)))
   def timeout[U, V](firstTimeout: Publisher[U], nextTimeoutFactory: T => Publisher[V], fallback: Publisher[T]): Flux[T] = wrapFlux[T](delegate.timeout[U, V](firstTimeout, asJavaFn1(nextTimeoutFactory), fallback))
 
   def timestamp(): Flux[(Long, T)] = wrapFlux[(Long, T)](delegate.timestamp().map(t => toScalaTuple2(t.mapT1(t1 => Long2long(t1)))))
-  def timestamp(scheduler: Scheduler): Flux[(Long, T)] = wrapFlux[(Long, T)](delegate.timestamp(scheduler).map(t => toScalaTuple2(t.mapT1(t1 => Long2long(t1)))))
+//  def timestamp(scheduler: Scheduler): Flux[(Long, T)] = wrapFlux[(Long, T)](delegate.timestamp(scheduler).map(t => toScalaTuple2(t.mapT1(t1 => Long2long(t1)))))
 
-  def toIterable(): Iterable[T] = toScalaIterable(delegate.toIterable())
-  def toIterable(batchSize: Int): Iterable[T] = toScalaIterable(delegate.toIterable(batchSize))
-  def toIterable(batchSize: Int, queueProvider: () => util.Queue[T]): Iterable[T] = toScalaIterable(delegate.toIterable(batchSize, asJavaSupplier(queueProvider)))
+//  def toIterable(): Iterable[T] = toScalaIterable(delegate.toIterable())
+//  def toIterable(batchSize: Int): Iterable[T] = toScalaIterable(delegate.toIterable(batchSize))
+//  def toIterable(batchSize: Int, queueProvider: () => util.Queue[T]): Iterable[T] = toScalaIterable(delegate.toIterable(batchSize, asJavaSupplier(queueProvider)))
 
   // toSeq is not part of Java api. Added for convenience.
-  def toSeq(): Iterable[T] = toScalaIterable(delegate.toIterable()).toSeq
-  def toSeq(batchSize: Int): Iterable[T] = toScalaIterable(delegate.toIterable(batchSize)).toSeq
+  def toSeq(): Seq[T] = toScalaIterable(delegate.toIterable()).toSeq
+  def toSeq(batchSize: Int): Seq[T] = toScalaIterable(delegate.toIterable(batchSize)).toSeq
 
-  def toStream(): Stream[T] = asScalaIterator(delegate.toStream().iterator()).toStream
-  def toStream(batchSize: Int): Stream[T] = asScalaIterator(delegate.toStream(batchSize).iterator()).toStream
+//  def toStream(): Stream[T] = asScalaIterator(delegate.toStream().iterator()).toStream
+//  def toStream(batchSize: Int): Stream[T] = asScalaIterator(delegate.toStream(batchSize).iterator()).toStream
 
   def transform[V](transformer: Flux[T] => Publisher[V]): Flux[V] = wrapFlux(delegate.transform[V](asJavaFn1((jflux: JFlux[T]) => transformer(wrapFlux(jflux)))))
   def transformDeferred[V](transformer: Flux[T] => Publisher[V]): Flux[V] = wrapFlux(delegate.transformDeferred[V](asJavaFn1((jflux: JFlux[T]) => transformer(wrapFlux(jflux)))))
@@ -751,27 +753,27 @@ trait Flux[T] extends Publisher[T] with ImplicitJavaInterop {
   def window(boundary: Publisher[_]): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.window(boundary).map(wrapFlux[T](_)))
   def window(windowingTimespan: FiniteDuration): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.window(asJavaDuration(windowingTimespan)).map(wrapFlux[T](_)))
   def window(windowingTimespan: FiniteDuration, openWindowEvery: FiniteDuration): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.window(asJavaDuration(windowingTimespan), asJavaDuration(openWindowEvery)).map(wrapFlux[T](_)))
-  def window(windowingTimespan: FiniteDuration, timer: Scheduler): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.window(asJavaDuration(windowingTimespan), timer).map(wrapFlux[T](_)))
-  def window(windowingTimespan: FiniteDuration, openWindowEvery: FiniteDuration, timer: Scheduler): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.window(asJavaDuration(windowingTimespan), asJavaDuration(openWindowEvery), timer).map(wrapFlux[T](_)))
+//  def window(windowingTimespan: FiniteDuration, timer: Scheduler): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.window(asJavaDuration(windowingTimespan), timer).map(wrapFlux[T](_)))
+//  def window(windowingTimespan: FiniteDuration, openWindowEvery: FiniteDuration, timer: Scheduler): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.window(asJavaDuration(windowingTimespan), asJavaDuration(openWindowEvery), timer).map(wrapFlux[T](_)))
 
   def windowTimeout(maxSize: Int, maxTime: FiniteDuration): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.windowTimeout(maxSize, asJavaDuration(maxTime)).map(wrapFlux[T](_)))
-  def windowTimeout(maxSize: Int, maxTime: FiniteDuration, timer: Scheduler): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.windowTimeout(maxSize, asJavaDuration(maxTime), timer).map(wrapFlux[T](_)))
+//  def windowTimeout(maxSize: Int, maxTime: FiniteDuration, timer: Scheduler): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.windowTimeout(maxSize, asJavaDuration(maxTime), timer).map(wrapFlux[T](_)))
 
   def windowUntil(boundaryTrigger: T => Boolean): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.windowUntil(asJavaPredicate(boundaryTrigger)).map(wrapFlux[T](_)))
   def windowUntil(boundaryTrigger: T => Boolean, cutBefore: Boolean): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.windowUntil(asJavaPredicate(boundaryTrigger), cutBefore).map(wrapFlux[T](_)))
-  def windowUntil(boundaryTrigger: T => Boolean, cutBefore: Boolean, prefetch: Int): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.windowUntil(asJavaPredicate(boundaryTrigger), cutBefore, prefetch).map(wrapFlux[T](_)))
+//  def windowUntil(boundaryTrigger: T => Boolean, cutBefore: Boolean, prefetch: Int): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.windowUntil(asJavaPredicate(boundaryTrigger), cutBefore, prefetch).map(wrapFlux[T](_)))
 
   def windowWhile(inclusionPredicate: T => Boolean): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.windowWhile(asJavaPredicate(inclusionPredicate)).map(wrapFlux[T](_)))
-  def windowWhile(inclusionPredicate: T => Boolean, prefetch: Int): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.windowWhile(asJavaPredicate(inclusionPredicate), prefetch).map(wrapFlux[T](_)))
+//  def windowWhile(inclusionPredicate: T => Boolean, prefetch: Int): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.windowWhile(asJavaPredicate(inclusionPredicate), prefetch).map(wrapFlux[T](_)))
 
   def windowWhen[U, V](bucketOpening: Publisher[U], closeSelector: U => Publisher[V]): Flux[Flux[T]] = wrapFlux[Flux[T]](delegate.windowWhen(bucketOpening, asJavaFn1(closeSelector)).map(wrapFlux[T](_)))
 
   def withLatestFrom[U, R](other: Publisher[U], resultSelector: (T, U) => R): Flux[R] = wrapFlux[R](delegate.withLatestFrom(other, asJavaFn2(resultSelector)))
 
   def zipWith[T2](source2: Publisher[T2]): Flux[(T, T2)] = wrapFlux[(T, T2)](delegate.zipWith(source2).map(toScalaTuple2(_)))
-  def zipWith[T2](source2: Publisher[T2], prefetch: Int): Flux[(T, T2)] = wrapFlux[(T, T2)](delegate.zipWith(source2, prefetch).map(toScalaTuple2(_)))
+//  def zipWith[T2](source2: Publisher[T2], prefetch: Int): Flux[(T, T2)] = wrapFlux[(T, T2)](delegate.zipWith(source2, prefetch).map(toScalaTuple2(_)))
   def zipWith[T2, V](source2: Publisher[T2], combinator: (T, T2) => V): Flux[V] = wrapFlux[V](delegate.zipWith(source2, asJavaFn2(combinator)))
-  def zipWith[T2, V](source2: Publisher[T2], prefetch: Int, combinator: (T, T2) => V): Flux[V] = wrapFlux[V](delegate.zipWith(source2, prefetch, asJavaFn2(combinator)))
+//  def zipWith[T2, V](source2: Publisher[T2], prefetch: Int, combinator: (T, T2) => V): Flux[V] = wrapFlux[V](delegate.zipWith(source2, prefetch, asJavaFn2(combinator)))
 
   def zipWithIterable[T2](iterable: Iterable[T2]): Flux[(T, T2)] = wrapFlux[(T, T2)](delegate.zipWithIterable(asJavaIterable(iterable)).map(toScalaTuple2(_)))
   def zipWithIterable[T2, V](iterable: Iterable[T2], zipper: (T, T2) => V): Flux[V] = wrapFlux[V](delegate.zipWithIterable(asJavaIterable(iterable), asJavaFn2(zipper)))

@@ -34,7 +34,6 @@ import org.reactivestreams.{Publisher, Subscriber, Subscription}
 import org.sireum.hamr.inspector.stream.JavaInterop._
 import reactor.core.Disposable
 import reactor.core.publisher.{MonoSink, Signal, SignalType, SynchronousSink, Flux => JFlux, Mono => JMono}
-import reactor.core.scheduler.Scheduler
 import reactor.util.Logger
 import reactor.util.context.Context
 import reactor.util.function.{Tuple2 => JTuple2}
@@ -52,17 +51,17 @@ object Mono {
 
   def create[T](callback: MonoSink[T] => Unit): Mono[T] = wrapMono(JMono.create(asJavaConsumer(callback)))
   def defer[T](supplier: () => Mono[T]): Mono[T] = wrapMono(JMono.defer(() => supplier.apply().delegate))
-  def deferWithContext[T](supplier: Context => Mono[T]): Mono[T] = wrapMono(JMono.deferWithContext((c: Context) => supplier(c).delegate))
+//  def deferWithContext[T](supplier: Context => Mono[T]): Mono[T] = wrapMono(JMono.deferWithContext((c: Context) => supplier(c).delegate))
 
   def delay(duration: Duration): Mono[Long] = duration match {
     case _: Infinite => wrapMono(JMono.never())
     case finiteDuration: FiniteDuration => wrapMono(JMono.delay(asJavaDuration(finiteDuration)).map(Long2long))
   }
 
-  def delay(duration: Duration, timer: Scheduler): Mono[Long] = duration match {
-    case _: Infinite => wrapMono(JMono.never())
-    case finiteDuration: FiniteDuration => wrapMono(JMono.delay(asJavaDuration(finiteDuration), timer).map(Long2long))
-  }
+//  def delay(duration: Duration, timer: Scheduler): Mono[Long] = duration match {
+//    case _: Infinite => wrapMono(JMono.never())
+//    case finiteDuration: FiniteDuration => wrapMono(JMono.delay(asJavaDuration(finiteDuration), timer).map(Long2long))
+//  }
 
   def empty[T](): Mono[T] = wrapMono(JMono.empty())
 
@@ -71,16 +70,16 @@ object Mono {
 
   // todo apply varargs pattern to other cases (especially needed in flux)
   def first[T](): Mono[T] = first(Seq())
-  def first[T](mono: Mono[T], monos: Mono[T]*): Mono[T] = first((mono +: monos) (Seq.canBuildFrom))
-  def first[T](monos: Iterable[_ <: Mono[T]]): Mono[T] = wrapMono(JMono.first(asJavaIterable(monos.map(_.delegate)(Iterable.canBuildFrom))))
+  def first[T](mono: Mono[T], monos: Mono[T]*): Mono[T] = first(mono +: monos)
+  def first[T](monos: Iterable[_ <: Mono[T]]): Mono[T] = wrapMono(JMono.first(asJavaIterable(monos.map(_.delegate))))
 
   def from[T](source: Publisher[T]): Mono[T] = wrapMono(JMono.from(source))
   def fromCallable[T](supplier: Callable[T]): Mono[T] = wrapMono(JMono.fromCallable(supplier))
 //  def fromCompletionStage[T](completionStage: CompletionStage[T]): Mono[T] = wrapMono(JMono.fromCompletionStage(completionStage)) // became fromFuture
 //  def fromCompletionStage[T](stageSupplier: () => CompletionStage[T]): Mono[T] = wrapMono(JMono.fromCompletionStage(stageSupplier)) // became fromFuture
-  def fromDirect[I](source: Publisher[I]): Mono[I] = wrapMono(JMono.fromDirect(source))
-  def fromFuture[T](future: Future[T]): Mono[T] = wrapMono(JMono.fromCompletionStage(asJavaCompletionStage(future))) // completionStage is java equiv of Future
-  def fromFutureSupplier[T](futureSupplier: () => Future[T]): Mono[T] = wrapMono(JMono.fromCompletionStage(() => asJavaCompletionStage(futureSupplier.apply())))
+//  def fromDirect[I](source: Publisher[I]): Mono[I] = wrapMono(JMono.fromDirect(source))
+//  def fromFuture[T](future: Future[T]): Mono[T] = wrapMono(JMono.fromCompletionStage(asJavaCompletionStage(future))) // completionStage is java equiv of Future
+//  def fromFutureSupplier[T](futureSupplier: () => Future[T]): Mono[T] = wrapMono(JMono.fromCompletionStage(() => asJavaCompletionStage(futureSupplier.apply())))
   def fromRunnable[T](runnable: () => Unit): Mono[T] = wrapMono(JMono.fromRunnable(asJavaRunnable(runnable)))
   def fromSupplier[T](supplier: () => T): Mono[T] = wrapMono(JMono.fromSupplier(asJavaSupplier(supplier)))
 
@@ -101,16 +100,16 @@ object Mono {
 
   def sequenceEqual[T](source1: Publisher[T], source2: Publisher[T]): Mono[Boolean] = wrapMono(JMono.sequenceEqual(source1, source2).asInstanceOf[JMono[Boolean]])
   def sequenceEqual[T](source1: Publisher[T], source2: Publisher[T], isEqual: (T, T) => Boolean): Mono[Boolean] = wrapMono(JMono.sequenceEqual(source1, source2, asJavaBiPredicate(isEqual)).asInstanceOf[JMono[Boolean]])
-  def sequenceEqual[T](source1: Publisher[T], source2: Publisher[T], isEqual: (T, T) => Boolean, prefetch: Int): Mono[Boolean] = wrapMono(JMono.sequenceEqual(source1, source2, asJavaBiPredicate(isEqual), prefetch).asInstanceOf[JMono[Boolean]])
+//  def sequenceEqual[T](source1: Publisher[T], source2: Publisher[T], isEqual: (T, T) => Boolean, prefetch: Int): Mono[Boolean] = wrapMono(JMono.sequenceEqual(source1, source2, asJavaBiPredicate(isEqual), prefetch).asInstanceOf[JMono[Boolean]])
 
-  def subscriberContext(): Mono[Context] = wrapMono(JMono.subscriberContext())
+//  def subscriberContext(): Mono[Context] = wrapMono(JMono.subscriberContext())
 
   // todo: look into scala Callable equivalent for using in both Mono and Flux apis
   def using[T, D](resourceSupplier: Callable[D], sourceSupplier: D => Mono[T], resourceCleanup: D => Unit): Mono[T] = wrapMono(JMono.using(resourceSupplier, asJavaFn1(sourceSupplier.andThen(_.delegate)), asJavaConsumer(resourceCleanup)))
   def using[T, D](resourceSupplier: Callable[D], sourceSupplier: D => Mono[T], resourceCleanup: D => Unit, eager: Boolean): Mono[T] = wrapMono(JMono.using(resourceSupplier, asJavaFn1(sourceSupplier.andThen(_.delegate)), asJavaConsumer(resourceCleanup), eager))
 
-  def usingWhen[T, D](resourceSupplier: Publisher[D], resourceClosure: D => Mono[T], asyncComplete: D => Publisher[_], asyncError: D => Publisher[_]): Mono[T] = wrapMono(JMono.usingWhen(resourceSupplier, asJavaFn1(resourceClosure.andThen(_.delegate)), asJavaFn1(asyncComplete), asJavaFn1(asyncError)))
-  def usingWhen[T, D](resourceSupplier: Publisher[D], resourceClosure: D => Mono[T], asyncComplete: D => Publisher[_], asyncError: D => Publisher[_], asyncCancel: D => Publisher[_]): Mono[T] = wrapMono(JMono.usingWhen(resourceSupplier, asJavaFn1(resourceClosure.andThen(_.delegate)), asJavaFn1(asyncComplete), asJavaFn1(asyncError), asJavaFn1(asyncCancel)))
+//  def usingWhen[T, D](resourceSupplier: Publisher[D], resourceClosure: D => Mono[T], asyncComplete: D => Publisher[_], asyncError: D => Publisher[_]): Mono[T] = wrapMono(JMono.usingWhen(resourceSupplier, asJavaFn1(resourceClosure.andThen(_.delegate)), asJavaFn1(asyncComplete), asJavaFn1(asyncError)))
+//  def usingWhen[T, D](resourceSupplier: Publisher[D], resourceClosure: D => Mono[T], asyncComplete: D => Publisher[_], asyncError: D => Publisher[_], asyncCancel: D => Publisher[_]): Mono[T] = wrapMono(JMono.usingWhen(resourceSupplier, asJavaFn1(resourceClosure.andThen(_.delegate)), asJavaFn1(asyncComplete), asJavaFn1(asyncError), asJavaFn1(asyncCancel)))
 
   def when(): Mono[_] = when(Seq())
 //  def when(source: Publisher[Any], sources: Publisher[Any]*): Mono[_] = when((source +: sources) (Seq.canBuildFrom))
@@ -132,8 +131,8 @@ object Mono {
   def zip[T1, T2, T3, T4, T5, T6, T7](p1: Mono[T1], p2: Mono[T2], p3: Mono[T3], p4: Mono[T4], p5: Mono[T5], p6: Mono[T6], p7: Mono[T7]): Mono[(T1, T2, T3, T4, T5, T6, T7)] = wrapMono(JMono.zip(p1.delegate, p2.delegate, p3.delegate, p4.delegate, p5.delegate, p6.delegate, p7.delegate).map(toScalaTuple7(_)))
   def zip[T1, T2, T3, T4, T5, T6, T7, T8](p1: Mono[T1], p2: Mono[T2], p3: Mono[T3], p4: Mono[T4], p5: Mono[T5], p6: Mono[T6], p7: Mono[T7], p8: Mono[T8]): Mono[(T1, T2, T3, T4, T5, T6, T7, T8)] = wrapMono(JMono.zip(p1.delegate, p2.delegate, p3.delegate, p4.delegate, p5.delegate, p6.delegate, p7.delegate, p8.delegate).map(toScalaTuple8(_)))
 
-  def zip[R](monos: Iterable[Mono[_]], combinator: (_ >: Array[AnyRef]) => R): Mono[R] = wrapMono(JMono.zip(asJavaIterable(monos.map(_.delegate)(Iterable.canBuildFrom)), asJavaFn1(combinator)))
-  def zip[R](combinator: (_ >: Array[AnyRef]) => R, monos: Mono[_]*): Mono[R] = wrapMono(JMono.zip(asJavaFn1(combinator), monos.map(_.delegate)(Seq.canBuildFrom):_*))
+  def zip[R](monos: Iterable[Mono[_]], combinator: (_ >: Array[AnyRef]) => R): Mono[R] = wrapMono(JMono.zip(asJavaIterable(monos.map(_.delegate)), asJavaFn1(combinator)))
+  def zip[R](combinator: (_ >: Array[AnyRef]) => R, monos: Mono[_]*): Mono[R] = wrapMono(JMono.zip(asJavaFn1(combinator), monos.map(_.delegate):_*))
 
   def zipDelayError[T1, T2](p1: Mono[T1], p2: Mono[T2]): Mono[(T1, T2)] = wrapMono(JMono.zipDelayError(p1.delegate, p2.delegate).map(toScalaTuple2(_)))
   def zipDelayError[T1, T2, T3](p1: Mono[T1], p2: Mono[T2], p3: Mono[T3]): Mono[(T1, T2, T3)] = wrapMono(JMono.zipDelayError(p1.delegate, p2.delegate, p3.delegate).map(toScalaTuple3(_)))
@@ -143,8 +142,8 @@ object Mono {
   def zipDelayError[T1, T2, T3, T4, T5, T6, T7](p1: Mono[T1], p2: Mono[T2], p3: Mono[T3], p4: Mono[T4], p5: Mono[T5], p6: Mono[T6], p7: Mono[T7]): Mono[(T1, T2, T3, T4, T5, T6, T7)] = wrapMono(JMono.zipDelayError(p1.delegate, p2.delegate, p3.delegate, p4.delegate, p5.delegate, p6.delegate, p7.delegate).map(toScalaTuple7(_)))
   def zipDelayError[T1, T2, T3, T4, T5, T6, T7, T8](p1: Mono[T1], p2: Mono[T2], p3: Mono[T3], p4: Mono[T4], p5: Mono[T5], p6: Mono[T6], p7: Mono[T7], p8: Mono[T8]): Mono[(T1, T2, T3, T4, T5, T6, T7, T8)] = wrapMono(JMono.zipDelayError(p1.delegate, p2.delegate, p3.delegate, p4.delegate, p5.delegate, p6.delegate, p7.delegate, p8.delegate).map(toScalaTuple8(_)))
 
-  def zipDelayError[R](monos: Iterable[Mono[_]], combinator: (_ >: Array[AnyRef]) => R): Mono[R] = wrapMono(JMono.zipDelayError(asJavaIterable(monos.map(_.delegate)(Iterable.canBuildFrom)), asJavaFn1(combinator)))
-  def zipDelayError[R](combinator: (_ >: Array[AnyRef]) => R, monos: Mono[_]*): Mono[R] = wrapMono(JMono.zipDelayError(asJavaFn1(combinator), monos.map(_.delegate)(Seq.canBuildFrom):_*))
+  def zipDelayError[R](monos: Iterable[Mono[_]], combinator: (_ >: Array[AnyRef]) => R): Mono[R] = wrapMono(JMono.zipDelayError(asJavaIterable(monos.map(_.delegate)), asJavaFn1(combinator)))
+  def zipDelayError[R](combinator: (_ >: Array[AnyRef]) => R, monos: Mono[_]*): Mono[R] = wrapMono(JMono.zipDelayError(asJavaFn1(combinator), monos.map(_.delegate):_*))
 
 }
 
@@ -191,19 +190,19 @@ trait Mono[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def and(other: Publisher[_]): Mono[_] = wrapMono(delegate.and(other))
 
-  def block(): T = delegate.block()
-
-  def block(timeout: Duration): T = timeout match {
-    case _: Infinite => delegate.block()
-    case finiteDuration: FiniteDuration => delegate.block(asJavaDuration(finiteDuration))
-  }
-
-  def blockOptional(): Option[T] = Option(delegate.block())
-
-  def blockOptional(timeout: Duration): Option[T] = timeout match {
-    case _: Infinite => Option(delegate.block())
-    case finiteDuration: FiniteDuration => Option(delegate.block(asJavaDuration(finiteDuration)))
-  }
+//  def block(): T = delegate.block()
+//
+//  def block(timeout: Duration): T = timeout match {
+//    case _: Infinite => delegate.block()
+//    case finiteDuration: FiniteDuration => delegate.block(asJavaDuration(finiteDuration))
+//  }
+//
+//  def blockOptional(): Option[T] = Option(delegate.block())
+//
+//  def blockOptional(timeout: Duration): Option[T] = timeout match {
+//    case _: Infinite => Option(delegate.block())
+//    case finiteDuration: FiniteDuration => Option(delegate.block(asJavaDuration(finiteDuration)))
+//  }
 
   def cache(): Mono[T] = wrapMono[T](delegate.cache())
 //  def cache(ttl: FiniteDuration): Mono[T] = wrapMono[T](delegate.cache(ttl))
@@ -215,10 +214,10 @@ trait Mono[T] extends Publisher[T] with ImplicitJavaInterop {
     case _: Infinite => cache()
     case finiteDuration: FiniteDuration => wrapMono(delegate.cache(asJavaDuration(finiteDuration)))
   }
-  def cache(ttl: Duration, timer: Scheduler): Mono[T] = ttl match {
-    case _: Infinite => cache()
-    case finiteDuration: FiniteDuration => wrapMono(delegate.cache(asJavaDuration(finiteDuration), timer))
-  }
+//  def cache(ttl: Duration, timer: Scheduler): Mono[T] = ttl match {
+//    case _: Infinite => cache()
+//    case finiteDuration: FiniteDuration => wrapMono(delegate.cache(asJavaDuration(finiteDuration), timer))
+//  }
 
 //  def cache(ttlForValue: T => Duration, ttlForError: Throwable => Duration, ttlForEmpty: () => Duration): Mono[T] = ttlForValue match {
 //    case _: Infinite => ttlForError match {
@@ -259,12 +258,12 @@ trait Mono[T] extends Publisher[T] with ImplicitJavaInterop {
   def defaultIfEmpty(defaultV: T): Mono[T] = wrapMono[T](delegate.defaultIfEmpty(defaultV))
 
   def delayElement(delay: FiniteDuration): Mono[T] = wrapMono[T](delegate.delayElement(asJavaDuration(delay)))
-  def delayElement(delay: FiniteDuration, timer: Scheduler): Mono[T] = wrapMono[T](delegate.delayElement(asJavaDuration(delay), timer))
+//  def delayElement(delay: FiniteDuration, timer: Scheduler): Mono[T] = wrapMono[T](delegate.delayElement(asJavaDuration(delay), timer))
 
   def delayUntil(triggerProvider: T => Publisher[_]): Mono[T] = wrapMono[T](delegate.delayUntil(asJavaFn1(triggerProvider)))
 
   def delaySubscription(delay: FiniteDuration): Mono[T] = wrapMono[T](delegate.delaySubscription(asJavaDuration(delay)))
-  def delaySubscription(delay: FiniteDuration, timer: Scheduler): Mono[T] = wrapMono[T](delegate.delaySubscription(asJavaDuration(delay), timer))
+//  def delaySubscription(delay: FiniteDuration, timer: Scheduler): Mono[T] = wrapMono[T](delegate.delaySubscription(asJavaDuration(delay), timer))
   def delaySubscription[U](subscriptionDelay: Publisher[U]): Mono[T] = wrapMono[T](delegate.delaySubscription(subscriptionDelay))
 
   def dematerialize[X](): Mono[X] = wrapMono[X](delegate.dematerialize())
@@ -287,7 +286,7 @@ trait Mono[T] extends Publisher[T] with ImplicitJavaInterop {
   def doOnTerminate(onTerminate: () => Unit): Mono[T] = wrapMono[T](delegate.doOnTerminate(asJavaRunnable(onTerminate)))
 
   def elapsed(): Mono[(Long, T)] = wrapMono[JTuple2[java.lang.Long, T]](delegate.elapsed()).map(tuple => toScalaTuple2(tuple.mapT1(t1 => Long2long(t1))))
-  def elapsed(scheduler: Scheduler): Mono[(Long, T)] = wrapMono[JTuple2[java.lang.Long, T]](delegate.elapsed()).map(tuple => toScalaTuple2(tuple.mapT1(t1 => Long2long(t1))))
+//  def elapsed(scheduler: Scheduler): Mono[(Long, T)] = wrapMono[JTuple2[java.lang.Long, T]](delegate.elapsed(scheduler)).map(tuple => toScalaTuple2(tuple.mapT1(t1 => Long2long(t1))))
 
   def expandDeep(expander: T => Publisher[T]): Flux[T] = wrapFlux[T](delegate.expandDeep(asJavaFn1(expander)))
   def expandDeep(expander: T => Publisher[T], capacityHint: Int): Flux[T] = wrapFlux[T](delegate.expandDeep(asJavaFn1(expander), capacityHint))
@@ -351,9 +350,9 @@ trait Mono[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def onErrorMap(mapper: Throwable => Throwable): Mono[T] = wrapMono[T](delegate.onErrorMap(asJavaFn1(mapper)))
   def onErrorMap[E <: Throwable](classType: Class[E], mapper: E => Throwable): Mono[T] = wrapMono[T](delegate.onErrorMap(classType, asJavaFn1(mapper)))
-  def onErrorMap(predicate: Throwable => Boolean, mapper: Throwable => Throwable): Mono[T] = wrapMono[T](delegate.onErrorMap(asJavaFn1(mapper)))
+  def onErrorMap(predicate: Throwable => Boolean, mapper: Throwable => Throwable): Mono[T] = wrapMono[T](delegate.onErrorMap(asJavaPredicate(predicate), asJavaFn1(mapper)))
 
-  def onErrorResume(fallback: Throwable => Mono[T]): Mono[T] = wrapMono[T](delegate.onErrorResume((throwable: Throwable) => JMono.from(fallback(throwable))))
+  def onErrorResume(fallback: Throwable => Mono[_ <: T]): Mono[T] = wrapMono[T](delegate.onErrorResume(asJavaFn1((t: Throwable) => (JMono.from(fallback(t))))))
   def onErrorResume[E <: Throwable](classType: Class[E], fallback: E => Mono[T]): Mono[T] = wrapMono[T](delegate.onErrorResume(classType, asJavaFn1((e: E) => JMono.from(fallback(e)))))
   def onErrorResume(predicate: Throwable => Boolean, fallback: Throwable => Mono[T]): Mono[T] = wrapMono[T](delegate.onErrorResume(asJavaPredicate(predicate), asJavaFn1((throwable: Throwable) => JMono.from(fallback(throwable)))))
 
@@ -365,7 +364,7 @@ trait Mono[T] extends Publisher[T] with ImplicitJavaInterop {
 
   def publish[R](transform: Mono[T] => Mono[R]): Mono[R] = wrapMono[R](delegate.publish((jmono: JMono[T]) => JMono.from[R](transform(Mono.from[T](jmono)))))
 
-  def publishOn(scheduler: Scheduler): Mono[T] = wrapMono[T](delegate.publishOn(scheduler))
+//  def publishOn(scheduler: Scheduler): Mono[T] = wrapMono[T](delegate.publishOn(scheduler))
 
   def repeat(): Flux[T] = wrapFlux[T](delegate.repeat())
   def repeat(predicate: () => Boolean): Flux[T] = wrapFlux[T](delegate.repeat(asJavaBooleanSupplier(predicate)))
@@ -389,17 +388,17 @@ trait Mono[T] extends Publisher[T] with ImplicitJavaInterop {
     wrapMono[T](delegate.repeatWhenEmpty(maxRepeat, asJavaFn1(fn)))
   }
 
-  def retry(): Mono[T] = wrapMono[T](delegate.retry())
-  def retry(numRetries: Long): Mono[T] = wrapMono[T](delegate.retry(numRetries))
-  def retry(retryMatcher: Throwable => Boolean): Mono[T] = wrapMono[T](delegate.retry(asJavaPredicate(retryMatcher)))
-  def retry(numRetries: Long, retryMatcher: Throwable => Boolean): Mono[T] = wrapMono[T](delegate.retry(numRetries, asJavaPredicate(retryMatcher)))
-//  def retryWhen(whenFactory: Flux[Throwable] => Publisher[_]): Mono[T] = wrapMono[T](delegate.retryWhen((flux: JFlux[Throwable]) => whenFactory(wrapFlux(flux))))
-
-  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration): Mono[T] = wrapMono[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff)))
-  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration): Mono[T] = wrapMono[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff)))
-  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration, backoffScheduler: Scheduler): Mono[T] = wrapMono[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff), backoffScheduler))
-  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration, jitterFactor: Double): Mono[T] = wrapMono[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff), jitterFactor))
-  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration, jitterFactor: Double, backoffScheduler: Scheduler): Mono[T] = wrapMono[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff), jitterFactor, backoffScheduler))
+//  def retry(): Mono[T] = wrapMono[T](delegate.retry())
+//  def retry(numRetries: Long): Mono[T] = wrapMono[T](delegate.retry(numRetries))
+//  def retry(retryMatcher: Throwable => Boolean): Mono[T] = wrapMono[T](delegate.retry(asJavaPredicate(retryMatcher)))
+//  def retry(numRetries: Long, retryMatcher: Throwable => Boolean): Mono[T] = wrapMono[T](delegate.retry(numRetries, asJavaPredicate(retryMatcher)))
+////  def retryWhen(whenFactory: Flux[Throwable] => Publisher[_]): Mono[T] = wrapMono[T](delegate.retryWhen((flux: JFlux[Throwable]) => whenFactory(wrapFlux(flux))))
+//
+//  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration): Mono[T] = wrapMono[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff)))
+//  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration): Mono[T] = wrapMono[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff)))
+////  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration, backoffScheduler: Scheduler): Mono[T] = wrapMono[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff), backoffScheduler))
+//  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration, jitterFactor: Double): Mono[T] = wrapMono[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff), jitterFactor))
+////  def retryBackoff(numRetries: Long, firstBackoff: FiniteDuration, maxBackoff: FiniteDuration, jitterFactor: Double, backoffScheduler: Scheduler): Mono[T] = wrapMono[T](delegate.retryBackoff(numRetries, asJavaDuration(firstBackoff), asJavaDuration(maxBackoff), jitterFactor, backoffScheduler))
 
   def single(): Mono[T] = wrapMono[T](delegate.single())
 
@@ -419,38 +418,38 @@ trait Mono[T] extends Publisher[T] with ImplicitJavaInterop {
   ///
   ///
 
-  def subscriberContext(mergeContext: Context): Mono[T] = wrapMono[T](delegate.subscriberContext(mergeContext))
-  def subscriberContext(doOnContext: Context => Context): Mono[T] = wrapMono[T](delegate.subscriberContext(asJavaFn1(doOnContext)))
+//  def subscriberContext(mergeContext: Context): Mono[T] = wrapMono[T](delegate.subscriberContext(mergeContext))
+//  def subscriberContext(doOnContext: Context => Context): Mono[T] = wrapMono[T](delegate.subscriberContext(asJavaFn1(doOnContext)))
 
-  def subscribeOn(scheduler: Scheduler): Mono[T] = wrapMono[T](delegate.subscribeOn(scheduler))
+//  def subscribeOn(scheduler: Scheduler): Mono[T] = wrapMono[T](delegate.subscribeOn(scheduler))
 
-  def subscribeWith[E <: Subscriber[T]](subscriber: E): E = delegate.subscribeWith(subscriber)
+//  def subscribeWith[E <: Subscriber[T]](subscriber: E): E = delegate.subscribeWith(subscriber)
 
   def switchIfEmpty(alternate: Mono[T]): Mono[T] = wrapMono[T](delegate.switchIfEmpty(alternate.delegate))
 
-  def tag(key: String, value: String): Mono[T] = wrapMono[T](delegate.tag(key, value))
+//  def tag(key: String, value: String): Mono[T] = wrapMono[T](delegate.tag(key, value))
 
   def take(timespan: FiniteDuration): Mono[T] = wrapMono[T](delegate.take(asJavaDuration(timespan)))
-  def take(timespan: FiniteDuration, scheduler: Scheduler): Mono[T] = wrapMono[T](delegate.take(asJavaDuration(timespan), scheduler))
+//  def take(timespan: FiniteDuration, scheduler: Scheduler): Mono[T] = wrapMono[T](delegate.take(asJavaDuration(timespan), scheduler))
 
   def takeUntilOther(other: Publisher[_]): Mono[T] = wrapMono[T](delegate.takeUntilOther(other))
 
-  def then(): Mono[Unit] = wrapMono[Void](delegate.`then`()).map(_ => ())
-  def then[V](other: Mono[V]): Mono[V] = wrapMono[V](delegate.`then`(other.delegate.asInstanceOf[JMono[V]]))
+//  def then(): Mono[Unit] = wrapMono[Void](delegate.`then`()).map(_ => ())
+//  def then[V](other: Mono[V]): Mono[V] = wrapMono[V](delegate.`then`(other.delegate.asInstanceOf[JMono[V]]))
 
   def thenReturn[V](value: V): Mono[V] = wrapMono[V](delegate.thenReturn(value))
-  def thenEmpty(other: Publisher[Unit]): Mono[Unit] = wrapMono[Unit](delegate.thenEmpty(Mono.from(other).map[Void](_ => null: Void)).map(_ => Unit))
+  def thenEmpty(other: Publisher[Unit]): Mono[Unit] = wrapMono[Unit](delegate.thenEmpty(Mono.from(other).map[Void](_ => null: Void)).map(_ => ()))
   def thenMany[V](other: Publisher[V]): Flux[V] = wrapFlux[V](delegate.thenMany(other))
 
   def timeout(timeout: FiniteDuration): Mono[T] = wrapMono[T](delegate.timeout(asJavaDuration(timeout)))
   def timeout(timeout: FiniteDuration, fallback: Mono[T]): Mono[T] = wrapMono[T](delegate.timeout(asJavaDuration(timeout), fallback.delegate))
-  def timeout(timeout: FiniteDuration, timer: Scheduler): Mono[T] = wrapMono[T](delegate.timeout(asJavaDuration(timeout), timer))
-  def timeout(timeout: FiniteDuration, fallback: Mono[T], timer: Scheduler): Mono[T] = wrapMono[T](delegate.timeout(asJavaDuration(timeout), fallback.delegate, timer))
+//  def timeout(timeout: FiniteDuration, timer: Scheduler): Mono[T] = wrapMono[T](delegate.timeout(asJavaDuration(timeout), timer))
+//  def timeout(timeout: FiniteDuration, fallback: Mono[T], timer: Scheduler): Mono[T] = wrapMono[T](delegate.timeout(asJavaDuration(timeout), fallback.delegate, timer))
   def timeout[U](firstTimeout: Publisher[U]): Mono[T] = wrapMono[T](delegate.timeout[U](firstTimeout))
   def timeout[U](firstTimeout: Publisher[U], fallback: Mono[T]): Mono[T] = wrapMono[T](delegate.timeout[U](firstTimeout, fallback.delegate))
 
   def timestamp(): Mono[(Long, T)] = wrapMono[(Long, T)](delegate.timestamp().map(t => toScalaTuple2(t.mapT1(t1 => Long2long(t1)))))
-  def timestamp(scheduler: Scheduler): Mono[(Long, T)] = wrapMono[(Long, T)](delegate.timestamp(scheduler).map(t => toScalaTuple2(t.mapT1(t1 => Long2long(t1)))))
+//  def timestamp(scheduler: Scheduler): Mono[(Long, T)] = wrapMono[(Long, T)](delegate.timestamp(scheduler).map(t => toScalaTuple2(t.mapT1(t1 => Long2long(t1)))))
 
   def toFuture: Future[T] = toScalaFuture(delegate.toFuture)
 

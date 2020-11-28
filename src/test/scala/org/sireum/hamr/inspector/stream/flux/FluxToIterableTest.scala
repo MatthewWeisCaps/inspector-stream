@@ -32,7 +32,7 @@ import org.sireum.hamr.inspector.stream.Flux
 class FluxToIterableTest extends AnyFunSuite {
 
   test("flux toIterable") {
-    val iterable = Flux.just("a", "b", "c", "d", "e").toIterable.toSeq
+    val iterable = Flux.just("a", "b", "c", "d", "e").toSeq()
 
     Assertions.assert(iterable(0) == "a")
     Assertions.assert(iterable(1) == "b")
